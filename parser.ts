@@ -190,11 +190,6 @@ export default class Parser
 			{
 				switch (token)
 				{
-					case Token.COMMENT_L:
-					{
-						// ugh..?
-						break;
-					}
 					case Token.COMMENT_R:
 					{
 						comment = false;
@@ -236,11 +231,6 @@ export default class Parser
 				case Token.COMMENT_L:
 				{
 					comment = true;
-					break;
-				}
-				case Token.COMMENT_R:
-				{
-					comment = false;
 					break;
 				}
 				//
