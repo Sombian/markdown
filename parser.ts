@@ -205,7 +205,7 @@ export default class Parser
 				//
 				case Token.BREAK:
 				{
-					[bold, italic, underline, strikethrough] = [false, false, false, false];
+					[bold, italic, underline, strikethrough] = [false, false, false, false]; // reset styles
 					
 					switch (node.constructor)
 					{

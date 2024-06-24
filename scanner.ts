@@ -433,7 +433,7 @@ export default class Scanner
 					//
 					if (0 < buffer.length - depth)
 					{
-						tokens.push(buffer.join("").slice(0, 0 < depth ? buffer.length - depth : Infinity));
+						tokens.push(buffer.join("").slice(0, 0 < depth ? - depth : Infinity));
 					}
 					//
 					// STEP 9. build token
