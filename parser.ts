@@ -284,7 +284,7 @@ export default class Parser
 				//
 				// stack
 				//
-				case Token.BLOCKQUOTE:
+				case Token.BQ:
 				{
 					if (node.last() instanceof BQ)
 					{

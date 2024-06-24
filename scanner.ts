@@ -35,7 +35,7 @@ export abstract class Token
 					Token.H6,
 					Token.HR,
 					// stack
-					Token.BLOCKQUOTE,
+					Token.BQ,
 					// layer
 					Token.INDENT,
 					Token.OL,
@@ -57,7 +57,7 @@ export abstract class Token
 					Token.COMMENT_L,
 					Token.COMMENT_R,
 					// stack
-					Token.BLOCKQUOTE,
+					Token.BQ,
 					// layer
 					Token.INDENT,
 					Token.OL,
@@ -79,7 +79,7 @@ export abstract class Token
 					Token.COMMENT_L,
 					Token.COMMENT_R,
 					// stack
-					Token.BLOCKQUOTE,
+					Token.BQ,
 					// layer
 					Token.INDENT,
 					Token.OL,
@@ -201,7 +201,7 @@ export abstract class Token
 	//
 	// stack
 	//
-	public static readonly BLOCKQUOTE = new (class BLOCKQUOTE extends Token
+	public static readonly BQ = new (class BQ extends Token
 	{
 		override get ctx()
 		{
@@ -220,7 +220,7 @@ export abstract class Token
 		}
 	})
 	("	", "  ", "    ");
-	public static readonly OL = new (class ORDERED_LIST extends Token
+	public static readonly OL = new (class OL extends Token
 	{
 		override get ctx()
 		{
@@ -228,7 +228,7 @@ export abstract class Token
 		}
 	})
 	("-\u0020");
-	public static readonly UL = new (class UNORDERED_LIST extends Token
+	public static readonly UL = new (class UL extends Token
 	{
 		override get ctx()
 		{
