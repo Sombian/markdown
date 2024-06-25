@@ -302,7 +302,7 @@ export default class Parser
 						default:
 						{
 							// fallback
-							node.children.push(new TEXT({ value: "\t" }));
+							node.children.push(new TEXT({ value: "&nbsp;&nbsp;" }));
 							break;
 						}
 					}
