@@ -345,6 +345,81 @@ export default class Scanner
 
 		let [ctx, node, depth, escape] = [Context.BLOCK, null as (null | Route), 0, false];
 
+		function examine(char: string)
+		{
+			if (node === null) throw new Error();
+			//
+			// STEP 1. into the deep
+			//
+			depth++;
+			//
+			// STEP 2. examine token
+			//
+			if (node[char] instanceof Token)
+			{
+				//
+				// STEP 3. switch ctx
+				//
+				if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(node[char]))
+				{
+					// core -> inline
+					ctx = Context.BLOCK;
+				}
+				else
+				{
+					switch (node[char].ctx)
+					{
+						case Context.BLOCK:
+						{
+							// block -> inline
+							ctx = Context.INLINE;
+							break;
+						}
+						case Context.NEST:
+						{
+							// nest -> nest
+							ctx = Context.NEST;
+							break;
+						}
+						case Context.LIST:
+						{
+							// list -> list
+							ctx = Context.LIST;
+							break;
+						}
+						case Context.INLINE:
+						{
+							// inline -> inline
+							ctx = Context.INLINE;
+							break;
+						}
+					}
+				}
+				//
+				// STEP 4. flush buffer
+				//
+				if (depth < buffer.length)
+				{
+					tokens.push(buffer.join("").slice(0, 0 < depth ? - depth : Infinity));
+				}
+				//
+				// STEP 5. build token
+				//
+				tokens.push(node[char]);
+				//
+				// STEP 6. reset
+				//
+				[node, depth, buffer.length] = [null, 0, 0];
+			}
+			else
+			{
+				//
+				// STEP 3. delve branch
+				//
+				node = node[char];
+			}
+		}
+
 		main:
 		for (const char of input.replace(/\r\n?/g, "\n"))
 		{
@@ -377,80 +452,11 @@ export default class Scanner
 				continue main;
 			}
 			//
-			// STEP 4. delve branch
+			// STEP 4. delve branch - main
 			//
 			if (char in (node ??= __TABLE__[ctx]))
 			{
-				//
-				// STEP 5. into the deep
-				//
-				depth++
-				//
-				// STEP 6. examine token
-				//
-				if (node[char] instanceof Token)
-				{
-					//
-					// STEP 7. switch ctx
-					//
-					if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(node[char]))
-					{
-						// core -> inline
-						ctx = Context.BLOCK;
-					}
-					else
-					{
-						switch (node[char].ctx)
-						{
-							case Context.BLOCK:
-							{
-								// block -> inline
-								ctx = Context.INLINE;
-								break;
-							}
-							case Context.NEST:
-							{
-								// nest -> nest
-								ctx = Context.NEST;
-								break;
-							}
-							case Context.LIST:
-							{
-								// list -> list
-								ctx = Context.LIST;
-								break;
-							}
-							case Context.INLINE:
-							{
-								// inline -> inline
-								ctx = Context.INLINE;
-								break;
-							}
-						}
-					}
-					//
-					// STEP 8. flush buffer
-					//
-					if (0 < buffer.length - depth)
-					{
-						tokens.push(buffer.join("").slice(0, 0 < depth ? - depth : Infinity));
-					}
-					//
-					// STEP 9. build token
-					//
-					tokens.push(node[char]);
-					//
-					// STEP 10. reset
-					//
-					[node, depth, buffer.length] = [null, 0, 0];
-				}
-				else
-				{
-					//
-					// STEP 7. delve branch
-					//
-					node = node[char];
-				}
+				examine(char);
 			}
 			else
 			{
@@ -458,6 +464,13 @@ export default class Scanner
 				// STEP 5. reset
 				//
 				[ctx, node, depth] = [Context.INLINE, null, 0];
+				//
+				// STEP 6. delve branch - fallback
+				//
+				if (char in (node ??= __TABLE__[ctx]))
+				{
+					examine(char);
+				}
 			}
 		}
 		//
