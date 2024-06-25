@@ -1,9 +1,9 @@
 const enum Context
 {
-	BLOCK = "block", // Block
-	NEST = "nest", // Nest extends Block
-	LIST = "list", // List extends Nest
-	INLINE = "inline", // Inline
+	// HTML = "html",
+	BLOCK = "block",
+	STACK = "stack",
+	INLINE = "inline",
 }
 
 export abstract class Token
@@ -23,90 +23,33 @@ export abstract class Token
 			{
 				return [
 					// core
-					Token.BREAK,
-					Token.COMMENT_L,
-					Token.COMMENT_R,
+					...Token.cores(),
 					// block
-					Token.H1,
-					Token.H2,
-					Token.H3,
-					Token.H4,
-					Token.H5,
-					Token.H6,
-					Token.HR,
+					...Token.blocks(),
 					// stack
-					Token.BQ,
-					// layer
-					Token.INDENT,
-					Token.OL,
-					Token.UL,
+					...Token.stacks(),
 					// inline
-					Token.BOLD,
-					Token.ITALIC,
-					Token.UNDERLINE,
-					Token.STRIKETHROUGH,
-					Token.UNCHECKED_BOX,
-					Token.CHECKED_BOX,
+					...Token.inlines(),
 				];
 			}
-			case Context.NEST:
+			case Context.STACK:
 			{
 				return [
 					// core
-					Token.BREAK,
-					Token.COMMENT_L,
-					Token.COMMENT_R,
+					...Token.cores(),
 					// stack
-					Token.BQ,
-					// layer
-					Token.INDENT,
-					Token.OL,
-					Token.UL,
+					...Token.stacks(),
 					// inline
-					Token.BOLD,
-					Token.ITALIC,
-					Token.UNDERLINE,
-					Token.STRIKETHROUGH,
-					Token.UNCHECKED_BOX,
-					Token.CHECKED_BOX,
-				];
-			}
-			case Context.LIST:
-			{
-				return [
-					// core
-					Token.BREAK,
-					Token.COMMENT_L,
-					Token.COMMENT_R,
-					// stack
-					Token.BQ,
-					// layer
-					Token.INDENT,
-					Token.OL,
-					Token.UL,
-					// inline
-					Token.BOLD,
-					Token.ITALIC,
-					Token.UNDERLINE,
-					Token.STRIKETHROUGH,
-					Token.UNCHECKED_BOX,
-					Token.CHECKED_BOX,
+					...Token.inlines(),
 				];
 			}
 			case Context.INLINE:
 			{
 				return [
 					// core
-					Token.BREAK,
-					Token.COMMENT_L,
-					Token.COMMENT_R,
+					...Token.cores(),
 					// inline
-					Token.BOLD,
-					Token.ITALIC,
-					Token.UNDERLINE,
-					Token.STRIKETHROUGH,
-					Token.UNCHECKED_BOX,
-					Token.CHECKED_BOX,
+					...Token.inlines(),
 				];
 			}
 		}
@@ -115,6 +58,14 @@ export abstract class Token
 	//
 	// core
 	//
+	public static cores()
+	{
+		return [
+			Token.BREAK,
+			Token.COMMENT_L,
+			Token.COMMENT_R,
+		];
+	}
 	public static readonly BREAK = new (class BREAK extends Token
 	{
 		override get ctx(): Context
@@ -142,6 +93,18 @@ export abstract class Token
 	//
 	// block
 	//
+	public static blocks()
+	{
+		return [
+			Token.H1,
+			Token.H2,
+			Token.H3,
+			Token.H4,
+			Token.H5,
+			Token.H6,
+			Token.HR,
+		];
+	}
 	public static readonly H1 = new (class H1 extends Token
 	{
 		override get ctx()
@@ -201,30 +164,36 @@ export abstract class Token
 	//
 	// stack
 	//
-	public static readonly BQ = new (class BQ extends Token
+	public static stacks()
 	{
-		override get ctx()
-		{
-			return Context.NEST;
-		}
-	})
-	(">\u0020");
-	//
-	// layer
-	//
+		return [
+			Token.INDENT,
+			Token.BQ,
+			Token.OL,
+			Token.UL,
+		];
+	}
 	public static readonly INDENT = new (class INDENT extends Token
 	{
 		override get ctx()
 		{
-			return Context.LIST;
+			return Context.STACK;
 		}
 	})
 	("	", "  ", "    ");
+	public static readonly BQ = new (class BQ extends Token
+	{
+		override get ctx()
+		{
+			return Context.STACK;
+		}
+	})
+	(">\u0020");
 	public static readonly OL = new (class OL extends Token
 	{
 		override get ctx()
 		{
-			return Context.LIST;
+			return Context.STACK;
 		}
 	})
 	("-\u0020");
@@ -232,13 +201,34 @@ export abstract class Token
 	{
 		override get ctx()
 		{
-			return Context.LIST;
+			return Context.STACK;
 		}
 	})
 	("~\u0020");
 	//
 	// inline
 	//
+	public static inlines()
+	{
+		return [
+			Token.BOLD,
+			Token.ITALIC,
+			Token.UNDERLINE,
+			Token.STRIKETHROUGH,
+			Token.UNCHECKED_BOX,
+			Token.CHECKED_BOX,
+			Token.ARROW_ALL,
+			Token.ARROW_LEFT,
+			Token.ARROW_RIGHT,
+			Token.FAT_ARROW_ALL,
+			Token.FAT_ARROW_LEFT,
+			Token.FAT_ARROW_RIGHT,
+			Token.MATH_APX,
+			Token.MATH_NET,
+			Token.MATH_LTOET,
+			Token.MATH_GTOET,
+		];
+	}
 	public static readonly BOLD = new (class BOLD extends Token
 	{
 		override get ctx()
@@ -287,6 +277,86 @@ export abstract class Token
 		}
 	})
 	("[x]");
+	public static readonly ARROW_ALL = new (class ARROW_ALL extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("<->");
+	public static readonly ARROW_LEFT = new (class ARROW_LEFT extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("<-");
+	public static readonly ARROW_RIGHT = new (class ARROW_RIGHT extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("->");
+	public static readonly FAT_ARROW_ALL = new (class FAT_ARROW_ALL extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("<=>");
+	public static readonly FAT_ARROW_LEFT = new (class FAT_ARROW_LEFT extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("<==");
+	public static readonly FAT_ARROW_RIGHT = new (class FAT_ARROW_RIGHT extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("=>");
+	public static readonly MATH_APX = new (class MATH_APX extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("~=");
+	public static readonly MATH_NET = new (class MATH_NET extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("!=");
+	public static readonly MATH_LTOET = new (class MATH_LTOET extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	("<=");
+	public static readonly MATH_GTOET = new (class MATH_GTOET extends Token
+	{
+		override get ctx()
+		{
+			return Context.INLINE;
+		}
+	})
+	(">=");
 }
 
 interface Route
@@ -299,14 +369,55 @@ const __TABLE__: Record<Context, Route> =
 	// auto generate
 	[Context.BLOCK]: {},
 	// auto generate
-	[Context.NEST]: {},
-	// auto generate
-	[Context.LIST]: {},
+	[Context.STACK]: {},
 	// auto generate
 	[Context.INLINE]: {},
 };
 
-for (const ctx of [Context.BLOCK, Context.NEST, Context.LIST, Context.INLINE])
+/*
+TODO: allow overlapping syntaxes
+
+<=
+{
+	"<":
+	{
+		"=": <token> // less than or equal to
+	}
+}
+
+<==
+
+{
+	"<":
+	{
+		"=":
+		{
+			"=": <token> // fat arrow left
+		}
+	}
+}
+
+<fix>
+
+{
+	"<":
+	{
+		"=":
+		{
+			"=": <token> // fat arrow left
+			default: <token> // less than or equal to
+		}
+	}
+}
+
+interface Route
+{
+	[key: string]: Token | Route;
+	// @ts-ignore
+	default?: Token;
+}
+*/
+for (const ctx of [Context.BLOCK, Context.STACK, Context.INLINE])
 {
 	for (const token of Token.of(ctx))
 	{
@@ -320,7 +431,15 @@ for (const ctx of [Context.BLOCK, Context.NEST, Context.LIST, Context.INLINE])
 
 				if (i + 1 === rule.length)
 				{
-					node[char] = token; 
+					// if (char in node)
+					// {
+					// 	throw new Error(`[${token.constructor.name}] Grammar Ambiguity: '${rule}'`);
+					// }
+					// else
+					// {
+					// 	node[char] = token;
+					// }
+					node[char] = token;
 				}
 				else
 				{
@@ -375,16 +494,10 @@ export default class Scanner
 							ctx = Context.INLINE;
 							break;
 						}
-						case Context.NEST:
+						case Context.STACK:
 						{
-							// nest -> nest
-							ctx = Context.NEST;
-							break;
-						}
-						case Context.LIST:
-						{
-							// list -> list
-							ctx = Context.LIST;
+							// stack -> stack
+							ctx = Context.STACK;
 							break;
 						}
 						case Context.INLINE:

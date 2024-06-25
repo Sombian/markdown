@@ -274,21 +274,6 @@ export default class Parser
 				//
 				// stack
 				//
-				case Token.BQ:
-				{
-					if (node.last() instanceof BQ)
-					{
-						node = node.last() as Branch;
-					}
-					else
-					{
-						node.children.push(node = new BQ(node));
-					}
-					break;
-				}
-				//
-				// layer
-				//
 				case Token.INDENT:
 				{
 					switch (node.last().constructor)
@@ -305,6 +290,18 @@ export default class Parser
 							node.children.push(new TEXT({ value: "&nbsp;&nbsp;" }));
 							break;
 						}
+					}
+					break;
+				}
+				case Token.BQ:
+				{
+					if (node.last() instanceof BQ)
+					{
+						node = node.last() as Branch;
+					}
+					else
+					{
+						node.children.push(node = new BQ(node));
 					}
 					break;
 				}
