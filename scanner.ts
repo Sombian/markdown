@@ -160,7 +160,7 @@ export abstract class Token
 			return Context.BLOCK;
 		}
 	})
-	("___");
+	("___\n");
 	public static readonly HR_B = new (class HR_B extends Token
 	{
 		override get ctx()
@@ -168,7 +168,7 @@ export abstract class Token
 			return Context.BLOCK;
 		}
 	})
-	("---");
+	("---\n");
 	public static readonly HR_C = new (class HR_C extends Token
 	{
 		override get ctx()
@@ -176,7 +176,7 @@ export abstract class Token
 			return Context.BLOCK;
 		}
 	})
-	("===");
+	("===\n");
 	//
 	// stack
 	//
