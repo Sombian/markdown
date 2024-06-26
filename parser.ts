@@ -167,7 +167,14 @@ class CHECKBOX extends Leaf<boolean>
 {
 	override parse()
 	{
-		return this.data ? `<input type="checkbox" checked/>` : `<input type="checkbox"/>`;
+		if (!this.data)
+		{
+			return `<input type="checkbox" onClick="return false"/>`;
+		}
+		else
+		{
+			return `<input type="checkbox" checked onClick="return false"/>`;
+		}
 	}
 }
 

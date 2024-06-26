@@ -590,7 +590,7 @@ export default class Scanner
 				{
 					const token = node.default;
 					//
-					// STEP 3. switch ctx
+					// STEP 5. switch ctx
 					//
 					if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(token))
 					{
@@ -622,16 +622,16 @@ export default class Scanner
 						}
 					}
 					//
-					// STEP 4. build token
-					//
-					tokens.push(token);
-					//
-					// STEP 4. shift buffer
+					// STEP 6. shift buffer
 					//
 					if (depth < buffer.length)
 					{
 						buffer.splice(0, depth);
 					}
+					//
+					// STEP 7. build token
+					//
+					tokens.push(token);
 				}
 				//
 				// STEP 5. reset states
