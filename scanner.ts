@@ -584,59 +584,55 @@ export default class Scanner
 				//
 				handle(char);
 			}
-			else if (node.default)
-			{
-				const token = node.default;
-				//
-				// STEP 3. switch ctx
-				//
-				if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(token))
-				{
-					// core -> inline
-					ctx = Context.BLOCK;
-				}
-				else
-				{
-					switch (token.ctx)
-					{
-						case Context.BLOCK:
-						{
-							// block -> inline
-							ctx = Context.INLINE;
-							break;
-						}
-						case Context.STACK:
-						{
-							// stack -> stack
-							ctx = Context.STACK;
-							break;
-						}
-						case Context.INLINE:
-						{
-							// inline -> inline
-							ctx = Context.INLINE;
-							break;
-						}
-					}
-				}
-				//
-				// STEP 4. build token
-				//
-				tokens.push(token);
-				//
-				// STEP 4. shift buffer
-				//
-				if (depth < buffer.length)
-				{
-					buffer.splice(0, depth);
-				}
-				//
-				// STEP 6. reset states
-				//
-				[node, depth] = [null, 0];
-			}
 			else
 			{
+				if (node.default)
+				{
+					const token = node.default;
+					//
+					// STEP 3. switch ctx
+					//
+					if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(token))
+					{
+						// core -> inline
+						ctx = Context.BLOCK;
+					}
+					else
+					{
+						switch (token.ctx)
+						{
+							case Context.BLOCK:
+							{
+								// block -> inline
+								ctx = Context.INLINE;
+								break;
+							}
+							case Context.STACK:
+							{
+								// stack -> stack
+								ctx = Context.STACK;
+								break;
+							}
+							case Context.INLINE:
+							{
+								// inline -> inline
+								ctx = Context.INLINE;
+								break;
+							}
+						}
+					}
+					//
+					// STEP 4. build token
+					//
+					tokens.push(token);
+					//
+					// STEP 4. shift buffer
+					//
+					if (depth < buffer.length)
+					{
+						buffer.splice(0, depth);
+					}
+				}
 				//
 				// STEP 5. reset states
 				//
