@@ -266,7 +266,9 @@ export default class Parser
 					node.children.push(node = new H6(node));
 					break;
 				}
-				case Token.HR:
+				case Token.HR_A:
+				case Token.HR_B:
+				case Token.HR_C:
 				{
 					node.children.push(node = new HR(node));
 					break;
@@ -274,7 +276,9 @@ export default class Parser
 				//
 				// stack
 				//
-				case Token.INDENT:
+				case Token.INDENT_1T:
+				case Token.INDENT_2S:
+				case Token.INDENT_4S:
 				{
 					switch (node.last().constructor)
 					{
@@ -287,7 +291,7 @@ export default class Parser
 						default:
 						{
 							// fallback
-							node.children.push(new TEXT({ value: "&nbsp;&nbsp;" }));
+							node.children.push(new TEXT({ value: token.grammar }));
 							break;
 						}
 					}
@@ -364,6 +368,56 @@ export default class Parser
 				case Token.CHECKED_BOX:
 				{
 					node.children.push(new CHECKBOX(true));
+					break;
+				}
+				case Token.ARROW_ALL:
+				{
+					node.children.push(new TEXT({ value: "↔", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.ARROW_LEFT:
+				{
+					node.children.push(new TEXT({ value: "←", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.ARROW_RIGHT:
+				{
+					node.children.push(new TEXT({ value: "→", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.FAT_ARROW_ALL:
+				{
+					node.children.push(new TEXT({ value: "⇔", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.FAT_ARROW_LEFT:
+				{
+					node.children.push(new TEXT({ value: "⇐", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.FAT_ARROW_RIGHT:
+				{
+					node.children.push(new TEXT({ value: "⇒", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.MATH_APX:
+				{
+					node.children.push(new TEXT({ value: "≈", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.MATH_NET:
+				{
+					node.children.push(new TEXT({ value: "≠", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.MATH_LTOET:
+				{
+					node.children.push(new TEXT({ value: "≤", bold, italic, underline, strikethrough }));
+					break;
+				}
+				case Token.MATH_GTOET:
+				{
+					node.children.push(new TEXT({ value: "≥", bold, italic, underline, strikethrough }));
 					break;
 				}
 				default:

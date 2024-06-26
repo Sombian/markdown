@@ -8,11 +8,9 @@ const enum Context
 
 export abstract class Token
 {
-	public readonly rules: string[];
-
-	private constructor(...rules: string[])
+	private constructor(public readonly grammar: string)
 	{
-		this.rules = rules;
+		// final
 	}
 
 	public static of(ctx: Context)
@@ -102,7 +100,9 @@ export abstract class Token
 			Token.H4,
 			Token.H5,
 			Token.H6,
-			Token.HR,
+			Token.HR_A,
+			Token.HR_B,
+			Token.HR_C,
 		];
 	}
 	public static readonly H1 = new (class H1 extends Token
@@ -153,34 +153,68 @@ export abstract class Token
 		}
 	})
 	("######\u0020");
-	public static readonly HR = new (class HR extends Token
+	public static readonly HR_A = new (class HR_A extends Token
 	{
 		override get ctx()
 		{
 			return Context.BLOCK;
 		}
 	})
-	("---", "===");
+	("___");
+	public static readonly HR_B = new (class HR_B extends Token
+	{
+		override get ctx()
+		{
+			return Context.BLOCK;
+		}
+	})
+	("---");
+	public static readonly HR_C = new (class HR_C extends Token
+	{
+		override get ctx()
+		{
+			return Context.BLOCK;
+		}
+	})
+	("===");
 	//
 	// stack
 	//
 	public static stacks()
 	{
 		return [
-			Token.INDENT,
+			Token.INDENT_1T,
+			Token.INDENT_2S,
+			Token.INDENT_4S,
 			Token.BQ,
 			Token.OL,
 			Token.UL,
 		];
 	}
-	public static readonly INDENT = new (class INDENT extends Token
+	public static readonly INDENT_1T = new (class INDENT_1T extends Token
 	{
 		override get ctx()
 		{
 			return Context.STACK;
 		}
 	})
-	("	", "  ", "    ");
+	("	");
+	public static readonly INDENT_2S = new (class INDENT_2S extends Token
+	{
+		override get ctx()
+		{
+			return Context.STACK;
+		}
+	})
+	("  ");
+	public static readonly INDENT_4S = new (class INDENT_4S extends Token
+	{
+		override get ctx()
+		{
+			return Context.STACK;
+		}
+	})
+	("    ");
 	public static readonly BQ = new (class BQ extends Token
 	{
 		override get ctx()
@@ -362,6 +396,8 @@ export abstract class Token
 interface Route
 {
 	[key: string]: Token | Route;
+	// @ts-ignore
+	default?: Token;
 }
 
 const __TABLE__: Record<Context, Route> =
@@ -374,77 +410,50 @@ const __TABLE__: Record<Context, Route> =
 	[Context.INLINE]: {},
 };
 
-/*
-TODO: allow overlapping syntaxes
-
-<=
-{
-	"<":
-	{
-		"=": <token> // less than or equal to
-	}
-}
-
-<==
-
-{
-	"<":
-	{
-		"=":
-		{
-			"=": <token> // fat arrow left
-		}
-	}
-}
-
-<fix>
-
-{
-	"<":
-	{
-		"=":
-		{
-			"=": <token> // fat arrow left
-			default: <token> // less than or equal to
-		}
-	}
-}
-
-interface Route
-{
-	[key: string]: Token | Route;
-	// @ts-ignore
-	default?: Token;
-}
-*/
 for (const ctx of [Context.BLOCK, Context.STACK, Context.INLINE])
 {
 	for (const token of Token.of(ctx))
 	{
-		for (const rule of token.rules)
+		let node = __TABLE__[ctx];
+
+		for (let i = 0; i < token.grammar.length; i++)
 		{
-			let node = __TABLE__[ctx];
+			const char = token.grammar[i];
 
-			for (let i = 0; i < rule.length; i++)
+			if (i + 1 < token.grammar.length)
 			{
-				const char = rule[i];
-
-				if (i + 1 === rule.length)
+				if (char in node)
 				{
-					// if (char in node)
-					// {
-					// 	throw new Error(`[${token.constructor.name}] Grammar Ambiguity: '${rule}'`);
-					// }
-					// else
-					// {
-					// 	node[char] = token;
-					// }
-					node[char] = token;
+					if (node[char] instanceof Token)
+					{
+						node = (node[char] = { default: node[char] });
+					}
+					else
+					{
+						node = node[char];
+					}
 				}
 				else
 				{
-					// @ts-ignore
-					node = node[char] ?? (node[char] = {});
+					node = (node[char] = {});
+				}
+			}
+			else
+			{
+				if (char in node)
+				{
+					if (node[char] instanceof Token)
+					{
+						throw new Error(`Token [${node[char].constructor.name}] and [${token.constructor.name}] has exact syntax`)
+					}
+					else
+					{
+						node[char].default = token;
+					}
+				}
+				else
+				{
+					node[char] = token;
 				}
 			}
 		}
@@ -464,7 +473,7 @@ export default class Scanner
 
 		let [ctx, node, depth, escape] = [Context.BLOCK, null as (null | Route), 0, false];
 
-		function examine(char: string)
+		function handle(char: string)
 		{
 			if (node === null) throw new Error();
 			//
@@ -476,17 +485,18 @@ export default class Scanner
 			//
 			if (node[char] instanceof Token)
 			{
+				const token = node[char];
 				//
 				// STEP 3. switch ctx
 				//
-				if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(node[char]))
+				if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(token))
 				{
 					// core -> inline
 					ctx = Context.BLOCK;
 				}
 				else
 				{
-					switch (node[char].ctx)
+					switch (token.ctx)
 					{
 						case Context.BLOCK:
 						{
@@ -513,14 +523,14 @@ export default class Scanner
 				//
 				if (depth < buffer.length)
 				{
-					tokens.push(buffer.join("").slice(0, 0 < depth ? - depth : Infinity));
+					tokens.push(buffer.join("").slice(0, - depth));
 				}
 				//
 				// STEP 5. build token
 				//
-				tokens.push(node[char]);
+				tokens.push(token);
 				//
-				// STEP 6. reset
+				// STEP 6. reset states
 				//
 				[node, depth, buffer.length] = [null, 0, 0];
 			}
@@ -542,7 +552,7 @@ export default class Scanner
 			if (!escape && char === "\\")
 			{
 				//
-				// STEP 2. reset
+				// STEP 2. reset states
 				//
 				[ctx, node, depth, escape] = [Context.INLINE, null, 0, true];
 
@@ -558,7 +568,7 @@ export default class Scanner
 			if (escape)
 			{
 				//
-				// STEP 4. reset
+				// STEP 4. reset states
 				//
 				[ctx, node, depth, escape] = [Context.INLINE, null, 0, false];
 
@@ -569,12 +579,66 @@ export default class Scanner
 			//
 			if (char in (node ??= __TABLE__[ctx]))
 			{
-				examine(char);
+				//
+				// STEP 5. examine char
+				//
+				handle(char);
+			}
+			else if (node.default)
+			{
+				const token = node.default;
+				//
+				// STEP 3. switch ctx
+				//
+				if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(token))
+				{
+					// core -> inline
+					ctx = Context.BLOCK;
+				}
+				else
+				{
+					switch (token.ctx)
+					{
+						case Context.BLOCK:
+						{
+							// block -> inline
+							ctx = Context.INLINE;
+							break;
+						}
+						case Context.STACK:
+						{
+							// stack -> stack
+							ctx = Context.STACK;
+							break;
+						}
+						case Context.INLINE:
+						{
+							// inline -> inline
+							ctx = Context.INLINE;
+							break;
+						}
+					}
+				}
+				//
+				// STEP 4. build token
+				//
+				tokens.push(token);
+				//
+				// STEP 4. shift buffer
+				//
+				if (depth < buffer.length)
+				{
+					buffer.splice(0, depth);
+				}
+				//
+				// STEP 6. reset states
+				//
+				[node, depth] = [null, 0];
 			}
 			else
 			{
 				//
-				// STEP 5. reset
+				// STEP 5. reset states
 				//
 				[ctx, node, depth] = [Context.INLINE, null, 0];
 				//
@@ -582,7 +646,10 @@ export default class Scanner
 				//
 				if (char in (node ??= __TABLE__[ctx]))
 				{
-					examine(char);
+					//
+					// STEP 7. examine char
+					//
+					handle(char);
 				}
 			}
 		}
