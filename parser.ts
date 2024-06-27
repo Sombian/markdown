@@ -232,6 +232,7 @@ export default class Parser
 							break;
 						}
 					}
+					// i'll be back
 					node = origin
 					break;
 				}
@@ -277,7 +278,8 @@ export default class Parser
 				case Token.HR_B:
 				case Token.HR_C:
 				{
-					node.children.push(node = new HR(node));
+					// i'll be back
+					(node = origin).children.push(new HR(node));
 					break;
 				}
 				//
