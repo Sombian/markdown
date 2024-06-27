@@ -258,35 +258,34 @@ export default class Scanner
 
 		let [ctx, node, depth, escape] = [Context.BLOCK, null as (null | Route), 0, false];
 
-		function follow(token: Token)
+		// Greninja transformed into the Grass Type!
+		function protean(token: Token)
 		{
-			if ([Token.BREAK, Token.COMMENT_L, Token.COMMENT_R].includes(token))
+			switch (token.ctx)
 			{
-				// core -> inline
-				ctx = Context.BLOCK;
-			}
-			else
-			{
-				switch (token.ctx)
+				case null:
 				{
-					case Context.BLOCK:
-					{
-						// block -> inline
-						ctx = Context.INLINE;
-						break;
-					}
-					case Context.STACK:
-					{
-						// stack -> stack
-						ctx = Context.STACK;
-						break;
-					}
-					case Context.INLINE:
-					{
-						// inline -> inline
-						ctx = Context.INLINE;
-						break;
-					}
+					// core -> inline
+					ctx = Context.BLOCK;
+					break;
+				}
+				case Context.BLOCK:
+				{
+					// block -> inline
+					ctx = Context.INLINE;
+					break;
+				}
+				case Context.STACK:
+				{
+					// stack -> stack
+					ctx = Context.STACK;
+					break;
+				}
+				case Context.INLINE:
+				{
+					// inline -> inline
+					ctx = Context.INLINE;
+					break;
 				}
 			}
 		}
@@ -307,7 +306,7 @@ export default class Scanner
 				//
 				// <ctx/switch>
 				//
-				follow(token);
+				protean(token);
 				//
 				// <buffer/flush>
 				//
@@ -379,7 +378,7 @@ export default class Scanner
 					//
 					// <ctx/switch>
 					//
-					follow(token);
+					protean(token);
 					//
 					// <buffer/manipulate>
 					//
@@ -428,7 +427,7 @@ export default class Scanner
 			}
 		}
 		//
-		// <flush buffer>
+		// <buffer/flush>
 		//
 		if (0 < buffer.length)
 		{
