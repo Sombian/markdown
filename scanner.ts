@@ -89,11 +89,11 @@ export abstract class Token
 	public static readonly H6 = new (class H6 extends Token {})
 	(Context.BLOCK, "######\u0020");
 	public static readonly HR_A = new (class HR_A extends Token {})
-	(Context.BLOCK, "___");
+	(Context.BLOCK, "___\n");
 	public static readonly HR_B = new (class HR_B extends Token {})
-	(Context.BLOCK, "---");
+	(Context.BLOCK, "---\n");
 	public static readonly HR_C = new (class HR_C extends Token {})
-	(Context.BLOCK, "===");
+	(Context.BLOCK, "===\n");
 	//
 	// stack
 	//
@@ -261,31 +261,39 @@ export default class Scanner
 		// Greninja transformed into the Grass Type!
 		function protean(token: Token)
 		{
-			switch (token.ctx)
+			if (token.grammar[token.grammar.length - 1] === "\n")
 			{
-				case null:
+				// <unknown> -> block
+				ctx = Context.BLOCK;
+			}
+			else
+			{
+				switch (token.ctx)
 				{
-					// core -> inline
-					ctx = Context.BLOCK;
-					break;
-				}
-				case Context.BLOCK:
-				{
-					// block -> inline
-					ctx = Context.INLINE;
-					break;
-				}
-				case Context.STACK:
-				{
-					// stack -> stack
-					ctx = Context.STACK;
-					break;
-				}
-				case Context.INLINE:
-				{
-					// inline -> inline
-					ctx = Context.INLINE;
-					break;
+					case null:
+					{
+						// core -> block
+						ctx = Context.BLOCK;
+						break;
+					}
+					case Context.BLOCK:
+					{
+						// block -> inline
+						ctx = Context.INLINE;
+						break;
+					}
+					case Context.STACK:
+					{
+						// stack -> stack
+						ctx = Context.STACK;
+						break;
+					}
+					case Context.INLINE:
+					{
+						// inline -> inline
+						ctx = Context.INLINE;
+						break;
+					}
 				}
 			}
 		}
