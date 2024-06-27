@@ -89,11 +89,11 @@ export abstract class Token
 	public static readonly H6 = new (class H6 extends Token {})
 	(Context.BLOCK, "######\u0020");
 	public static readonly HR_A = new (class HR_A extends Token {})
-	(Context.BLOCK, "___\n");
+	(Context.BLOCK, "___");
 	public static readonly HR_B = new (class HR_B extends Token {})
-	(Context.BLOCK, "---\n");
+	(Context.BLOCK, "---");
 	public static readonly HR_C = new (class HR_C extends Token {})
-	(Context.BLOCK, "===\n");
+	(Context.BLOCK, "===");
 	//
 	// stack
 	//
