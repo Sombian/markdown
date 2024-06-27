@@ -272,8 +272,8 @@ export default class Scanner
 				{
 					case null:
 					{
-						// core -> block
-						ctx = Context.BLOCK;
+						// core -> inline
+						ctx = Context.INLINE;
 						break;
 					}
 					case Context.BLOCK:

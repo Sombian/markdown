@@ -14,7 +14,7 @@ Bun.file("./input.md").text().then((text) =>
 	{
 		console.debug(tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name));
 	}
-	if (!true)
+	if (true)
 	{
 		// @ts-ignore
 		console.debug(require("util").inspect(AST, { depth: null }));

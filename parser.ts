@@ -182,7 +182,7 @@ export default class Parser
 {
 	public static run(tokens: ReturnType<typeof Scanner.run>)
 	{
-		const origin = new (class ROOT extends Branch { override parse() { return `<article>${this.children.map((child) => child.parse()).join("")}</article>`; } })(null as never);
+		const origin = new (class ROOT extends Branch { override parse() { return `<article style="white-space: pre;">${this.children.map((child) => child.parse()).join("")}</article>`; } })(null as never);
 
 		let node = origin;
 
@@ -289,7 +289,7 @@ export default class Parser
 				case Token.INDENT_2S:
 				case Token.INDENT_4S:
 				{
-					switch (node.last().constructor)
+					switch (node.last()?.constructor)
 					{
 						case OL:
 						case UL:
