@@ -1,0 +1,7 @@
+{
+	"files.exclude":
+	{
+		"bun.lockb": true,
+		"node_modules": true,
+	}
+}

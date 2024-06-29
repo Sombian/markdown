@@ -144,13 +144,22 @@ export abstract class Token
 	(Context.INLINE, "<=");
 	public static readonly MATH_GTOET = new (class MATH_GTOET extends Token {})
 	(Context.INLINE, ">=");
+	public static readonly BRACKET_L = new (class BRACKET_L extends Token {})
+	(Context.INLINE, "(");
+	public static readonly BRACKET_R = new (class BRACKET_R extends Token {})
+	(Context.INLINE, ")");
+	public static readonly SQ_BRACKET_L = new (class SQ_BRACKET_L extends Token {})
+	(Context.INLINE, "[");
+	public static readonly SQ_BRACKET_R = new (class SQ_BRACKET_R extends Token {})
+	(Context.INLINE, "]");
+	public static readonly EXCLAMATION_MARK = new (class SQ_BRACKET_R extends Token {})
+	(Context.INLINE, "!");
 }
 
 interface Route
 {
-	[key: string]: Token | Route;
 	// @ts-ignore
-	default?: Token;
+	[key: string]: Token | Route; default?: Token;
 }
 
 const __TABLE__: Record<Context, Route> =
