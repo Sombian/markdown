@@ -7,14 +7,14 @@ function debug()
 {
 	Bun.file("./input.md").text().then((text) =>
 	{
-		if (true)
+		if (!true)
 		{
 			console.debug(text);
 		}
 
 		const tokens = benchmark("Scanner", () => Scanner.run(text));
 			
-		if (true)
+		if (!true)
 		{
 			console.debug(tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name));
 		}
