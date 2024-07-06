@@ -22,7 +22,7 @@ export abstract class Token
 
 	private constructor(public readonly ctx: Context, public readonly grammar: string)
 	{
-		Token.__MAP__.get(ctx)?.push(this);
+		Token.__MAP__.get(ctx)!!.push(this);
 	}
 
 	public static of(ctx: Context)
@@ -33,33 +33,33 @@ export abstract class Token
 			{
 				return [
 					// @ts-ignore
-					...Token.__MAP__.get(null),
+					...Token.__MAP__.get(null)!!,
 					// block
-					...Token.__MAP__.get(Context.BLOCK),
+					...Token.__MAP__.get(Context.BLOCK)!!,
 					// stack
-					...Token.__MAP__.get(Context.STACK),
+					...Token.__MAP__.get(Context.STACK)!!,
 					// inline
-					...Token.__MAP__.get(Context.INLINE),
+					...Token.__MAP__.get(Context.INLINE)!!,
 				];
 			}
 			case Context.STACK:
 			{
 				return [
 					// @ts-ignore
-					...Token.__MAP__.get(null),
+					...Token.__MAP__.get(null)!!,
 					// stack
-					...Token.__MAP__.get(Context.STACK),
+					...Token.__MAP__.get(Context.STACK)!!,
 					// inline
-					...Token.__MAP__.get(Context.INLINE),
+					...Token.__MAP__.get(Context.INLINE)!!,
 				];
 			}
 			case Context.INLINE:
 			{
 				return [
 					// @ts-ignore
-					...Token.__MAP__.get(null),
+					...Token.__MAP__.get(null)!!,
 					// inline
-					...Token.__MAP__.get(Context.INLINE),
+					...Token.__MAP__.get(Context.INLINE)!!,
 				];
 			}
 		}
@@ -144,15 +144,15 @@ export abstract class Token
 	(Context.INLINE, "<=");
 	public static readonly MATH_GTOET = new (class MATH_GTOET extends Token {})
 	(Context.INLINE, ">=");
-	public static readonly BRACKET_L = new (class BRACKET_L extends Token {})
+	public static readonly L_PAREN = new (class L_PAREN extends Token {})
 	(Context.INLINE, "(");
-	public static readonly BRACKET_R = new (class BRACKET_R extends Token {})
+	public static readonly R_PAREN = new (class R_PAREN extends Token {})
 	(Context.INLINE, ")");
-	public static readonly SQ_BRACKET_L = new (class SQ_BRACKET_L extends Token {})
+	public static readonly L_BRACKET = new (class L_BRACKET extends Token {})
 	(Context.INLINE, "[");
-	public static readonly SQ_BRACKET_R = new (class SQ_BRACKET_R extends Token {})
+	public static readonly R_BRACKET = new (class R_BRACKET extends Token {})
 	(Context.INLINE, "]");
-	public static readonly EXCLAMATION_MARK = new (class SQ_BRACKET_R extends Token {})
+	public static readonly EXCLAMATION = new (class EXCLAMATION extends Token {})
 	(Context.INLINE, "!");
 }
 
@@ -399,9 +399,9 @@ export default class Scanner
 					//
 					// <buffer/manipulate>
 					//
-					if (depth < buffer.length)
+					if (depth < buffer.length - 0)
 					{
-						if (depth + 1 < buffer.length)
+						if (depth < buffer.length - 1)
 						{
 							/*
 							e.g. token=<ITALIC { grammar: "*" }>, depth=1

@@ -7,22 +7,26 @@ function debug()
 {
 	Bun.file("./input.md").text().then((text) =>
 	{
-		const tokens = benchmark("Scanner", () => Scanner.run(text)); const AST = benchmark("Parser", () => Parser.run(tokens));
-			
-		if (!true)
+		if (true)
 		{
 			console.debug(text);
 		}
+
+		const tokens = benchmark("Scanner", () => Scanner.run(text));
+			
 		if (true)
 		{
 			console.debug(tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name));
 		}
+
+		const AST = benchmark("Parser", () => Parser.run(tokens));
+
 		if (!true)
 		{
 			console.debug(require("util").inspect(AST, { depth: null }));
 		}
 		// :3
-		Bun.write("./output.html", AST.parse());
+		Bun.write("./output.html", AST.render());
 	});
 }
 
@@ -39,17 +43,20 @@ function benchmark<T>(name: string, task: () => T)
 	return value;
 }
 
-const watcher = watch("./input.md", (event, file) =>
+if (!true)
 {
-	debug();
-});
-
-process.on("SIGINT", () =>
-{
-	watcher.close();
-
-	process.exit(0);
-});
-
+	const watcher = watch("./input.md", (event, file) =>
+	{
+		debug();
+	});
+		
+	process.on("SIGINT", () =>
+	{
+		watcher.close();
+		
+		process.exit(0);
+	});
+		
+}
 
 debug();

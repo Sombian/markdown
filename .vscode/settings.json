@@ -3,5 +3,5 @@
 	{
 		"bun.lockb": true,
 		"node_modules": true,
-	}
+	},
 }

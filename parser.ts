@@ -2,98 +2,84 @@ import Scanner, { Token } from "./scanner";
 
 abstract class AST
 {
-	public abstract parse(): string;
-}
+	public readonly children: (string | AST)[] = [];
 
-abstract class Branch extends AST
-{
-	constructor(public readonly parent: Branch, public readonly children: AST[] = [])
+	constructor(...children: AST["children"])
 	{
-		super();
+		this.children.push(...children);
 	}
 
-	public first()
+	public get first()
 	{
 		return this.children[0];
 	}
 
-	public last()
+	public get last()
 	{
 		return this.children[this.children.length - 1];
 	}
-}
 
-abstract class Leaf<T> extends AST
-{
-	constructor(public readonly data: T)
+	public get body()
 	{
-		super();
+		return this.children.map((child) => typeof child === "string" ? child : child.render()).join("");
 	}
-}
-//
-// core
-//
-class BREAK extends Leaf<never>
-{
-	override parse()
-	{
-		return `<br/>`;
-	}
+
+	public abstract render(): string;
 }
 //
 // block
 //
-class H1 extends Branch
+class H1 extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<h1>${this.children.map((child) => child.parse()).join("")}</h1>`;
+		return `<h1>${this.body}</h1>`;
 	}
 }
 
-class H2 extends Branch
+class H2 extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<h2>${this.children.map((child) => child.parse()).join("")}</h2>`;
+		return `<h2>${this.body}</h2>`;
 	}
 }
 
-class H3 extends Branch
+class H3 extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<h3>${this.children.map((child) => child.parse()).join("")}</h3>`;
+		return `<h3>${this.body}</h3>`;
 	}
 }
 
-class H4 extends Branch
+class H4 extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<h4>${this.children.map((child) => child.parse()).join("")}</h4>`;
+		return `<h4>${this.body}</h4>`;
 	}
 }
 
-class H5 extends Branch
+class H5 extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<h5>${this.children.map((child) => child.parse()).join("")}</h5>`;
+		return `<h5>${this.body}</h5>`;
 	}
 }
 
-class H6 extends Branch
+class H6 extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<h6>${this.children.map((child) => child.parse()).join("")}</h6>`;
+		return `<h6>${this.body}</h6>`;
 	}
 }
 
-class HR extends Branch
+class HR extends AST
 {
-	override parse()
+	override render()
 	{
 		return `<hr/>`;
 	}
@@ -101,344 +87,600 @@ class HR extends Branch
 //
 // stack
 //
-class BQ extends Branch
+class BQ extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<blockquote>${this.children.map((child) => child.parse()).join("")}</blockquote>`;
+		return `<blockquote>${this.body}</blockquote>`;
 	}
 }
 
-class OL extends Branch
+class OL extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<ol>${this.children.map((child) => child.parse()).join("")}</ol>`;
+		return `<ol>${this.body}</ol>`;
 	}
 }
 
-class UL extends Branch
+class UL extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<ul>${this.children.map((child) => child.parse()).join("")}</ul>`;
+		return `<ul>${this.body}</ul>`;
 	}
 }
 
-class LI extends Branch
+class LI extends AST
 {
-	override parse()
+	override render()
 	{
-		return `<li>${this.children.map((child) => child.parse()).join("")}</li>`;
+		return `<li>${this.body}</li>`;
 	}
 }
 //
 // inline
 //
-class TEXT extends Leaf<{ value: string; bold?: boolean; italic?: boolean; underline?: boolean; strikethrough?: boolean; }>
+class BR extends AST
 {
-	override parse()
+	override render()
 	{
-		const [tags, buffer] = [[] as string[], [] as string[]];
-
-		if (this.data.bold) tags.push("strong");
-		if (this.data.italic) tags.push("i");
-		if (this.data.underline) tags.push("u");
-		if (this.data.strikethrough) tags.push("s");
-
-		// open
-		for (const tag of tags)
-		{
-			buffer.push("<" + tag + ">");
-		}
-		// content
-		buffer.push(this.data.value);
-		// close
-		for (const tag of tags.reverse())
-		{
-			buffer.push("</" + tag + ">");
-		}
-
-		return buffer.join("");
+		return `<br>`;
 	}
 }
 
-class CHECKBOX extends Leaf<boolean>
+class PR extends AST
 {
-	override parse()
+	override render()
 	{
-		if (!this.data)
-		{
-			return `<input type="checkbox" onClick="return false"/>`;
-		}
-		else
-		{
-			return `<input type="checkbox" checked onClick="return false"/>`;
-		}
+		return `<p>${this.body}</p>`;
 	}
 }
+
+class BOLD extends AST
+{
+	override render()
+	{
+		return `<strong>${this.body}</strong>`
+	}
+}
+
+class ITALIC extends AST
+{
+	override render()
+	{
+		return `<i>${this.body}</i>`
+	}
+}
+
+class UNDERLINE extends AST
+{
+	override render()
+	{
+		return `<u>${this.body}</u>`
+	}
+}
+
+class STRIKETHROUGH extends AST
+{
+	override render()
+	{
+		return `<s>${this.body}</s>`
+	}
+}
+
+class UNCHECKED_BOX extends AST
+{
+	override render()
+	{
+		return `<input type="checkbox" onClick="return false"/>`;
+	}
+}
+
+class CHECKED_BOX extends AST
+{
+	override render()
+	{
+		return `<input type="checkbox" checked onClick="return false"/>`;
+	}
+}
+
+const EOF = Symbol();
 
 export default class Parser
 {
 	public static run(tokens: ReturnType<typeof Scanner.run>)
 	{
-		const origin = new (class ROOT extends Branch { override parse() { return `<article style="white-space: pre;">${this.children.map((child) => child.parse()).join("")}</article>`; } })(null as never);
+		return new Parser(tokens).run();
+	}
 
-		let node = origin;
+	private readonly origin = new (class ROOT extends AST
+	{
+		override render()
+		{
+			return `<article class="md">${this.body}</article>`;
+		}
+	})
+	();
+	//
+	// pointer
+	//
+	private i = 0; private node: AST = this.origin;
 
-		let [bold, italic, underline, strikethrough] = [false, false, false, false];
+	private constructor(private readonly tokens: ReturnType<typeof Scanner.run>)
+	{
+		// final
+	}
 
-		let comment = false;
+	private run()
+	{
+		main:
+		while (this.peek() !== EOF)
+		{
+			const ast = this._block();
+			// ast may be null due to indent
+			if (ast) this.node.children.push(ast);
+		}
+		if (true)
+		{
+			console.debug(require("util").inspect(this.origin, { depth: null }));
+		}
+		return this.origin;
+	}
+
+	private peek(offset = 0)
+	{
+		if ((this.i += offset) >= this.tokens.length)
+		{
+			return EOF;
+		}
+		return this.tokens[this.i];
+	}
+
+	private consume(token?: Token)
+	{
+		if (token && this.peek() !== token)
+		{
+			throw new Error(`Unexpected token ${this.peek().toString()} at position ${this.i}`);
+		}
+		this.i++; // next
+	}
+
+	private _block()
+	{
+		main:
+		switch (this.peek())
+		{
+			case Token.BREAK:
+			{
+				this.consume(); this.node = this.origin; return null;
+			}
+			case Token.H1:
+			{
+				this.consume(); return new H1(this._inline());
+			}
+			case Token.H2:
+			{
+				this.consume(); return new H2(this._inline());
+			}
+			case Token.H3:
+			{
+				this.consume(); return new H3(this._inline());
+			}
+			case Token.H4:
+			{
+				this.consume(); return  new H4(this._inline());
+			}
+			case Token.H5:
+			{
+				this.consume(); return new H5(this._inline());
+			}
+			case Token.H6:
+			{
+				this.consume(); return new H6(this._inline());
+			}
+			case Token.HR_A:
+			case Token.HR_B:
+			case Token.HR_C:
+			{
+				this.consume(); return new HR(); // no children
+			}
+			default:
+			{
+				return this._stack();
+			}
+		}
+	}
+
+	private _stack()
+	{
+		switch (this.peek())
+		{
+			case Token.INDENT_1T:
+			case Token.INDENT_2S:
+			case Token.INDENT_4S:
+			{
+				const token = this.peek(); this.consume();
+
+				switch (this.node.last?.constructor)
+				{
+					case OL:
+					case UL:
+					{
+						// pickup
+						this.node = this.node.last as AST; return null;
+					}
+				}
+				// fallback
+				return (token as Token).grammar;
+			}
+			case Token.BQ:
+			{
+				this.consume(); return this._bq();
+			}
+			case Token.OL:
+			{
+				this.consume(); return this._ol();
+			}
+			case Token.UL:
+			{
+				this.consume(); return this._ul();
+			}
+			default:
+			{
+				return this._inline();
+			}
+		}
+	}
+
+	private _bq()
+	{
+		const node = new PR();
 
 		main:
-		for (const token of tokens)
+		while (true)
 		{
-			if (comment)
+			switch (this.peek())
 			{
-				switch (token)
+				case EOF: case Token.BREAK:
 				{
-					case Token.COMMENT_R:
-					{
-						comment = false;
-						break;
-					}
-				}
-				continue main;
-			}
-			switch (token)
-			{
-				//
-				// core
-				//
-				case Token.BREAK:
-				{
-					[bold, italic, underline, strikethrough] = [false, false, false, false]; // reset styles
-					
-					switch (node.constructor)
-					{
-						case H1:
-						case H2:
-						case H3:
-						case H4:
-						case H5:
-						case H6:
-						case HR:
-						{
-							break; // block-level, ignore
-						}
-						default:
-						{
-							node.children.push(new BREAK(null as never)); // others, continue
-							break;
-						}
-					}
-					// i'll be back
-					node = origin
-					break;
-				}
-				case Token.COMMENT_L:
-				{
-					comment = true;
-					break;
-				}
-				//
-				// block
-				//
-				case Token.H1:
-				{
-					node.children.push(node = new H1(node));
-					break;
-				}
-				case Token.H2:
-				{
-					node.children.push(node = new H2(node));
-					break;
-				}
-				case Token.H3:
-				{
-					node.children.push(node = new H3(node));
-					break;
-				}
-				case Token.H4:
-				{
-					node.children.push(node = new H4(node));
-					break;
-				}
-				case Token.H5:
-				{
-					node.children.push(node = new H5(node));
-					break;
-				}
-				case Token.H6:
-				{
-					node.children.push(node = new H6(node));
-					break;
-				}
-				case Token.HR_A:
-				case Token.HR_B:
-				case Token.HR_C:
-				{
-					// i'll be back
-					(node = origin).children.push(new HR(node));
-					break;
-				}
-				//
-				// stack
-				//
-				case Token.INDENT_1T:
-				case Token.INDENT_2S:
-				case Token.INDENT_4S:
-				{
-					switch (node.last()?.constructor)
-					{
-						case OL:
-						case UL:
-						{
-							node = node.last() as Branch;
-							break;
-						}
-						default:
-						{
-							// fallback
-							node.children.push(new TEXT({ value: token.grammar }));
-							break;
-						}
-					}
-					break;
-				}
-				case Token.BQ:
-				{
-					if (node.last() instanceof BQ)
-					{
-						node = node.last() as Branch;
-					}
-					else
-					{
-						node.children.push(node = new BQ(node));
-					}
-					break;
-				}
-				case Token.OL:
-				{
-					if (node.last() instanceof OL)
-					{
-						node = node.last() as Branch;
-					}
-					else
-					{
-						node.children.push(node = new OL(node))
-					}
-					// insert
-					node.children.push(node = new LI(node));
-					break;
-				}
-				case Token.UL:
-				{
-					if (node.last() instanceof UL)
-					{
-						node = node.last() as Branch;
-					}
-					else
-					{
-						node.children.push(node = new UL(node))
-					}
-					// insert
-					node.children.push(node = new LI(node));
-					break;
-				}
-				//
-				// inline
-				//
-				case Token.BOLD:
-				{
-					bold = !bold;
-					break;
-				}
-				case Token.ITALIC:
-				{
-					italic = !italic;
-					break;
-				}
-				case Token.UNDERLINE:
-				{
-					underline = !underline;
-					break;
-				}
-				case Token.STRIKETHROUGH:
-				{
-					strikethrough = !strikethrough;
-					break;
-				}
-				case Token.UNCHECKED_BOX:
-				{
-					node.children.push(new CHECKBOX(false));
-					break;
-				}
-				case Token.CHECKED_BOX:
-				{
-					node.children.push(new CHECKBOX(true));
-					break;
-				}
-				case Token.ARROW_ALL:
-				{
-					node.children.push(new TEXT({ value: "↔", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.ARROW_LEFT:
-				{
-					node.children.push(new TEXT({ value: "←", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.ARROW_RIGHT:
-				{
-					node.children.push(new TEXT({ value: "→", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.FAT_ARROW_ALL:
-				{
-					node.children.push(new TEXT({ value: "⇔", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.FAT_ARROW_LEFT:
-				{
-					node.children.push(new TEXT({ value: "⇐", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.FAT_ARROW_RIGHT:
-				{
-					node.children.push(new TEXT({ value: "⇒", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.MATH_APX:
-				{
-					node.children.push(new TEXT({ value: "≈", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.MATH_NET:
-				{
-					node.children.push(new TEXT({ value: "≠", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.MATH_LTOET:
-				{
-					node.children.push(new TEXT({ value: "≤", bold, italic, underline, strikethrough }));
-					break;
-				}
-				case Token.MATH_GTOET:
-				{
-					node.children.push(new TEXT({ value: "≥", bold, italic, underline, strikethrough }));
-					break;
+					break main; // let block handle Token.BREAK
 				}
 				default:
 				{
+					const token = this.peek();
+
 					if (typeof token === "string")
 					{
-						node.children.push(new TEXT({ value: token, bold, italic, underline, strikethrough }));
+						this.consume(); node.children.push(token);
+					}
+					else
+					{
+						const ast = this._stack();
+						// ast may be null due to indent
+						if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
 					}
 					break;
 				}
 			}
 		}
-		return origin;
+		switch (this.node.last?.constructor)
+		{
+			case BQ:
+			{
+				this.node = this.node.last as AST; return node;
+			}
+			default:
+			{
+				return new BQ(node);
+			}
+		}
+	}
+
+	private _ol()
+	{
+		const node = new LI();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case Token.BREAK: case EOF: 
+				{
+					this.consume(); this.node = this.origin; break main;
+				}
+				default:
+				{
+					const token = this.peek();
+
+					if (typeof token === "string")
+					{
+						this.consume(); node.children.push(token);
+					}
+					else
+					{
+						const ast = this._stack();
+						// ast may be null due to indent
+						if (ast) node.children.push(ast);
+					}
+					break;
+				}
+			}
+		}
+		return new OL(node);
+	}
+
+	private _ul()
+	{
+		const node = new LI();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case Token.BREAK: case EOF: 
+				{
+					this.consume(); this.node = this.origin; break main;
+				}
+				default:
+				{
+					const token = this.peek();
+
+					if (typeof token === "string")
+					{
+						this.consume(); node.children.push(token);
+					}
+					else
+					{
+						const ast = this._stack();
+						// ast may be null due to indent
+						if (ast) node.children.push(ast);
+					}
+					break;
+				}
+			}
+		}
+		return new UL(node);
+	}
+
+	private _inline()
+	{
+		const ast = new PR();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case EOF: case Token.BREAK:
+				{
+					this.consume(); this.node = this.origin; break main;
+				}
+				case Token.BOLD:
+				{
+					this.consume(); ast.children.push(this._bold()); break;
+				}
+				case Token.ITALIC:
+				{
+					this.consume(); ast.children.push(this._italic()); break;
+				}
+				case Token.UNDERLINE:
+				{
+					this.consume(); ast.children.push(this._underline()); break;
+				}
+				case Token.STRIKETHROUGH:
+				{
+					this.consume(); ast.children.push(this._strikethrough()); break;
+				}
+				case Token.UNCHECKED_BOX:
+				{
+					this.consume(); ast.children.push(new UNCHECKED_BOX()); break;
+				}
+				case Token.CHECKED_BOX:
+				{
+					this.consume(); ast.children.push(new CHECKED_BOX()); break;
+				}
+				case Token.ARROW_ALL:
+				{
+					this.consume(); ast.children.push("↔"); break;
+				}
+				case Token.ARROW_LEFT:
+				{
+					this.consume(); ast.children.push("←"); break;
+				}
+				case Token.ARROW_RIGHT:
+				{
+					this.consume(); ast.children.push("→"); break;
+				}
+				case Token.FAT_ARROW_ALL:
+				{
+					this.consume(); ast.children.push("⇔"); break;
+				}
+				case Token.FAT_ARROW_LEFT:
+				{
+					this.consume(); ast.children.push("⇐"); break;
+				}
+				case Token.FAT_ARROW_RIGHT:
+				{
+					this.consume(); ast.children.push("⇒"); break;
+				}
+				case Token.MATH_APX:
+				{
+					this.consume(); ast.children.push("≈"); break;
+				}
+				case Token.MATH_NET:
+				{
+					this.consume(); ast.children.push("≠"); break;
+				}
+				case Token.MATH_LTOET:
+				{
+					this.consume(); ast.children.push("≤"); break;
+				}
+				case Token.MATH_GTOET:
+				{
+					this.consume(); ast.children.push("≥"); break;
+				}
+				default:
+				{
+					const token = this.peek();
+	
+					if (typeof token === "string")
+					{
+						this.consume(); ast.children.push(token); break;
+					}
+					else
+					{
+						throw new Error(`Unexpected token ${token.constructor.name} at position ${this.i}`);
+					}
+				}
+			}
+		}
+		return ast;
+	}
+
+	private _bold()
+	{
+		const node = new BOLD();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case EOF: case Token.BREAK:
+				{
+					this.node = this.origin;
+				}
+				case Token.BOLD:
+				{
+					this.consume(); break main;
+				}
+				default:
+				{
+					const token = this.peek();
+
+					if (typeof token === "string")
+					{
+						this.consume(); node.children.push(token);
+					}
+					else
+					{
+						node.children.push(this._inline());
+					}
+					break;
+				}
+			}
+		}
+		return node;
+	}
+
+	private _italic()
+	{
+		const node = new ITALIC();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case EOF: case Token.BREAK:
+				{
+					this.node = this.origin;
+				}
+				case Token.ITALIC:
+				{
+					this.consume(); break main;
+				}
+				default:
+				{
+					const token = this.peek();
+
+					if (typeof token === "string")
+					{
+						this.consume(); node.children.push(token);
+					}
+					else
+					{
+						node.children.push(this._inline());
+					}
+					break;
+				}
+			}
+		}
+		return node;
+	}
+
+	private _underline()
+	{
+		const node = new UNDERLINE();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case EOF: case Token.BREAK:
+				{
+					this.node = this.origin;
+				}
+				case Token.UNDERLINE:
+				{
+					this.consume(); break main;
+				}
+				default:
+				{
+					const token = this.peek();
+
+					if (typeof token === "string")
+					{
+						this.consume(); node.children.push(token);
+					}
+					else
+					{
+						node.children.push(this._inline());
+					}
+					break;
+				}
+			}
+		}
+		return node;
+	}
+
+	private _strikethrough()
+	{
+		const node = new STRIKETHROUGH();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case EOF: case Token.BREAK:
+				{
+					this.node = this.origin;
+				}
+				case Token.STRIKETHROUGH:
+				{
+					this.consume(); break main;
+				}
+				default:
+				{
+					const token = this.peek();
+
+					if (typeof token === "string")
+					{
+						this.consume(); node.children.push(token);
+					}
+					else
+					{
+						node.children.push(this._inline());
+					}
+					break;
+				}
+			}
+		}
+		return node;
 	}
 }
