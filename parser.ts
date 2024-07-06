@@ -515,6 +515,26 @@ export default class Parser
 				{
 					break main; // let block handle Token.BREAK
 				}
+				//
+				// "Exhaust every possibility until none are left." - Raphael
+				//
+				case Token.COMMENT_L:
+				{
+					comment:
+					while (true)
+					{
+						this.consume();
+
+						switch (this.peek())
+						{
+							case EOF: case Token.COMMENT_R:
+							{
+								this.consume(); break comment;
+							}
+						}
+					}
+					break;
+				}
 				case Token.BOLD:
 				{
 					this.consume(); node.children.push(this._bold()); break;
@@ -579,39 +599,39 @@ export default class Parser
 				{
 					this.consume(); node.children.push("≥"); break;
 				}
+				//
 				// ![alt](url)
+				//
 				case Token.EXCLAMATION:
 				{
 					/* this.consume(); */ node.children.push(this._image()); break;
 				}
+				//
 				// [text](url)
-				case Token.L_BRACKET:
+				//
+				case Token.BRACKET_L:
 				{
 					/* this.consume(); */ node.children.push(this._backlink()); break;
 				}
-				case Token.R_BRACKET:
+				//
+				// others
+				//
+				case Token.COMMENT_R:
+				case Token.BRACKET_R:
+				case Token.PAREN_L:
+				case Token.PAREN_R:
 				{
-					this.consume(); node.children.push("]"); break;
-				}
-				case Token.L_PAREN:
-				{
-					this.consume(); node.children.push("("); break;
-				}
-				case Token.R_PAREN:
-				{
-					this.consume(); node.children.push(")"); break;
+					node.children.push((this.consume() as Token).grammar); break;
 				}
 				default:
 				{
-					const token = this.peek();
-	
-					if (typeof token === "string")
+					if (typeof this.peek() === "string")
 					{
-						this.consume(); node.children.push(token); break;
+						node.children.push(this.consume() as string); break;
 					}
 					else
 					{
-						throw new Error(`Unexpected token ${token.constructor.name} at position ${this.i}`);
+						throw new Error(`Unexpected token ${this.peek().constructor.name} at position ${this.i}`);
 					}
 				}
 			}
@@ -638,11 +658,9 @@ export default class Parser
 				}
 				default:
 				{
-					const token = this.peek();
-
-					if (typeof token === "string")
+					if (typeof this.peek() === "string")
 					{
-						this.consume(); node.children.push(token);
+						node.children.push(this.consume() as string);
 					}
 					else
 					{
@@ -674,11 +692,9 @@ export default class Parser
 				}
 				default:
 				{
-					const token = this.peek();
-
-					if (typeof token === "string")
+					if (typeof this.peek() === "string")
 					{
-						this.consume(); node.children.push(token);
+						node.children.push(this.consume() as string);
 					}
 					else
 					{
@@ -710,11 +726,9 @@ export default class Parser
 				}
 				default:
 				{
-					const token = this.peek();
-
-					if (typeof token === "string")
+					if (typeof this.peek() === "string")
 					{
-						this.consume(); node.children.push(token);
+						node.children.push(this.consume() as string);
 					}
 					else
 					{
@@ -746,11 +760,9 @@ export default class Parser
 				}
 				default:
 				{
-					const token = this.peek();
-
-					if (typeof token === "string")
+					if (typeof this.peek() === "string")
 					{
-						this.consume(); node.children.push(token);
+						node.children.push(this.consume() as string);
 					}
 					else
 					{
@@ -769,7 +781,7 @@ export default class Parser
 
 		try
 		{
-			for (const syntax of [Token.EXCLAMATION, Token.L_BRACKET, ("string" as const), Token.R_BRACKET, Token.L_PAREN, ("string" as const), Token.R_PAREN])
+			for (const syntax of [Token.EXCLAMATION, Token.BRACKET_L, ("string" as const), Token.BRACKET_R, Token.PAREN_L, ("string" as const), Token.PAREN_R])
 			{
 				fallback.push(this.consume(syntax));
 			}
@@ -787,7 +799,7 @@ export default class Parser
 
 		try
 		{
-			for (const syntax of [Token.L_BRACKET, ("string" as const), Token.R_BRACKET, Token.L_PAREN, ("string" as const), Token.R_PAREN])
+			for (const syntax of [Token.BRACKET_L, ("string" as const), Token.BRACKET_R, Token.PAREN_L, ("string" as const), Token.PAREN_R])
 			{
 				fallback.push(this.consume(syntax));
 			}

@@ -146,13 +146,13 @@ export abstract class Token
 	(Context.INLINE, ">=");
 	public static readonly EXCLAMATION = new (class EXCLAMATION extends Token {})
 	(Context.INLINE, "!");
-	public static readonly L_BRACKET = new (class L_BRACKET extends Token {})
+	public static readonly BRACKET_L = new (class BRACKET_L extends Token {})
 	(Context.INLINE, "[");
-	public static readonly R_BRACKET = new (class R_BRACKET extends Token {})
+	public static readonly BRACKET_R = new (class BRACKET_R extends Token {})
 	(Context.INLINE, "]");	
-	public static readonly L_PAREN = new (class L_PAREN extends Token {})
+	public static readonly PAREN_L = new (class PAREN_L extends Token {})
 	(Context.INLINE, "(");
-	public static readonly R_PAREN = new (class R_PAREN extends Token {})
+	public static readonly PAREN_R = new (class PAREN_R extends Token {})
 	(Context.INLINE, ")");
 }
 
