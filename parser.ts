@@ -133,7 +133,7 @@ class PR extends AST
 {
 	override render()
 	{
-		return `<p>${this.body}</p>`;
+		return this.body;
 	}
 }
 
@@ -386,9 +386,9 @@ export default class Parser
 		{
 			switch (this.peek())
 			{
-				case Token.BREAK: case EOF: 
+				case EOF: case Token.BREAK:
 				{
-					this.consume(); this.node = this.origin; break main;
+					break main; // let block handle Token.BREAK
 				}
 				default:
 				{
@@ -420,9 +420,9 @@ export default class Parser
 		{
 			switch (this.peek())
 			{
-				case Token.BREAK: case EOF: 
+				case EOF: case Token.BREAK:
 				{
-					this.consume(); this.node = this.origin; break main;
+					break main; // let block handle Token.BREAK
 				}
 				default:
 				{
@@ -456,7 +456,7 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					this.consume(); this.node = this.origin; break main;
+					ast.children.push(new BR()); break main; // let block handle Token.BREAK
 				}
 				case Token.BOLD:
 				{
@@ -542,7 +542,7 @@ export default class Parser
 
 	private _bold()
 	{
-		const node = new BOLD();
+		const ast = new BOLD();
 
 		main:
 		while (true)
@@ -551,7 +551,7 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					this.node = this.origin;
+					break main; // let block handle Token.BREAK
 				}
 				case Token.BOLD:
 				{
@@ -563,22 +563,22 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); node.children.push(token);
+						this.consume(); ast.children.push(token);
 					}
 					else
 					{
-						node.children.push(this._inline());
+						ast.children.push(this._inline());
 					}
 					break;
 				}
 			}
 		}
-		return node;
+		return ast;
 	}
 
 	private _italic()
 	{
-		const node = new ITALIC();
+		const ast = new ITALIC();
 
 		main:
 		while (true)
@@ -587,7 +587,7 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					this.node = this.origin;
+					break main; // let block handle Token.BREAK
 				}
 				case Token.ITALIC:
 				{
@@ -599,22 +599,22 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); node.children.push(token);
+						this.consume(); ast.children.push(token);
 					}
 					else
 					{
-						node.children.push(this._inline());
+						ast.children.push(this._inline());
 					}
 					break;
 				}
 			}
 		}
-		return node;
+		return ast;
 	}
 
 	private _underline()
 	{
-		const node = new UNDERLINE();
+		const ast = new UNDERLINE();
 
 		main:
 		while (true)
@@ -623,7 +623,7 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					this.node = this.origin;
+					break main; // let block handle Token.BREAK
 				}
 				case Token.UNDERLINE:
 				{
@@ -635,22 +635,22 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); node.children.push(token);
+						this.consume(); ast.children.push(token);
 					}
 					else
 					{
-						node.children.push(this._inline());
+						ast.children.push(this._inline());
 					}
 					break;
 				}
 			}
 		}
-		return node;
+		return ast;
 	}
 
 	private _strikethrough()
 	{
-		const node = new STRIKETHROUGH();
+		const ast = new STRIKETHROUGH();
 
 		main:
 		while (true)
@@ -659,7 +659,7 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					this.node = this.origin;
+					break main; // let block handle Token.BREAK
 				}
 				case Token.STRIKETHROUGH:
 				{
@@ -671,16 +671,16 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); node.children.push(token);
+						this.consume(); ast.children.push(token);
 					}
 					else
 					{
-						node.children.push(this._inline());
+						ast.children.push(this._inline());
 					}
 					break;
 				}
 			}
 		}
-		return node;
+		return ast;
 	}
 }
