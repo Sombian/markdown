@@ -402,13 +402,24 @@ export default class Parser
 					{
 						const ast = this._stack();
 						// ast may be null due to indent
-						if (ast) node.children.push(ast);
+						if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
 					}
 					break;
 				}
 			}
 		}
-		return new OL(node);
+		switch (this.node.last?.constructor)
+		{
+			case OL:
+			case UL:
+			{
+				this.node = this.node.last as AST; return node;
+			}
+			default:
+			{
+				return new OL(node);
+			}
+		}
 	}
 
 	private _ul()
@@ -436,13 +447,24 @@ export default class Parser
 					{
 						const ast = this._stack();
 						// ast may be null due to indent
-						if (ast) node.children.push(ast);
+						if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
 					}
 					break;
 				}
 			}
 		}
-		return new UL(node);
+		switch (this.node.last?.constructor)
+		{
+			case OL:
+			case UL:
+			{
+				this.node = this.node.last as AST; return node;
+			}
+			default:
+			{
+				return new UL(node);
+			}
+		}
 	}
 
 	private _inline()
