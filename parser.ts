@@ -189,29 +189,29 @@ class CHECKED_BOX extends AST
 
 class IMAGE extends AST
 {
-	constructor(private readonly value: string, private readonly url: string)
+	constructor(private readonly alt: string, private readonly src: string)
 	{
 		super()
 	}
 
 	override render()
 	{
-		return `<img alt="${this.value}" src="${this.url}">`;
+		return `<img alt="${this.alt}" src="${this.src}">`;
 	}
 }
 
 class BACKLINK extends AST
 {
-	constructor(private readonly value: string, private readonly url: string)
+	constructor(private readonly text: string, private readonly href: string)
 	{
 		super()
 
-		console.log(value, url)
+		console.log(text, href)
 	}
 
 	override render()
 	{
-		return `<a href="${this.url}">${this.value}</>`;
+		return `<a href="${this.href}">${this.text}</>`;
 	}
 }
 
@@ -248,10 +248,6 @@ export default class Parser
 			const ast = this._block();
 			// ast may be null due to indent
 			if (ast) this.node.children.push(ast);
-		}
-		if (true)
-		{
-			console.debug(require("util").inspect(this.origin, { depth: null }));
 		}
 		return this.origin;
 	}
@@ -297,7 +293,7 @@ export default class Parser
 			}
 			case Token.H4:
 			{
-				this.consume(); return  new H4(this._inline());
+				this.consume(); return new H4(this._inline());
 			}
 			case Token.H5:
 			{
@@ -332,6 +328,7 @@ export default class Parser
 
 				switch (this.node.last?.constructor)
 				{
+					case BQ:
 					case OL:
 					case UL:
 					{
@@ -365,6 +362,12 @@ export default class Parser
 	{
 		const node = new PR();
 
+		if (this.node.last?.constructor !==  BQ)
+		{
+			this.node.children.push(new BQ());
+		}
+		this.node = this.node.last as AST;
+
 		main:
 		while (true)
 		{
@@ -376,33 +379,37 @@ export default class Parser
 				}
 				default:
 				{
-					const token = this.peek();
-
-					if (typeof token === "string")
+					if (this.peek() === "string")
 					{
-						this.consume(); node.children.push(token);
+						node.children.push(this.consume() as string);
 					}
 					else
 					{
 						const ast = this._stack();
-						// ast may be null due to indent
-						if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
+
+						switch (ast?.constructor)
+						{
+							case OL:
+							case UL:
+							case LI:
+							{
+								this.node.children.push(ast); this.node = this.node.last as AST; break;
+							}
+							default:
+							{
+								if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
+							}
+						}
 					}
 					break;
 				}
 			}
 		}
-		switch (this.node.last?.constructor)
+		if (node.children.length)
 		{
-			case BQ:
-			{
-				this.node = this.node.last as AST; return node;
-			}
-			default:
-			{
-				return new BQ(node);
-			}
+			this.node.children.push(node)
 		}
+		return null;
 	}
 
 	private _ol()
