@@ -187,7 +187,7 @@ class CHECKED_BOX extends AST
 	}
 }
 
-class EMBEDED extends AST
+class IMAGE extends AST
 {
 	constructor(private readonly value: string, private readonly url: string)
 	{
@@ -196,7 +196,7 @@ class EMBEDED extends AST
 
 	override render()
 	{
-		return `<img alt="${this.value}" href="${this.url}">`;
+		return `<img alt="${this.value}" src="${this.url}">`;
 	}
 }
 
@@ -575,7 +575,7 @@ export default class Parser
 				// ![alt](url)
 				case Token.EXCLAMATION:
 				{
-					/* this.consume(); */ node.children.push(this._embeded()); break;
+					/* this.consume(); */ node.children.push(this._image()); break;
 				}
 				// [text](url)
 				case Token.L_BRACKET:
@@ -756,7 +756,7 @@ export default class Parser
 		return node;
 	}
 
-	private _embeded()
+	private _image()
 	{
 		const fallback: ReturnType<typeof this.consume>[] = [];
 
@@ -766,7 +766,7 @@ export default class Parser
 			{
 				fallback.push(this.consume(syntax));
 			}
-			return new EMBEDED(fallback[2] as string, fallback[5] as string);
+			return new IMAGE(fallback[2] as string, fallback[5] as string);
 		}
 		catch (error)
 		{
