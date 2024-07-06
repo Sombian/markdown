@@ -103,7 +103,9 @@ export abstract class Token
 	(Context.STACK, "  ");
 	public static readonly INDENT_4S = new (class INDENT_4S extends Token {})
 	(Context.STACK, "    ");
-	public static readonly BQ = new (class BQ extends Token {})
+	public static readonly BQ_A = new (class BQ_A extends Token {})
+	(Context.STACK, ">");
+	public static readonly BQ_B = new (class BQ_B extends Token {})
 	(Context.STACK, ">\u0020");
 	public static readonly OL = new (class OL extends Token {})
 	(Context.STACK, "-\u0020");
@@ -430,10 +432,17 @@ export default class Scanner
 					//
 					tokens.push(token);
 				}
+				else
+				{
+					//
+					// <ctx/switch>
+					//
+					ctx = Context.INLINE;
+				}
 				//
 				// <state/reset>
 				//
-				[ctx, node, depth] = [Context.INLINE, null, 0];
+				[node, depth] = [null, 0];
 				//
 				// <branch/delve>
 				//

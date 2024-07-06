@@ -252,13 +252,9 @@ export default class Parser
 		return this.origin;
 	}
 
-	private peek(offset = 0)
+	private peek()
 	{
-		if ((this.i += offset) >= this.tokens.length)
-		{
-			return EOF;
-		}
-		return this.tokens[this.i];
+		return (this.tokens[this.i] ?? EOF)  as string | Token | typeof EOF;
 	}
 
 	private consume(token?: "string" | Token)
@@ -267,7 +263,7 @@ export default class Parser
 		{
 			throw new Error(`Unexpected token ${this.peek().constructor.name} at position ${this.i}`);
 		}
-		return this.tokens[this.i++];
+		return (this.tokens[this.i++] ?? EOF) as string | Token | typeof EOF;
 	}
 
 	private _block()
@@ -328,7 +324,6 @@ export default class Parser
 
 				switch (this.node.last?.constructor)
 				{
-					case BQ:
 					case OL:
 					case UL:
 					{
@@ -339,7 +334,8 @@ export default class Parser
 				// fallback
 				return (token as Token).grammar;
 			}
-			case Token.BQ:
+			case Token.BQ_A:
+			case Token.BQ_B:
 			{
 				this.consume(); return this._bq();
 			}
@@ -523,9 +519,7 @@ export default class Parser
 					comment:
 					while (true)
 					{
-						this.consume();
-
-						switch (this.peek())
+						switch (this.consume())
 						{
 							case EOF: case Token.COMMENT_R:
 							{
