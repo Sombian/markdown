@@ -1,5 +1,7 @@
 import Scanner, { Token } from "./scanner";
 
+const EOF = Symbol();
+
 abstract class AST
 {
 	public readonly children: (string | AST)[] = [];
@@ -133,7 +135,7 @@ class PR extends AST
 {
 	override render()
 	{
-		return this.body;
+		return `<p>${this.body}</p>`
 	}
 }
 
@@ -185,7 +187,33 @@ class CHECKED_BOX extends AST
 	}
 }
 
-const EOF = Symbol();
+class EMBEDED extends AST
+{
+	constructor(private readonly value: string, private readonly url: string)
+	{
+		super()
+	}
+
+	override render()
+	{
+		return `<img alt="${this.value}" href="${this.url}">`;
+	}
+}
+
+class BACKLINK extends AST
+{
+	constructor(private readonly value: string, private readonly url: string)
+	{
+		super()
+
+		console.log(value, url)
+	}
+
+	override render()
+	{
+		return `<a href="${this.url}">${this.value}</>`;
+	}
+}
 
 export default class Parser
 {
@@ -237,13 +265,13 @@ export default class Parser
 		return this.tokens[this.i];
 	}
 
-	private consume(token?: Token)
+	private consume(token?: "string" | Token)
 	{
-		if (token && this.peek() !== token)
+		if (token && (token === "string" ? typeof this.peek() !== "string" : this.peek() !== token))
 		{
-			throw new Error(`Unexpected token ${this.peek().toString()} at position ${this.i}`);
+			throw new Error(`Unexpected token ${this.peek().constructor.name} at position ${this.i}`);
 		}
-		this.i++; // next
+		return this.tokens[this.i++];
 	}
 
 	private _block()
@@ -469,7 +497,7 @@ export default class Parser
 
 	private _inline()
 	{
-		const ast = new PR();
+		const node = new PR();
 
 		main:
 		while (true)
@@ -478,71 +506,93 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					ast.children.push(new BR()); break main; // let block handle Token.BREAK
+					break main; // let block handle Token.BREAK
 				}
 				case Token.BOLD:
 				{
-					this.consume(); ast.children.push(this._bold()); break;
+					this.consume(); node.children.push(this._bold()); break;
 				}
 				case Token.ITALIC:
 				{
-					this.consume(); ast.children.push(this._italic()); break;
+					this.consume(); node.children.push(this._italic()); break;
 				}
 				case Token.UNDERLINE:
 				{
-					this.consume(); ast.children.push(this._underline()); break;
+					this.consume(); node.children.push(this._underline()); break;
 				}
 				case Token.STRIKETHROUGH:
 				{
-					this.consume(); ast.children.push(this._strikethrough()); break;
+					this.consume(); node.children.push(this._strikethrough()); break;
 				}
 				case Token.UNCHECKED_BOX:
 				{
-					this.consume(); ast.children.push(new UNCHECKED_BOX()); break;
+					this.consume(); node.children.push(new UNCHECKED_BOX()); break;
 				}
 				case Token.CHECKED_BOX:
 				{
-					this.consume(); ast.children.push(new CHECKED_BOX()); break;
+					this.consume(); node.children.push(new CHECKED_BOX()); break;
 				}
 				case Token.ARROW_ALL:
 				{
-					this.consume(); ast.children.push("↔"); break;
+					this.consume(); node.children.push("↔"); break;
 				}
 				case Token.ARROW_LEFT:
 				{
-					this.consume(); ast.children.push("←"); break;
+					this.consume(); node.children.push("←"); break;
 				}
 				case Token.ARROW_RIGHT:
 				{
-					this.consume(); ast.children.push("→"); break;
+					this.consume(); node.children.push("→"); break;
 				}
 				case Token.FAT_ARROW_ALL:
 				{
-					this.consume(); ast.children.push("⇔"); break;
+					this.consume(); node.children.push("⇔"); break;
 				}
 				case Token.FAT_ARROW_LEFT:
 				{
-					this.consume(); ast.children.push("⇐"); break;
+					this.consume(); node.children.push("⇐"); break;
 				}
 				case Token.FAT_ARROW_RIGHT:
 				{
-					this.consume(); ast.children.push("⇒"); break;
+					this.consume(); node.children.push("⇒"); break;
 				}
 				case Token.MATH_APX:
 				{
-					this.consume(); ast.children.push("≈"); break;
+					this.consume(); node.children.push("≈"); break;
 				}
 				case Token.MATH_NET:
 				{
-					this.consume(); ast.children.push("≠"); break;
+					this.consume(); node.children.push("≠"); break;
 				}
 				case Token.MATH_LTOET:
 				{
-					this.consume(); ast.children.push("≤"); break;
+					this.consume(); node.children.push("≤"); break;
 				}
 				case Token.MATH_GTOET:
 				{
-					this.consume(); ast.children.push("≥"); break;
+					this.consume(); node.children.push("≥"); break;
+				}
+				// ![alt](url)
+				case Token.EXCLAMATION:
+				{
+					/* this.consume(); */ node.children.push(this._embeded()); break;
+				}
+				// [text](url)
+				case Token.L_BRACKET:
+				{
+					/* this.consume(); */ node.children.push(this._backlink()); break;
+				}
+				case Token.R_BRACKET:
+				{
+					this.consume(); node.children.push("]"); break;
+				}
+				case Token.L_PAREN:
+				{
+					this.consume(); node.children.push("("); break;
+				}
+				case Token.R_PAREN:
+				{
+					this.consume(); node.children.push(")"); break;
 				}
 				default:
 				{
@@ -550,7 +600,7 @@ export default class Parser
 	
 					if (typeof token === "string")
 					{
-						this.consume(); ast.children.push(token); break;
+						this.consume(); node.children.push(token); break;
 					}
 					else
 					{
@@ -559,12 +609,12 @@ export default class Parser
 				}
 			}
 		}
-		return ast;
+		return node;
 	}
 
 	private _bold()
 	{
-		const ast = new BOLD();
+		const node = new BOLD();
 
 		main:
 		while (true)
@@ -585,22 +635,22 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); ast.children.push(token);
+						this.consume(); node.children.push(token);
 					}
 					else
 					{
-						ast.children.push(this._inline());
+						node.children.push(...this._inline().children);
 					}
 					break;
 				}
 			}
 		}
-		return ast;
+		return node;
 	}
 
 	private _italic()
 	{
-		const ast = new ITALIC();
+		const node = new ITALIC();
 
 		main:
 		while (true)
@@ -621,22 +671,22 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); ast.children.push(token);
+						this.consume(); node.children.push(token);
 					}
 					else
 					{
-						ast.children.push(this._inline());
+						node.children.push(...this._inline().children);
 					}
 					break;
 				}
 			}
 		}
-		return ast;
+		return node;
 	}
 
 	private _underline()
 	{
-		const ast = new UNDERLINE();
+		const node = new UNDERLINE();
 
 		main:
 		while (true)
@@ -657,22 +707,22 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); ast.children.push(token);
+						this.consume(); node.children.push(token);
 					}
 					else
 					{
-						ast.children.push(this._inline());
+						node.children.push(...this._inline().children);
 					}
 					break;
 				}
 			}
 		}
-		return ast;
+		return node;
 	}
 
 	private _strikethrough()
 	{
-		const ast = new STRIKETHROUGH();
+		const node = new STRIKETHROUGH();
 
 		main:
 		while (true)
@@ -693,16 +743,52 @@ export default class Parser
 
 					if (typeof token === "string")
 					{
-						this.consume(); ast.children.push(token);
+						this.consume(); node.children.push(token);
 					}
 					else
 					{
-						ast.children.push(this._inline());
+						node.children.push(...this._inline().children);
 					}
 					break;
 				}
 			}
 		}
-		return ast;
+		return node;
+	}
+
+	private _embeded()
+	{
+		const fallback: ReturnType<typeof this.consume>[] = [];
+
+		try
+		{
+			for (const syntax of [Token.EXCLAMATION, Token.L_BRACKET, ("string" as const), Token.R_BRACKET, Token.L_PAREN, ("string" as const), Token.R_PAREN])
+			{
+				fallback.push(this.consume(syntax));
+			}
+			return new EMBEDED(fallback[2] as string, fallback[5] as string);
+		}
+		catch (error)
+		{
+			return fallback.map((_) => _ instanceof Token ? _.grammar : _.toString()).join("");
+		}
+	}
+
+	private _backlink()
+	{
+		const fallback: ReturnType<typeof this.consume>[] = [];
+
+		try
+		{
+			for (const syntax of [Token.L_BRACKET, ("string" as const), Token.R_BRACKET, Token.L_PAREN, ("string" as const), Token.R_PAREN])
+			{
+				fallback.push(this.consume(syntax));
+			}
+			return new BACKLINK(fallback[1] as string, fallback[4] as string);
+		}
+		catch (error)
+		{
+			return fallback.map((_) => _ instanceof Token ? _.grammar : _.toString()).join("");
+		}
 	}
 }

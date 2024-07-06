@@ -144,16 +144,16 @@ export abstract class Token
 	(Context.INLINE, "<=");
 	public static readonly MATH_GTOET = new (class MATH_GTOET extends Token {})
 	(Context.INLINE, ">=");
+	public static readonly EXCLAMATION = new (class EXCLAMATION extends Token {})
+	(Context.INLINE, "!");
+	public static readonly L_BRACKET = new (class L_BRACKET extends Token {})
+	(Context.INLINE, "[");
+	public static readonly R_BRACKET = new (class R_BRACKET extends Token {})
+	(Context.INLINE, "]");	
 	public static readonly L_PAREN = new (class L_PAREN extends Token {})
 	(Context.INLINE, "(");
 	public static readonly R_PAREN = new (class R_PAREN extends Token {})
 	(Context.INLINE, ")");
-	public static readonly L_BRACKET = new (class L_BRACKET extends Token {})
-	(Context.INLINE, "[");
-	public static readonly R_BRACKET = new (class R_BRACKET extends Token {})
-	(Context.INLINE, "]");
-	public static readonly EXCLAMATION = new (class EXCLAMATION extends Token {})
-	(Context.INLINE, "!");
 }
 
 interface Route
