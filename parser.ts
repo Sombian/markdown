@@ -191,7 +191,7 @@ class IMAGE extends AST
 {
 	constructor(private readonly alt: string, private readonly src: string)
 	{
-		super()
+		super();
 	}
 
 	override render()
@@ -204,9 +204,7 @@ class BACKLINK extends AST
 {
 	constructor(private readonly text: string, private readonly href: string)
 	{
-		super()
-
-		console.log(text, href)
+		super();
 	}
 
 	override render()
@@ -246,7 +244,7 @@ export default class Parser
 		while (this.peek() !== EOF)
 		{
 			const ast = this._block();
-			// ast may be null due to indent
+			// ast may be null due to edge cases
 			if (ast) this.node.children.push(ast);
 		}
 		return this.origin;
@@ -335,6 +333,7 @@ export default class Parser
 								case OL:
 								case UL:
 								{
+									this.consume();
 									// pickup
 									this.node = this.node.last as AST;
 									break;
@@ -354,9 +353,9 @@ export default class Parser
 						}
 						default:
 						{
-							this.consume();
+							const ast = this._stack();
 							// insert
-							this.node.children.push(this._inline());
+							if (ast) this.node.children.push(ast);
 							// no more indent, exit
 							break indent;
 						}
@@ -386,7 +385,7 @@ export default class Parser
 
 	private _bq()
 	{
-		const parent = new PR();
+		const node = new PR();
 
 		switch (this.node.last?.constructor)
 		{
@@ -404,100 +403,85 @@ export default class Parser
 		// pickup
 		this.node = this.node.last as AST;
 
-		const branch = this._stack();
+		const ast = this._stack();
 
-		switch (branch?.constructor)
+		switch (ast?.constructor)
 		{
 			case OL:
 			case UL:
 			case LI:
 			{
-				this.node.children.push(branch); this.node = this.node.last as AST;
+				this.node.children.push(ast); this.node = this.node.last as AST;
 				break;
 			}
 			case PR:
 			{
-				parent.children.push(...(branch as AST).children);
+				node.children.push(...(ast as AST).children);
 				break;
 			}
 			default:
 			{
-				if (branch) parent.children.push(branch);
+				if (ast) node.children.push(ast);
 				break;
 			}
 		}
 
-		if (parent.children.length)
+		if (node.children.length)
 		{
-			this.node.children.push(parent);
+			this.node.children.push(node);
 		}
-
 		return null;
 	}
 
 	private _ol()
 	{
-		const parent = new LI();
+		const [node, ast] = [new LI(), this._stack()];
+
+		if (ast) node.children.push(...ast.children);
 
 		switch (this.node.last?.constructor)
 		{
 			case OL:
 			case UL:
 			{
-				// skip
+				// pickup
+				this.node = this.node.last as AST;
+				this.node.children.push(node);
 				break;
 			}
 			default:
 			{
-				this.node.children.push(new OL());
+				// insert
+				this.node.children.push(new OL(node));
 				break;
 			}
 		}
-		// pickup
-		this.node = this.node.last as AST;
-
-		const branch = this._stack();
-
-		if (branch) parent.children.push(...(typeof branch === "string" ? [branch] : (branch as AST).children));
-
-		if (parent.children.length)
-		{
-			this.node.children.push(parent);
-		}
-
 		return null;
 	}
 
 	private _ul()
 	{
-		const parent = new LI();
+		const [node, ast] = [new LI(), this._stack()];
+
+		if (ast) node.children.push(...ast.children);
 
 		switch (this.node.last?.constructor)
 		{
 			case OL:
 			case UL:
 			{
-				// skip
+				// pickup
+				this.node = this.node.last as AST;
+				this.node.children.push(node);
 				break;
 			}
 			default:
 			{
-				this.node.children.push(new UL());
+				// insert
+				this.node.children.push(new UL(node));
 				break;
 			}
 		}
-		// pickup
-		this.node = this.node.last as AST;
-
-		const branch = this._stack();
-		
-		if (branch) parent.children.push(...(typeof branch === "string" ? [branch] : (branch as AST).children));
-
-		if (parent.children.length)
-		{
-			this.node.children.push(parent);
-		}
-
 		return null;
 	}
 
@@ -530,100 +514,100 @@ export default class Parser
 							}
 						}
 					}
-					break;
+					continue main;
 				}
 				//
 				// ![alt](url)
 				//
 				case Token.EXCLAMATION:
 				{
-					/* this.consume(); */ node.children.push(this._image()); break;
+					/* this.consume(); */ node.children.push(this._image()); continue main;
 				}
 				//
 				// [text](url)
 				//
 				case Token.BRACKET_L:
 				{
-					/* this.consume(); */ node.children.push(this._backlink()); break;
+					/* this.consume(); */ node.children.push(this._backlink()); continue main;
 				}
 				case Token.BOLD:
 				{
-					this.consume(); node.children.push(this._bold()); break;
+					this.consume(); node.children.push(this._bold()); continue main;
 				}
 				case Token.ITALIC:
 				{
-					this.consume(); node.children.push(this._italic()); break;
+					this.consume(); node.children.push(this._italic()); continue main;
 				}
 				case Token.UNDERLINE:
 				{
-					this.consume(); node.children.push(this._underline()); break;
+					this.consume(); node.children.push(this._underline()); continue main;
 				}
 				case Token.STRIKETHROUGH:
 				{
-					this.consume(); node.children.push(this._strikethrough()); break;
+					this.consume(); node.children.push(this._strikethrough()); continue main;
 				}
 				case Token.UNCHECKED_BOX:
 				{
-					this.consume(); node.children.push(new UNCHECKED_BOX()); break;
+					this.consume(); node.children.push(new UNCHECKED_BOX()); continue main;
 				}
 				case Token.CHECKED_BOX:
 				{
-					this.consume(); node.children.push(new CHECKED_BOX()); break;
+					this.consume(); node.children.push(new CHECKED_BOX()); continue main;
 				}
 				case Token.ARROW_ALL:
 				{
-					this.consume(); node.children.push("↔"); break;
+					this.consume(); node.children.push("↔"); continue main;
 				}
 				case Token.ARROW_LEFT:
 				{
-					this.consume(); node.children.push("←"); break;
+					this.consume(); node.children.push("←"); continue main;
 				}
 				case Token.ARROW_RIGHT:
 				{
-					this.consume(); node.children.push("→"); break;
+					this.consume(); node.children.push("→"); continue main;
 				}
 				case Token.FAT_ARROW_ALL:
 				{
-					this.consume(); node.children.push("⇔"); break;
+					this.consume(); node.children.push("⇔"); continue main;
 				}
 				case Token.FAT_ARROW_LEFT:
 				{
-					this.consume(); node.children.push("⇐"); break;
+					this.consume(); node.children.push("⇐"); continue main;
 				}
 				case Token.FAT_ARROW_RIGHT:
 				{
-					this.consume(); node.children.push("⇒"); break;
+					this.consume(); node.children.push("⇒"); continue main;
 				}
 				case Token.MATH_APX:
 				{
-					this.consume(); node.children.push("≈"); break;
+					this.consume(); node.children.push("≈"); continue main;
 				}
 				case Token.MATH_NET:
 				{
-					this.consume(); node.children.push("≠"); break;
+					this.consume(); node.children.push("≠"); continue main;
 				}
 				case Token.MATH_LTOET:
 				{
-					this.consume(); node.children.push("≤"); break;
+					this.consume(); node.children.push("≤"); continue main;
 				}
 				case Token.MATH_GTOET:
 				{
-					this.consume(); node.children.push("≥"); break;
+					this.consume(); node.children.push("≥"); continue main;
 				}
 				//
 				// fallback
 				//
 				case Token.INDENT_1T:
 				{
-					this.consume(); node.children.push("&nbsp".repeat(1)); break;
+					this.consume(); node.children.push("&nbsp".repeat(4)); continue main;
 				}
 				case Token.INDENT_2S:
 				{
-					this.consume(); node.children.push("&nbsp".repeat(1)); break;
+					this.consume(); node.children.push("&nbsp".repeat(2)); continue main;
 				}
 				case Token.INDENT_4S:
 				{
-					this.consume(); node.children.push("&nbsp".repeat(1)); break;
+					this.consume(); node.children.push("&nbsp".repeat(4)); continue main;
 				}
 				case Token.COMMENT_R:
 				case Token.BRACKET_R:
@@ -632,13 +616,13 @@ export default class Parser
 				case Token.OL:
 				case Token.UL:
 				{
-					node.children.push((this.consume() as Token).grammar); break;
+					node.children.push((this.consume() as Token).grammar); continue main;
 				}
 				default:
 				{
 					if (typeof this.peek() === "string")
 					{
-						node.children.push(this.consume() as string); break;
+						node.children.push(this.consume() as string); continue main;
 					}
 					else
 					{

@@ -3,9 +3,18 @@ import { watch } from "fs";
 import Scanner from "../scanner";
 import Parser from "../parser";
 
+Bun.serve(
+{
+	fetch(request)
+	{
+		console.debug(request.url);
+		return new Response("Hello, world!");
+	}
+});
+
 function debug()
 {
-	Bun.file("./input.md").text().then((text) =>
+	Bun.file([import.meta.dirname, "input.md"].join("/")).text().then((text) =>
 	{
 		if (true)
 		{
@@ -26,7 +35,7 @@ function debug()
 			console.debug(require("util").inspect(AST, { depth: null }));
 		}
 		// :3
-		Bun.write("./output.html", AST.render());
+		Bun.write([import.meta.dirname, "output.html"].join("/"), AST.render());
 	});
 }
 
@@ -43,9 +52,9 @@ function benchmark<T>(name: string, task: () => T)
 	return value;
 }
 
-if (!true)
+if (true)
 {
-	const watcher = watch("./input.md", (event, file) =>
+	const watcher = watch([import.meta.dirname, "input.md"].join("/"), (event, file) =>
 	{
 		debug();
 	});

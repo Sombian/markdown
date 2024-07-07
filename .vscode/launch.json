@@ -1,0 +1,8 @@
+{
+	"configurations":
+	[
+		{
+			"name": "test", "type": "node-terminal", "request": "launch", "command": "bun --watch test/index.ts",
+		}
+	],
+}
