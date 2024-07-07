@@ -254,7 +254,7 @@ export default class Parser
 
 	private peek()
 	{
-		return (this.tokens[this.i] ?? EOF)  as string | Token | typeof EOF;
+		return (this.tokens[this.i] ?? EOF) as string | Token | typeof EOF;
 	}
 
 	private consume(token?: "string" | Token)
@@ -320,19 +320,49 @@ export default class Parser
 			case Token.INDENT_2S:
 			case Token.INDENT_4S:
 			{
-				const token = this.peek(); this.consume();
-
-				switch (this.node.last?.constructor)
+				indent:
+				while (true)
 				{
-					case OL:
-					case UL:
+					switch (this.peek())
 					{
-						// pickup
-						this.node = this.node.last as AST; return null;
+						// redundant lookup... im sorry :(
+						case Token.INDENT_1T:
+						case Token.INDENT_2S:
+						case Token.INDENT_4S:
+						{		
+							switch (this.node.last?.constructor)
+							{
+								case OL:
+								case UL:
+								{
+									// pickup
+									this.node = this.node.last as AST;
+									break;
+								}
+								default:
+								{
+									// fuck
+									this.node = this.origin;
+									// insert
+									this.node.children.push(this._inline());
+									// indent level mismatch, exit
+									break indent;
+								}
+							}
+							// more to go
+							continue indent;
+						}
+						default:
+						{
+							this.consume();
+							// insert
+							this.node.children.push(this._inline());
+							// no more indent, exit
+							break indent;
+						}
 					}
 				}
-				// fallback
-				return (token as Token).grammar;
+				return null;
 			}
 			case Token.BQ_A:
 			case Token.BQ_B:
@@ -356,146 +386,119 @@ export default class Parser
 
 	private _bq()
 	{
-		const node = new PR();
+		const parent = new PR();
 
-		if (this.node.last?.constructor !==  BQ)
+		switch (this.node.last?.constructor)
 		{
-			this.node.children.push(new BQ());
-		}
-		this.node = this.node.last as AST;
-
-		main:
-		while (true)
-		{
-			switch (this.peek())
+			case BQ:
 			{
-				case EOF: case Token.BREAK:
-				{
-					break main; // let block handle Token.BREAK
-				}
-				default:
-				{
-					if (this.peek() === "string")
-					{
-						node.children.push(this.consume() as string);
-					}
-					else
-					{
-						const ast = this._stack();
-
-						switch (ast?.constructor)
-						{
-							case OL:
-							case UL:
-							case LI:
-							{
-								this.node.children.push(ast); this.node = this.node.last as AST; break;
-							}
-							default:
-							{
-								if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
-							}
-						}
-					}
-					break;
-				}
+				// skip
+				break;
+			}
+			default:
+			{
+				this.node.children.push(new OL());
+				break;
 			}
 		}
-		if (node.children.length)
+		// pickup
+		this.node = this.node.last as AST;
+
+		const branch = this._stack();
+
+		switch (branch?.constructor)
 		{
-			this.node.children.push(node)
+			case OL:
+			case UL:
+			case LI:
+			{
+				this.node.children.push(branch); this.node = this.node.last as AST;
+				break;
+			}
+			case PR:
+			{
+				parent.children.push(...(branch as AST).children);
+				break;
+			}
+			default:
+			{
+				if (branch) parent.children.push(branch);
+				break;
+			}
 		}
+
+		if (parent.children.length)
+		{
+			this.node.children.push(parent);
+		}
+
 		return null;
 	}
 
 	private _ol()
 	{
-		const node = new LI();
+		const parent = new LI();
 
-		main:
-		while (true)
-		{
-			switch (this.peek())
-			{
-				case EOF: case Token.BREAK:
-				{
-					break main; // let block handle Token.BREAK
-				}
-				default:
-				{
-					const token = this.peek();
-
-					if (typeof token === "string")
-					{
-						this.consume(); node.children.push(token);
-					}
-					else
-					{
-						const ast = this._stack();
-						// ast may be null due to indent
-						if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
-					}
-					break;
-				}
-			}
-		}
 		switch (this.node.last?.constructor)
 		{
 			case OL:
 			case UL:
 			{
-				this.node = this.node.last as AST; return node;
+				// skip
+				break;
 			}
 			default:
 			{
-				return new OL(node);
+				this.node.children.push(new OL());
+				break;
 			}
 		}
+		// pickup
+		this.node = this.node.last as AST;
+
+		const branch = this._stack();
+
+		if (branch) parent.children.push(...(typeof branch === "string" ? [branch] : (branch as AST).children));
+
+		if (parent.children.length)
+		{
+			this.node.children.push(parent);
+		}
+
+		return null;
 	}
 
 	private _ul()
 	{
-		const node = new LI();
+		const parent = new LI();
 
-		main:
-		while (true)
-		{
-			switch (this.peek())
-			{
-				case EOF: case Token.BREAK:
-				{
-					break main; // let block handle Token.BREAK
-				}
-				default:
-				{
-					const token = this.peek();
-
-					if (typeof token === "string")
-					{
-						this.consume(); node.children.push(token);
-					}
-					else
-					{
-						const ast = this._stack();
-						// ast may be null due to indent
-						if (ast) node.children.push(...(typeof ast === "string" ? [ast] : (ast as AST).children));
-					}
-					break;
-				}
-			}
-		}
 		switch (this.node.last?.constructor)
 		{
 			case OL:
 			case UL:
 			{
-				this.node = this.node.last as AST; return node;
+				// skip
+				break;
 			}
 			default:
 			{
-				return new UL(node);
+				this.node.children.push(new UL());
+				break;
 			}
 		}
+		// pickup
+		this.node = this.node.last as AST;
+
+		const branch = this._stack();
+		
+		if (branch) parent.children.push(...(typeof branch === "string" ? [branch] : (branch as AST).children));
+
+		if (parent.children.length)
+		{
+			this.node.children.push(parent);
+		}
+
+		return null;
 	}
 
 	private _inline()
@@ -528,6 +531,20 @@ export default class Parser
 						}
 					}
 					break;
+				}
+				//
+				// ![alt](url)
+				//
+				case Token.EXCLAMATION:
+				{
+					/* this.consume(); */ node.children.push(this._image()); break;
+				}
+				//
+				// [text](url)
+				//
+				case Token.BRACKET_L:
+				{
+					/* this.consume(); */ node.children.push(this._backlink()); break;
 				}
 				case Token.BOLD:
 				{
@@ -594,26 +611,26 @@ export default class Parser
 					this.consume(); node.children.push("≥"); break;
 				}
 				//
-				// ![alt](url)
+				// fallback
 				//
-				case Token.EXCLAMATION:
+				case Token.INDENT_1T:
 				{
-					/* this.consume(); */ node.children.push(this._image()); break;
+					this.consume(); node.children.push("&nbsp".repeat(1)); break;
 				}
-				//
-				// [text](url)
-				//
-				case Token.BRACKET_L:
+				case Token.INDENT_2S:
 				{
-					/* this.consume(); */ node.children.push(this._backlink()); break;
+					this.consume(); node.children.push("&nbsp".repeat(1)); break;
 				}
-				//
-				// others
-				//
+				case Token.INDENT_4S:
+				{
+					this.consume(); node.children.push("&nbsp".repeat(1)); break;
+				}
 				case Token.COMMENT_R:
 				case Token.BRACKET_R:
 				case Token.PAREN_L:
 				case Token.PAREN_R:
+				case Token.OL:
+				case Token.UL:
 				{
 					node.children.push((this.consume() as Token).grammar); break;
 				}
