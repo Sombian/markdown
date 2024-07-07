@@ -396,7 +396,7 @@ export default class Parser
 			}
 			default:
 			{
-				this.node.children.push(new OL());
+				this.node.children.push(new BQ());
 				break;
 			}
 		}
