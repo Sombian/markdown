@@ -1,4 +1,4 @@
-import Scanner, { Token } from "./scanner";
+import Scanner, { Context, Token } from "./scanner";
 
 const EOF = Symbol();
 
@@ -271,7 +271,24 @@ export default class Parser
 		{
 			case Token.BREAK:
 			{
-				this.consume(); this.node = this.origin; return null;
+				this.consume();
+				// reset pointer
+				this.node = this.origin;
+
+				if (this.peek() instanceof Token)
+				{
+					if (this.peek() === Token.BREAK)
+					{
+						// edge case - itself
+						return new BR();
+					}
+					if ((this.peek() as Token).ctx === Context.INLINE)
+					{
+						// general case - inline
+						return new BR();
+					}
+				}
+				return null;
 			}
 			case Token.H1:
 			{

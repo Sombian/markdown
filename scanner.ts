@@ -1,4 +1,4 @@
-const enum Context
+export const enum Context
 {
 	// HTML = "html",
 	BLOCK = "block",
