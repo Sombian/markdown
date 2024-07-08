@@ -209,7 +209,7 @@ class BACKLINK extends AST
 
 	override render()
 	{
-		return `<a href="${this.href}">${this.text}</>`;
+		return `<a href="${this.href}">${this.text}</a>`;
 	}
 }
 
