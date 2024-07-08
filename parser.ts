@@ -797,6 +797,11 @@ export default class Parser
 			{
 				fallback.push(this.consume(syntax));
 			}
+			if (this.node.last.constructor === BR)
+			{
+				// dedupe newline
+				this.node.children.pop();
+			}
 			return new IMAGE(fallback[2] as string, fallback[5] as string);
 		}
 		catch (error)
@@ -814,6 +819,11 @@ export default class Parser
 			for (const syntax of [Token.BRACKET_L, ("string" as const), Token.BRACKET_R, Token.PAREN_L, ("string" as const), Token.PAREN_R])
 			{
 				fallback.push(this.consume(syntax));
+			}
+			if (this.node.last.constructor === BR)
+			{
+				// dedupe newline
+				this.node.children.pop();
 			}
 			return new BACKLINK(fallback[1] as string, fallback[4] as string);
 		}
