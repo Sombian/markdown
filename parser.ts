@@ -791,16 +791,16 @@ export default class Parser
 	{
 		const fallback: ReturnType<typeof this.consume>[] = [];
 
+		if (this.node.last?.constructor === BR)
+		{
+			// dedupe newline
+			this.node.children.pop();
+		}
 		try
 		{
 			for (const syntax of [Token.EXCLAMATION, Token.BRACKET_L, ("string" as const), Token.BRACKET_R, Token.PAREN_L, ("string" as const), Token.PAREN_R])
 			{
 				fallback.push(this.consume(syntax));
-			}
-			if (this.node.last.constructor === BR)
-			{
-				// dedupe newline
-				this.node.children.pop();
 			}
 			return new IMAGE(fallback[2] as string, fallback[5] as string);
 		}
@@ -814,16 +814,16 @@ export default class Parser
 	{
 		const fallback: ReturnType<typeof this.consume>[] = [];
 
+		if (this.node.last?.constructor === BR)
+		{
+			// dedupe newline
+			this.node.children.pop();
+		}
 		try
 		{
 			for (const syntax of [Token.BRACKET_L, ("string" as const), Token.BRACKET_R, Token.PAREN_L, ("string" as const), Token.PAREN_R])
 			{
 				fallback.push(this.consume(syntax));
-			}
-			if (this.node.last.constructor === BR)
-			{
-				// dedupe newline
-				this.node.children.pop();
 			}
 			return new BACKLINK(fallback[1] as string, fallback[4] as string);
 		}
