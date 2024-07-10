@@ -79,6 +79,14 @@ class H6 extends AST
 	}
 }
 
+class CB extends AST
+{
+	override render()
+	{
+		return `<pre><code>${this.body}</code></pre>`
+	}
+}
+
 class HR extends AST
 {
 	override render()
@@ -139,6 +147,15 @@ class PR extends AST
 	}
 }
 
+class CODE extends AST
+{
+	override render()
+	{
+		return `<code>${this.body}</code>`
+	}
+}
+
+
 class BOLD extends AST
 {
 	override render()
@@ -189,6 +206,8 @@ class CHECKED_BOX extends AST
 
 class IMAGE extends AST
 {
+	declare children: never;
+
 	constructor(private readonly alt: string, private readonly src: string)
 	{
 		super();
@@ -202,6 +221,8 @@ class IMAGE extends AST
 
 class BACKLINK extends AST
 {
+	declare children: never;
+
 	constructor(private readonly text: string, private readonly href: string)
 	{
 		super();
@@ -314,17 +335,59 @@ export default class Parser
 			{
 				this.consume(); return new H6(this._inline());
 			}
-			case Token.HR_A:
-			case Token.HR_B:
-			case Token.HR_C:
+			case Token.CB:
 			{
-				this.consume(); return new HR(); // no children
+				this.consume(); return this._cb();
+			}
+			case Token.HR_1:
+			case Token.HR_2:
+			case Token.HR_3:
+			{
+				this.consume(); return this._hr();
 			}
 			default:
 			{
 				return this._stack();
 			}
 		}
+	}
+
+	private _cb()
+	{
+		const node = new CB(); // TODO: add syntax highlight
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case EOF:
+				{
+					break main; // let _block() handle Token.BREAK
+				}
+				case Token.CB:
+				{
+					// :3
+					this.consume();
+					
+					break main;
+				}
+				default:
+				{
+					const token = this.consume();
+
+					node.children.push(typeof token === "string" ? token : (token as Token).grammar);
+
+					continue main;
+				}
+			}
+		}
+		return node;
+	}
+
+	private _hr()
+	{
+		return new HR(); // no children
 	}
 
 	private _stack()
@@ -380,8 +443,7 @@ export default class Parser
 				}
 				return null;
 			}
-			case Token.BQ_A:
-			case Token.BQ_B:
+			case Token.BQ:
 			{
 				this.consume(); return this._bq();
 			}
@@ -511,7 +573,7 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					break main; // let block handle Token.BREAK
+					break main; // let _block() handle Token.BREAK
 				}
 				//
 				// "Exhaust every possibility until none are left." - Raphael
@@ -544,6 +606,10 @@ export default class Parser
 				case Token.BRACKET_L:
 				{
 					/* this.consume(); */ node.children.push(this._backlink()); continue main;
+				}
+				case Token.CODE:
+				{
+					this.consume(); node.children.push(this._code()); continue main;
 				}
 				case Token.BOLD:
 				{
@@ -649,9 +715,9 @@ export default class Parser
 		return node;
 	}
 
-	private _bold()
+	private _code()
 	{
-		const node = new BOLD();
+		const node = new CODE();
 
 		main:
 		while (true)
@@ -660,11 +726,14 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					break main; // let block handle Token.BREAK
+					break main; // let _block() handle Token.BREAK
 				}
-				case Token.BOLD:
+				case Token.CODE:
 				{
-					this.consume(); break main;
+					// :3
+					this.consume();
+
+					break main;
 				}
 				default:
 				{
@@ -676,7 +745,44 @@ export default class Parser
 					{
 						node.children.push(...this._inline().children);
 					}
-					break;
+					continue main;
+				}
+			}
+		}
+		return node;
+	}
+
+	private _bold()
+	{
+		const node = new BOLD();
+
+		main:
+		while (true)
+		{
+			switch (this.peek())
+			{
+				case EOF: case Token.BREAK:
+				{
+					break main; // let _block() handle Token.BREAK
+				}
+				case Token.BOLD:
+				{
+					// :3
+					this.consume();
+					
+					break main;
+				}
+				default:
+				{
+					if (typeof this.peek() === "string")
+					{
+						node.children.push(this.consume() as string);
+					}
+					else
+					{
+						node.children.push(...this._inline().children);
+					}
+					continue main;
 				}
 			}
 		}
@@ -694,11 +800,14 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					break main; // let block handle Token.BREAK
+					break main; // let _block() handle Token.BREAK
 				}
 				case Token.ITALIC:
 				{
-					this.consume(); break main;
+					// :3
+					this.consume();
+					
+					break main;
 				}
 				default:
 				{
@@ -710,7 +819,7 @@ export default class Parser
 					{
 						node.children.push(...this._inline().children);
 					}
-					break;
+					continue main;
 				}
 			}
 		}
@@ -728,11 +837,14 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					break main; // let block handle Token.BREAK
+					break main; // let _block() handle Token.BREAK
 				}
 				case Token.UNDERLINE:
 				{
-					this.consume(); break main;
+					// :3
+					this.consume();
+					
+					break main;
 				}
 				default:
 				{
@@ -744,7 +856,7 @@ export default class Parser
 					{
 						node.children.push(...this._inline().children);
 					}
-					break;
+					continue main;
 				}
 			}
 		}
@@ -762,11 +874,14 @@ export default class Parser
 			{
 				case EOF: case Token.BREAK:
 				{
-					break main; // let block handle Token.BREAK
+					break main; // let _block() handle Token.BREAK
 				}
 				case Token.STRIKETHROUGH:
 				{
-					this.consume(); break main;
+					// :3
+					this.consume();
+					
+					break main;
 				}
 				default:
 				{
@@ -778,7 +893,7 @@ export default class Parser
 					{
 						node.children.push(...this._inline().children);
 					}
-					break;
+					continue main;
 				}
 			}
 		}

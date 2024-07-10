@@ -45,4 +45,9 @@ function main()
 	});
 }
 
-const watcher = fs.watch(input, main); process.on("SIGINT", () => { watcher.close(); process.exit(0); });
+declare global
+{
+	var watcher: fs.FSWatcher;
+}
+
+globalThis.watcher ??= fs.watch(input, main); process.on("SIGINT", () => { globalThis?.watcher.close(); process.exit(0); });

@@ -77,22 +77,24 @@ export abstract class Token
 	// block
 	//
 	public static readonly H1 = new (class H1 extends Token {})
-	(Context.BLOCK, "#\u0020");
+	(Context.BLOCK, "#".repeat(1) + "\u0020");
 	public static readonly H2 = new (class H2 extends Token {})
-	(Context.BLOCK, "##\u0020");
+	(Context.BLOCK, "#".repeat(2) + "\u0020");
 	public static readonly H3 = new (class H3 extends Token {})
-	(Context.BLOCK, "###\u0020");
+	(Context.BLOCK, "#".repeat(3) + "\u0020");
 	public static readonly H4 = new (class H4 extends Token {})
-	(Context.BLOCK, "####\u0020");
+	(Context.BLOCK, "#".repeat(4) + "\u0020");
 	public static readonly H5 = new (class H5 extends Token {})
-	(Context.BLOCK, "#####\u0020");
+	(Context.BLOCK, "#".repeat(5) + "\u0020");
 	public static readonly H6 = new (class H6 extends Token {})
-	(Context.BLOCK, "######\u0020");
-	public static readonly HR_A = new (class HR_A extends Token {})
+	(Context.BLOCK, "#".repeat(6) + "\u0020");
+	public static readonly CB = new (class CB extends Token {})
+	(Context.BLOCK, "```");
+	public static readonly HR_1 = new (class HR_1 extends Token {})
 	(Context.BLOCK, "___\n");
-	public static readonly HR_B = new (class HR_B extends Token {})
+	public static readonly HR_2 = new (class HR_2 extends Token {})
 	(Context.BLOCK, "---\n");
-	public static readonly HR_C = new (class HR_C extends Token {})
+	public static readonly HR_3 = new (class HR_3 extends Token {})
 	(Context.BLOCK, "===\n");
 	//
 	// stack
@@ -103,9 +105,7 @@ export abstract class Token
 	(Context.STACK, "  ");
 	public static readonly INDENT_4S = new (class INDENT_4S extends Token {})
 	(Context.STACK, "    ");
-	public static readonly BQ_A = new (class BQ_A extends Token {})
-	(Context.STACK, ">");
-	public static readonly BQ_B = new (class BQ_B extends Token {})
+	public static readonly BQ = new (class BQ extends Token {})
 	(Context.STACK, ">\u0020");
 	public static readonly OL = new (class OL extends Token {})
 	(Context.STACK, "-\u0020");
@@ -114,6 +114,8 @@ export abstract class Token
 	//
 	// inline
 	//
+	public static readonly CODE = new (class CODE extends Token {})
+	(Context.INLINE, "`");
 	public static readonly BOLD = new (class BOLD extends Token {})
 	(Context.INLINE, "**");
 	public static readonly ITALIC = new (class ITALIC extends Token {})
