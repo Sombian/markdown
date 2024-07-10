@@ -459,7 +459,6 @@ export default class Parser
 		switch (this.node.last?.constructor)
 		{
 			case OL:
-			case UL:
 			{
 				// pickup
 				this.node = this.node.last as AST;
@@ -484,7 +483,6 @@ export default class Parser
 
 		switch (this.node.last?.constructor)
 		{
-			case OL:
 			case UL:
 			{
 				// pickup
