@@ -29,7 +29,7 @@ function main()
 
 		const tokens = benchmark("Scanner", () => Scanner.run(text));
 	
-		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor), "\n");
+		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 	
 		const AST = benchmark("Parser", () => Parser.run(tokens));
 		
@@ -47,6 +47,7 @@ function main()
 
 declare global
 {
+	// eslint-disable-next-line no-var
 	var watcher: fs.FSWatcher;
 }
 

@@ -1,8 +1,1 @@
-```
-while (true)
-{
-	console.debug("hello world");
-}
-```
-
-`:3`
+**AA *BB* CC__DD

@@ -261,7 +261,6 @@ export default class Parser
 
 	private run()
 	{
-		main:
 		while (this.peek() !== EOF)
 		{
 			const ast = this._block();
@@ -271,23 +270,26 @@ export default class Parser
 		return this.origin;
 	}
 
-	private peek()
+	private peek(token?: "string" | Token)
 	{
+		if (token && (token === "string" ? this.tokens[this.i] !== "string" : this.tokens[this.i] !== token))
+		{
+			throw new Error(`Unexpected token ${this.tokens[this.i].constructor.name} at position ${this.i}`);
+		}
 		return (this.tokens[this.i] ?? EOF) as string | Token | typeof EOF;
 	}
 
 	private consume(token?: "string" | Token)
 	{
-		if (token && (token === "string" ? typeof this.peek() !== "string" : this.peek() !== token))
+		if (token && (token === "string" ? this.tokens[this.i] !== "string" : this.tokens[this.i] !== token))
 		{
-			throw new Error(`Unexpected token ${this.peek().constructor.name} at position ${this.i}`);
+			throw new Error(`Unexpected token ${this.tokens[this.i].constructor.name} at position ${this.i}`);
 		}
 		return (this.tokens[this.i++] ?? EOF) as string | Token | typeof EOF;
 	}
 
 	private _block()
 	{
-		main:
 		switch (this.peek())
 		{
 			case Token.BREAK:
@@ -523,8 +525,7 @@ export default class Parser
 			case OL:
 			{
 				// pickup
-				this.node = this.node.last as AST;
-				this.node.children.push(node);
+				(this.node = this.node.last as AST).children.push(node);
 				break;
 			}
 			default:
@@ -548,8 +549,7 @@ export default class Parser
 			case UL:
 			{
 				// pickup
-				this.node = this.node.last as AST;
-				this.node.children.push(node);
+				(this.node = this.node.last as AST).children.push(node);
 				break;
 			}
 			default:

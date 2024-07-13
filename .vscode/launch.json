@@ -3,6 +3,9 @@
 	[
 		{
 			"name": "test", "type": "node-terminal", "cwd":"${workspaceFolder}", "request": "launch", "command": "bun --hot test/index.ts",
-		}
+		},
+		{
+			"name": "lint", "type": "node-terminal", "cwd":"${workspaceFolder}", "request": "launch", "command": "bun x eslint",
+		},
 	],
 }

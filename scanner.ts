@@ -8,7 +8,7 @@ export const enum Context
 
 export abstract class Token
 {
-	// @ts-ignore
+	// @ts-expect-error [key: null] is used for core tokens
 	private static readonly __MAP__ = new Map<Context, Token[]>([
 		// auto-generate
 		[null, []],
@@ -22,7 +22,7 @@ export abstract class Token
 
 	private constructor(public readonly ctx: Context, public readonly grammar: string)
 	{
-		Token.__MAP__.get(ctx)!!.push(this);
+		Token.__MAP__.get(ctx)!.push(this);
 	}
 
 	public static of(ctx: Context)
@@ -32,34 +32,34 @@ export abstract class Token
 			case Context.BLOCK:
 			{
 				return [
-					// @ts-ignore
-					...Token.__MAP__.get(null)!!,
-					// block
-					...Token.__MAP__.get(Context.BLOCK)!!,
+					// @ts-expect-error [key: null] is used for core tokens
+					...Token.__MAP__.get(null)!,
+					// block  
+					...Token.__MAP__.get(Context.BLOCK)!,
 					// stack
-					...Token.__MAP__.get(Context.STACK)!!,
+					...Token.__MAP__.get(Context.STACK)!,
 					// inline
-					...Token.__MAP__.get(Context.INLINE)!!,
+					...Token.__MAP__.get(Context.INLINE)!,
 				];
 			}
 			case Context.STACK:
 			{
 				return [
-					// @ts-ignore
-					...Token.__MAP__.get(null)!!,
+					// @ts-expect-error [key: null] is used for core tokens
+					...Token.__MAP__.get(null)!,
 					// stack
-					...Token.__MAP__.get(Context.STACK)!!,
+					...Token.__MAP__.get(Context.STACK)!,
 					// inline
-					...Token.__MAP__.get(Context.INLINE)!!,
+					...Token.__MAP__.get(Context.INLINE)!,
 				];
 			}
 			case Context.INLINE:
 			{
 				return [
-					// @ts-ignore
-					...Token.__MAP__.get(null)!!,
+					// @ts-expect-error [key: null] is used for core tokens
+					...Token.__MAP__.get(null)!,
 					// inline
-					...Token.__MAP__.get(Context.INLINE)!!,
+					...Token.__MAP__.get(Context.INLINE)!,
 				];
 			}
 		}
@@ -100,11 +100,11 @@ export abstract class Token
 	// stack
 	//
 	public static readonly INDENT_1T = new (class INDENT_1T extends Token {})
-	(Context.STACK, "	");
+	(Context.STACK, "\u0009".repeat(1));
 	public static readonly INDENT_2S = new (class INDENT_2S extends Token {})
-	(Context.STACK, "  ");
+	(Context.STACK, "\u0020".repeat(2));
 	public static readonly INDENT_4S = new (class INDENT_4S extends Token {})
-	(Context.STACK, "    ");
+	(Context.STACK, "\u0020".repeat(4));
 	public static readonly BQ = new (class BQ extends Token {})
 	(Context.STACK, ">\u0020");
 	public static readonly OL = new (class OL extends Token {})
@@ -162,8 +162,8 @@ export abstract class Token
 
 interface Route
 {
-	// @ts-ignore
-	[key: string]: Token | Route; default?: Token;
+	// @ts-expect-error [key: "default"] is used for fallback
+	[key: string]: Route | Token; default?: Token;
 }
 
 const __TABLE__: Record<Context, Route> =
@@ -405,6 +405,9 @@ export default class Scanner
 					//
 					if (depth < buffer.length - 0)
 					{
+						//
+						// <buffer/manipulate>
+						//
 						if (depth < buffer.length - 1)
 						{
 							/*
