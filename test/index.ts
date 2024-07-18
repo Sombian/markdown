@@ -2,8 +2,9 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
-import Parser from "../parser";
-import Scanner from "../scanner";
+import Preset from "../src/preset";
+import Parser from "../src/parser";
+import Scanner from "../src/scanner";
 
 const [input, output] = [path.join(import.meta.dirname, "in.txt"), path.join(import.meta.dirname, "out.html")];
 
@@ -27,11 +28,11 @@ function main()
 	{
 		process.stdout.write("\x1Bc");
 
-		const tokens = benchmark("Scanner", () => Scanner.run(text));
+		const tokens = benchmark("Scanner", () => new Scanner(Preset.ARUM[0]).scan(text));
 	
 		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 	
-		const AST = benchmark("Parser", () => Parser.run(tokens));
+		const AST = benchmark("Parser", () => new Parser(Preset.ARUM[1]).parse(tokens));
 		
 		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
 	
@@ -41,7 +42,7 @@ function main()
 
 		const bytes = await Bun.write(output, HTML);
 
-		console.debug(`${output}: \x1b[4m${bytes}bytes\x1b[0m`);
+		console.debug(`\x1b[4m${output}\x1b[0m ~ ${bytes}bytes`);
 	});
 }
 
