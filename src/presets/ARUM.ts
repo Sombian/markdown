@@ -47,11 +47,11 @@ const T = Object.freeze(
 	CB: new (class CB extends impl {})
 	(Context.BLOCK, "```"),
 	HR_1: new (class HR_1 extends impl {})
-	(Context.BLOCK, "___\n"),
+	(Context.BLOCK, "___" + "\n"),
 	HR_2: new (class HR_2 extends impl {})
-	(Context.BLOCK, "---\n"),
+	(Context.BLOCK, "---" + "\n"),
 	HR_3: new (class HR_3 extends impl {})
-	(Context.BLOCK, "===\n"),
+	(Context.BLOCK, "===" + "\n"),
 	//
 	// stack
 	//
@@ -158,7 +158,7 @@ const P: ConstructorParameters<typeof Markdown> = [
 	//
 	// tokens
 	//
-	Object.values(T),
+	Object.freeze(Object.values(T)),
 	//
 	// handle
 	//
@@ -195,6 +195,8 @@ const P: ConstructorParameters<typeof Markdown> = [
 			}
 			case T.COMMENT_L:
 			{
+				next();
+
 				comment:
 				while (true)
 				{

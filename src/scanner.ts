@@ -34,7 +34,7 @@ export default class Scanner
 		[Context.INLINE]: {},
 	};
 
-	constructor(data: Token[])
+	constructor(data: Readonly<Token[]>)
 	{
 		/*
 		e.g.

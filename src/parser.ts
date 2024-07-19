@@ -42,9 +42,13 @@ export default class Parser
 			}
 		})
 		();
-		// reflect
+		//
+		// assign
+		//
 		[this.data, this.i] = [data, 0];
-
+		//
+		// iterate
+		//
 		while (this.i in this.data)
 		{
 			try
