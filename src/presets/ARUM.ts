@@ -277,23 +277,43 @@ const P: ConstructorParameters<typeof Markdown> = [
 						}
 						case T.BOLD:
 						{
-							next(); inline.children.push(style(new HTML.BOLD(), T.BOLD)); break examine;
+							next(); const ast = style(new HTML.BOLD(), T.BOLD);
+							
+							if (0 < ast.children.length) inline.children.push(ast);
+							
+							break examine;
 						}
 						case T.CODE:
 						{
-							next(); inline.children.push(style(new HTML.CODE(), T.CODE)); break examine;
+							next(); const ast = style(new HTML.CODE(), T.CODE);
+							
+							if (0 < ast.children.length) inline.children.push(ast);
+							
+							break examine;
 						}
 						case T.ITALIC:
 						{
-							next(); inline.children.push(style(new HTML.ITALIC(), T.ITALIC)); break examine;
+							next(); const ast = style(new HTML.ITALIC(), T.ITALIC);
+							
+							if (0 < ast.children.length) inline.children.push(ast);
+							
+							break examine;
 						}
 						case T.STRIKE:
 						{
-							next(); inline.children.push(style(new HTML.STRIKE(), T.STRIKE)); break examine;
+							next(); const ast = style(new HTML.STRIKE(), T.STRIKE);
+							
+							if (0 < ast.children.length) inline.children.push(ast);
+							
+							break examine;
 						}
 						case T.UNDERLINE:
 						{
-							next(); inline.children.push(style(new HTML.UNDERLINE(), T.UNDERLINE)); break examine;
+							next(); const ast = style(new HTML.UNDERLINE(), T.UNDERLINE);
+							
+							if (0 < ast.children.length) inline.children.push(ast);
+							
+							break examine;
 						}
 						default:
 						{
