@@ -1,10 +1,14 @@
+import ARUM from "./presets/ARUM";
+// import GITHUB from "./presets/GITHUB";
+// import OBSIDIAN from "./presets/OBSIDIAN";
+
 import Parser from "./parser";
 import Scanner from "./scanner";
 
-export default class Markdown
+export class Markdown
 {
-	private readonly scanner: Scanner;
-	private readonly parser: Parser;
+	public readonly scanner: Scanner;
+	public readonly parser: Parser;
 
 	constructor
 	(
@@ -19,5 +23,17 @@ export default class Markdown
 	public run(data: string)
 	{
 		return this.parser.parse(this.scanner.scan(data)).render();
+	}
+}
+
+export abstract class Preset
+{
+	public static readonly ARUM = ARUM;
+	public static readonly GITHUB = null;
+	public static readonly OBSIDIAN = null;
+
+	private constructor()
+	{
+		// final
 	}
 }

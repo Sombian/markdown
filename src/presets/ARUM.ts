@@ -1,4 +1,4 @@
-import Markdown from "../.."; import { Token, Context } from "../../scanner"; import { AST } from "../../parser"; import * as HTML from "../../html";
+import { Markdown } from ".."; import { Token, Context } from "../scanner"; import { AST } from "../parser"; import * as HTML from "../html";
 
 const T = Object.freeze(
 {
@@ -171,27 +171,33 @@ const P: ConstructorParameters<typeof Markdown> = [
 			}
 			case T.H1:
 			{
-				next(); return new HTML.H1(recursive({ peek, next, until: [] }));
+				next(); return new HTML.H1(...recursive({ peek, next, until: [] }).children);
 			}
 			case T.H2:
 			{
-				next(); return new HTML.H2(recursive({ peek, next, until: [] }));
+				next(); return new HTML.H2(...recursive({ peek, next, until: [] }).children);
 			}
 			case T.H3:
 			{
-				next(); return new HTML.H3(recursive({ peek, next, until: [] }));
+				next(); return new HTML.H3(...recursive({ peek, next, until: [] }).children);
 			}
 			case T.H4:
 			{
-				next(); return new HTML.H4(recursive({ peek, next, until: [] }));
+				next(); return new HTML.H4(...recursive({ peek, next, until: [] }).children);
 			}
 			case T.H5:
 			{
-				next(); return new HTML.H5(recursive({ peek, next, until: [] }));
+				next(); return new HTML.H5(...recursive({ peek, next, until: [] }).children);
 			}
 			case T.H6:
 			{
-				next(); return new HTML.H6(recursive({ peek, next, until: [] }));
+				next(); return new HTML.H6(...recursive({ peek, next, until: [] }).children);
+			}
+			case T.HR_1:
+			case T.HR_2:
+			case T.HR_3:
+			{
+				next(); return new HTML.HR();
 			}
 			default:
 			{
@@ -235,14 +241,15 @@ const P: ConstructorParameters<typeof Markdown> = [
 				inline:
 				while (true)
 				{
-					if ([T.BREAK, null, ...until].includes(peek() as never))
-					{
-						break inline;
-					}
+					const token = peek(); if (until.includes(token as never)) break inline;
 					
 					examine:
-					switch (peek())
+					switch (token)
 					{
+						case T.BREAK: case null:
+						{
+							break inline;
+						}
 						case T.BOLD:
 						{
 							next(); inline.children.push(style(new HTML.BOLD(), T.BOLD)); break examine;
@@ -265,13 +272,13 @@ const P: ConstructorParameters<typeof Markdown> = [
 						}
 						default:
 						{
-							if (typeof peek() === "string")
+							if (typeof token === "string")
 							{
-								inline.children.push(next() as string);
+								next(); inline.children.push(token);
 							}
 							else
 							{
-								inline.children.push((next() as Token).code);
+								next(); inline.children.push(token.code);
 							}
 							break examine;
 						}

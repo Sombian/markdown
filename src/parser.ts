@@ -34,8 +34,6 @@ export default class Parser
 
 	public parse(data: typeof Parser.prototype.data)
 	{
-		[this.data, this.i] = [data, 0];
-
 		const root = new (class ROOT extends AST
 		{
 			override render()
@@ -44,6 +42,8 @@ export default class Parser
 			}
 		})
 		();
+		// reflect
+		[this.data, this.i] = [data, 0];
 
 		while (this.peek() !== null)
 		{
