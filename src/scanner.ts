@@ -22,10 +22,7 @@ export abstract class Token
 		// TODO: none
 	}
 
-	public get next()
-	{
-		return this.code.at(-1) === "\n" ? Context.BLOCK : Context.INLINE;
-	}
+	public abstract get next(): Context;
 }
 
 export default class Scanner
