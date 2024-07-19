@@ -74,7 +74,10 @@ export default class Scanner
 		*/
 		for (const token of data)
 		{
-			for (const ctx of (token.ctx === Context.BLOCK ? [Context.BLOCK] : [Context.BLOCK, Context.INLINE]))
+			for (const ctx of new Set
+			(
+				(token.ctx === Context.BLOCK) ? [token.ctx] : [Context.BLOCK, Context.INLINE]
+			))
 			{
 				let node = this.__TABLE__[ctx];
 		
