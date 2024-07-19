@@ -45,14 +45,21 @@ export default class Parser
 		// reflect
 		[this.data, this.i] = [data, 0];
 
-		while (this.peek() !== null)
+		while (this.i in this.data)
 		{
-			root.children.push(this.handle(
+			try
 			{
-				peek: this.peek.bind(this),
-				next: this.next.bind(this),
-				until: [],
-			}));
+				root.children.push(this.handle(
+				{
+					peek: this.peek.bind(this),
+					next: this.next.bind(this),
+					until: [],
+				}));
+			}
+			catch (error)
+			{
+				if (error !== "EOF") console.debug(error);
+			}
 		}
 		return root;
 	}

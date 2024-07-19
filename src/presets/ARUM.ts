@@ -150,9 +150,30 @@ const P: ConstructorParameters<typeof Markdown> = [
 		block:
 		switch (peek())
 		{
-			case T.BREAK: case null:
+			case null:
 			{
-				next(); return new HTML.BR();
+				throw "EOF";
+			}
+			case T.BREAK:
+			{
+				next();
+
+				const token = peek();
+
+				if (token instanceof Token)
+				{
+					// edge case - itself
+					if (token === T.BREAK)
+					{
+						return new HTML.BR();
+					}
+					// edge case - inline
+					if (token.ctx === Context.INLINE)
+					{
+						return new HTML.BR();
+					}
+				}
+				return recursive({ peek, next, until: [] });
 			}
 			case T.COMMENT_L:
 			{
@@ -161,7 +182,11 @@ const P: ConstructorParameters<typeof Markdown> = [
 				{
 					switch (next())
 					{
-						case T.COMMENT_R: case null:
+						case null:
+						{
+							throw "EOF";
+						}
+						case T.COMMENT_R:
 						{
 							break comment;
 						}
