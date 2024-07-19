@@ -24,7 +24,7 @@ export abstract class Token
 
 	public get next()
 	{
-		return Context.INLINE;
+		return this.code.at(-1) === "\n" ? Context.BLOCK : Context.INLINE;
 	}
 }
 

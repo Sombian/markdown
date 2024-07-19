@@ -5,29 +5,11 @@ const T = Object.freeze(
 	//
 	// core
 	//
-	BREAK: new (class BREAK extends Token
-	{
-		override get next()
-		{
-			return Context.BLOCK;
-		}
-	})
+	BREAK: new (class BREAK extends Token {})
 	(null as never, "\n"),
-	COMMENT_L: new (class COMMENT_L extends Token
-	{
-		override get next()
-		{
-			return Context.BLOCK;
-		}
-	})
+	COMMENT_L: new (class COMMENT_L extends Token {})
 	(null as never, "/*"),
-	COMMENT_R: new (class COMMENT_R extends Token
-	{
-		override get next()
-		{
-			return Context.BLOCK;
-		}
-	})
+	COMMENT_R: new (class COMMENT_R extends Token {})
 	(null as never, "*/"),
 	//
 	// block
