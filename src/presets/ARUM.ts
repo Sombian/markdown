@@ -24,11 +24,11 @@ const T = Object.freeze(
 	// core
 	//
 	BREAK: new (class BREAK extends impl {})
-	(null as never, "\n"),
+	("all", "\n"),
 	COMMENT_L: new (class COMMENT_L extends impl {})
-	(null as never, "/*"),
+	("all", "/*"),
 	COMMENT_R: new (class COMMENT_R extends impl {})
-	(null as never, "*/"),
+	("all", "*/"),
 	//
 	// block
 	//
@@ -164,8 +164,6 @@ const P: ConstructorParameters<typeof Markdown> = [
 	//
 	function recursive({ peek, next, until }): AST
 	{
-		// eslint-disable-next-line no-unused-labels
-		block:
 		switch (peek())
 		{
 			case null:
@@ -242,29 +240,104 @@ const P: ConstructorParameters<typeof Markdown> = [
 			case T.HR_2:
 			case T.HR_3:
 			{
-				next(); return new HTML.HR();
+				next(); return new HTML.HR(/* leaf node */);
+			}
+			case T.BQ:
+			{
+				next();
+				
+				const root = new HTML.BQ(); let node: null | AST = root;
+
+				stack:
+				while (true)
+				{
+					const token = peek();
+
+					switch (token)
+					{
+						case null:
+						{
+							break stack;
+						}
+						case T.BREAK:
+						{
+							next();
+							// reset
+							node = null;
+							
+							continue stack;
+						}
+						case T.BQ:
+						{
+							next();
+
+							if (node === null)
+							{
+								// after newline
+								node = root;
+							}
+							else if (node.children.at(-1) instanceof HTML.BQ)
+							{
+								// nesting - pickup
+								node = node.children.at(-1) as AST;
+							}
+							else
+							{
+								// nesting - delve
+								node.children.push(node = new HTML.BQ());
+							}
+							continue stack;
+						}
+						default:
+						{
+							// :skull:
+							if (node === null)
+							{
+								break stack;
+							}
+							const ast = recursive({ peek, next, until: [] });
+
+							if (ast instanceof HTML.PR)
+							{
+								node.children.push(...ast.children);
+							}
+							else
+							{
+								node.children.push(ast);
+
+								if (typeof token !== "string" && token.next === Context.BLOCK)
+								{
+									// reset
+									node = null;
+								}
+							}
+							continue stack;
+						}
+					}
+				}
+				return root;
 			}
 			default:
 			{
 				const inline = new HTML.PR();
 
-				function style(ast: AST, closing: impl)
+				function style(ast: AST, closing: Token)
 				{
-					main:
+					style:
 					while (true)
 					{
-						const token = peek();
-
-						if ([T.BREAK, null, ...until].includes(peek() as never))
-						{
-							break main;
-						}
+						const token = peek(); if (until.includes(peek() as never)) break style;
 
 						switch (token)
 						{
+							case null:
+							case T.BREAK:
+							{
+								break style;
+							}
 							case closing:
 							{
-								next(); break main;
+								next(); break style;
 							}
 							default:
 							{
@@ -274,9 +347,13 @@ const P: ConstructorParameters<typeof Markdown> = [
 								}
 								else
 								{
-									ast.children.push(...recursive({ peek, next, until: [...until, closing] }).children);
+									ast.children.push(...recursive(
+									{
+										peek, next, until: [...until, closing]
+									}
+									).children);
 								}
-								continue main;
+								continue style;
 							}
 						}
 					}
@@ -291,7 +368,8 @@ const P: ConstructorParameters<typeof Markdown> = [
 					examine:
 					switch (token)
 					{
-						case T.BREAK: case null:
+						case null:
+						case T.BREAK:
 						{
 							break inline;
 						}

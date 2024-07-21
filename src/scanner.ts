@@ -4,7 +4,7 @@ interface Route
 	[key: string]: Route | Token; default?: Token;
 }
 
-export const enum Context
+export enum Context
 {
 	// HTML = "html",
 	BLOCK = "block",
@@ -13,11 +13,7 @@ export const enum Context
 
 export abstract class Token
 {
-	constructor
-	(
-		public readonly ctx: Context,
-		public readonly code: string,
-	)
+	constructor(public readonly ctx: "all" | Context, public readonly code: string)
 	{
 		// TODO: none
 	}
@@ -69,12 +65,28 @@ export default class Scanner
 			}
 		}
 		*/
+		function routes(ctx: typeof Token.prototype.ctx)
+		{
+			switch (ctx)
+			{
+				case "all":
+				{
+					return Object.values(Context);
+				}
+				case Context.BLOCK:
+				{
+					return [Context.BLOCK];
+				}
+				case Context.INLINE:
+				{
+					return [Context.BLOCK, Context.INLINE];
+				}
+			}
+		}
+
 		for (const token of data)
 		{
-			for (const ctx of new Set
-			(
-				(token.ctx === Context.BLOCK) ? [token.ctx] : [Context.BLOCK, Context.INLINE]
-			))
+			for (const ctx of routes(token.ctx))
 			{
 				let node = this.__TABLE__[ctx];
 		
@@ -125,14 +137,7 @@ export default class Scanner
 
 	public scan(data: string)
 	{
-		const [sigma, buffer] =
-		[
-			[] as (string | Token)[], [] as string[],
-		];
-		let [ctx, node, depth, escape] =
-		[
-			Context.BLOCK, this.__TABLE__[Context.BLOCK], 0, false,
-		];
+		const [main, buffer] = [[] as (string | Token)[], [] as string[]]; let [ctx, node, depth, escape] = [Context.BLOCK, this.__TABLE__[Context.BLOCK], 0, false];
 
 		const handle = (char: string) =>
 		{
@@ -152,12 +157,12 @@ export default class Scanner
 				//
 				if (depth < buffer.length)
 				{
-					sigma.push(buffer.join("").slice(0, - depth));
+					main.push(buffer.join("").slice(0, - depth));
 				}
 				//
 				// <token/build>
 				//
-				sigma.push(token);
+				main.push(token);
 				//
 				// <state/reset>
 				//
@@ -238,7 +243,7 @@ export default class Scanner
 							(to)
 							buffer=["*", "<CHARACTER>"]
 							*/
-							sigma.push(buffer.splice(0, buffer.length - depth - 1).join(""));
+							main.push(buffer.splice(0, buffer.length - depth - 1).join(""));
 						}
 						/*
 						e.g. token=<ITALIC { grammar: "*" }>, depth=1
@@ -254,7 +259,7 @@ export default class Scanner
 					//
 					// <token/build>
 					//
-					sigma.push(token);
+					main.push(token);
 				}
 				else
 				{
@@ -281,9 +286,9 @@ export default class Scanner
 		//
 		if (0 < buffer.length)
 		{
-			sigma.push(buffer.join(""));
+			main.push(buffer.join(""));
 		}
 		
-		return sigma;
+		return main;
 	}
 }

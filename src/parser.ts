@@ -2,9 +2,9 @@ import Scanner, { Token } from "./scanner";
 
 export abstract class AST
 {
-	public readonly children: (string | AST)[];
+	public readonly children: (AST | string)[];
 
-	constructor(...children: AST["children"])
+	constructor(...children: typeof this.children)
 	{
 		this.children = children;
 	}
@@ -32,7 +32,7 @@ export default class Parser
 		// TODO: none
 	}
 
-	public parse(data: typeof Parser.prototype.data)
+	public parse(data: typeof this.data)
 	{
 		const root = new (class ROOT extends AST
 		{
