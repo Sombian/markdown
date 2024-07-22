@@ -164,6 +164,34 @@ export default Object.freeze([
 	//
 	function recursive({ peek, next, until }): AST
 	{
+		function comment()
+		{
+			switch (peek())
+			{
+				case T.COMMENT_L:
+				{
+					next();
+			
+					comment:
+					while (true)
+					{
+						switch (next())
+						{
+							case null:
+							{
+								throw "EOF";
+							}
+							case T.COMMENT_R:
+							{
+								break comment;
+							}
+						}
+					}
+					break;
+				}
+			}
+			return peek();
+		}
 		function core()
 		{
 			switch (peek())
@@ -193,33 +221,12 @@ export default Object.freeze([
 					}
 					return recursive({ peek, next, until: [] });
 				}
-				case T.COMMENT_L:
-				{
-					next();
-		
-					comment:
-					while (true)
-					{
-						switch (next())
-						{
-							case null:
-							{
-								throw "EOF";
-							}
-							case T.COMMENT_R:
-							{
-								break comment;
-							}
-						}
-					}
-					return recursive({ peek, next, until: [] });
-				}
 			}
 		}
 
 		function block()
 		{
-			switch (peek())
+			switch (comment())
 			{
 				case T.H1:
 				{
@@ -258,7 +265,7 @@ export default Object.freeze([
 		{
 			const root = (() =>
 			{
-				switch (peek())
+				switch (comment())
 				{
 					case T.BQ: { next(); return new HTML.BQ(); }
 					case T.OL: { next(); return new HTML.OL(); }
@@ -274,7 +281,7 @@ export default Object.freeze([
 				stack:
 				while (true)
 				{
-					switch (peek())
+					switch (comment())
 					{
 						case null:
 						{
@@ -457,7 +464,7 @@ export default Object.freeze([
 				style:
 				while (true)
 				{
-					const token = peek(); if (until.includes(peek() as never)) break style;
+					const token = comment(); if (until.includes(token as never)) break style;
 
 					switch (token)
 					{
@@ -494,7 +501,7 @@ export default Object.freeze([
 			inline:
 			while (true)
 			{
-				const token = peek(); if (until.includes(token as never)) break inline;
+				const token = comment(); if (until.includes(token as never)) break inline;
 				
 				examine:
 				switch (token)
