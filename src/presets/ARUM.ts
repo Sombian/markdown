@@ -272,27 +272,28 @@ export default Object.freeze([
 					case T.OL: { next(); return new HTML.OL(); }
 					case T.UL: { next(); return new HTML.UL(); }
 				}
+
 			})
 			();
 
 			if (root)
 			{
-				let [node, list] = [root as null | AST, root !instanceof HTML.BQ];
+				let [node, list] = [root as null | AST, !(root instanceof HTML.BQ)];
 
 				stack:
 				while (true)
 				{
-					switch (scan())
+					const token = scan();
+
+					switch (token)
 					{
 						case null:
-						{
-							break stack;
-						}
 						case T.BREAK:
 						{
 							if (node === null) break stack;
 
 							next();
+
 							node = null;
 							continue stack;
 						}
@@ -300,133 +301,67 @@ export default Object.freeze([
 						case T.INDENT_2S:
 						case T.INDENT_4S:
 						{
-							indent:
-							while (true)
-							{
-								const ref = node?.children.at(-1) ?? root;
-								
-								switch (scan())
-								{
-									// redundant lookup... im sorry :(
-									case T.INDENT_1T:
-									case T.INDENT_2S:
-									case T.INDENT_4S:
-									{		
-										switch (ref.constructor)
-										{
-											case HTML.OL:
-											case HTML.UL:
-											{
-												// pickup
-												next();
-												node = ref as AST;
-												continue indent;
-											}
-											default:
-											{
-												// indent level mismatch
-												if (!node) break stack;
-												node.children.push(inline()); break indent
-											}
-										}
-									}
-									default:
-									{
-										if (node === null) break stack;
 
-										break indent;
-									}
-								}
+							const ref = node?.children.at(-1) ?? root;
+
+							if (ref instanceof HTML.OL || ref instanceof HTML.UL)
+							{
+								next();
+								node = ref as AST;
+							}
+							else if (node)
+							{
+								node.children.push(inline());
+							}
+							else
+							{
+								break stack;
 							}
 							continue stack;
+
 						}
 						case T.BQ:
-						{
-							const ref = node?.children.at(-1) ?? root;
-								
-							if (ref instanceof HTML.BQ)
-							{
-								next();
-								// pickup
-								node = ref;
-							}
-							else if (ref === root)
-							{
-								// oops
-								break stack;
-							}
-							else if (node)
-							{
-								next();
-								// insert
-								node.children.push(node = new HTML.BQ());
-							}
-							else
-							{
-								break stack;
-							}
-							continue stack;
-						}
 						case T.OL:
-						{
-							const ref = node?.children.at(-1) ?? root;
-
-							list = true;
-								
-							if (ref instanceof HTML.OL)
-							{
-								next();
-								// pickup
-								node = ref;
-							}
-							else if (node)
-							{
-								next();
-								// insert
-								node.children.push(node = new HTML.OL());
-							}
-							else
-							{
-								break stack;
-							}
-							continue stack;
-						}
 						case T.UL:
 						{
 							const ref = node?.children.at(-1) ?? root;
 
-							list = true;
-								
-							if (ref instanceof HTML.UL)
+							const HTMLType = token === T.BQ ? HTML.BQ : token === T.OL ? HTML.OL : HTML.UL;
+
+							if (ref instanceof HTMLType)
 							{
 								next();
-								// pickup
 								node = ref;
 							}
 							else if (node)
 							{
 								next();
-								// insert
-								node.children.push(node = new HTML.UL());
+								node.children.push(node = new HTMLType());
 							}
 							else
 							{
 								break stack;
 							}
+							list = token !== T.BQ;
+
 							continue stack;
+
 						}
 						default:
 						{
 							if (node === null) break stack;
+
 							const ast = recursive({ peek, next, until: [] });
 							node.children.push(list ? new HTML.LI(...ast.children) : ast);
+
 							list = false;
+
 							continue stack;
 						}
 					}
 				}
-				return root;
 			}
+			return root;
 		}
 
 		function inline()
