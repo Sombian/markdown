@@ -195,7 +195,7 @@ export default Object.freeze([
 
 		function core()
 		{
-			switch (peek())
+			switch (scan())
 			{
 				case null:
 				{
@@ -205,7 +205,7 @@ export default Object.freeze([
 				{
 					next();
 		
-					const token = peek();
+					const token = scan();
 		
 					if (token instanceof impl)
 					{
@@ -305,7 +305,7 @@ export default Object.freeze([
 							{
 								const ref = node?.children.at(-1) ?? root;
 								
-								switch (peek())
+								switch (scan())
 								{
 									// redundant lookup... im sorry :(
 									case T.INDENT_1T:
