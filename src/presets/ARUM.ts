@@ -361,6 +361,10 @@ export default Object.freeze([
 								// insert
 								node.children.push(node = new HTML.BQ());
 							}
+							else
+							{
+								break stack;
+							}
 							continue stack;
 						}
 						case T.OL:
@@ -381,6 +385,10 @@ export default Object.freeze([
 								// insert
 								node.children.push(node = new HTML.OL());
 							}
+							else
+							{
+								break stack;
+							}
 							continue stack;
 						}
 						case T.UL:
@@ -395,16 +403,15 @@ export default Object.freeze([
 								// pickup
 								node = ref;
 							}
-							else if (ref === root)
-							{
-								// oops
-								break stack;
-							}
 							else if (node)
 							{
 								next();
 								// insert
 								node.children.push(node = new HTML.UL());
+							}
+							else
+							{
+								break stack;
 							}
 							continue stack;
 						}
