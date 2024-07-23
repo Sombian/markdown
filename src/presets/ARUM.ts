@@ -164,7 +164,7 @@ export default Object.freeze([
 	//
 	function recursive({ peek, next, until }): AST
 	{
-		function comment()
+		function scan()
 		{
 			switch (peek())
 			{
@@ -192,6 +192,7 @@ export default Object.freeze([
 			}
 			return peek();
 		}
+
 		function core()
 		{
 			switch (peek())
@@ -226,7 +227,7 @@ export default Object.freeze([
 
 		function block()
 		{
-			switch (comment())
+			switch (scan())
 			{
 				case T.H1:
 				{
@@ -265,7 +266,7 @@ export default Object.freeze([
 		{
 			const root = (() =>
 			{
-				switch (comment())
+				switch (scan())
 				{
 					case T.BQ: { next(); return new HTML.BQ(); }
 					case T.OL: { next(); return new HTML.OL(); }
@@ -276,12 +277,12 @@ export default Object.freeze([
 
 			if (root)
 			{
-				let node: null | AST = root; let is_list = !(root instanceof HTML.BQ);
+				let [node, list] = [root as null | AST, root !instanceof HTML.BQ];
 
 				stack:
 				while (true)
 				{
-					switch (comment())
+					switch (scan())
 					{
 						case null:
 						{
@@ -289,45 +290,10 @@ export default Object.freeze([
 						}
 						case T.BREAK:
 						{
+							if (node === null) break stack;
+
 							next();
-							// reset
-							if (node)
-							{
-								node = null; continue stack;
-							}
-							else
-							{
-								break stack;
-							}
-						}
-						case T.BQ:
-						{
-							const ref = node?.children.at(-1) ?? root;
-							
-							if (ref instanceof HTML.BQ)
-							{
-								next();
-								// pickup
-								node = ref;
-							}
-							else if (ref === root)
-							{
-								// oops
-								break stack;
-							}
-							else if (node && 0 < node.children.length)
-							{
-								next();
-								// insert
-								// node.children.push(node = new HTML.BQ(inline()));
-								node.children.push(node = new HTML.BQ());
-							}
-							else
-							{
-								// // indent level mistmatch
-								// ref.children.push(inline());
-								// node = null;
-							}
+							node = null;
 							continue stack;
 						}
 						case T.INDENT_1T:
@@ -351,102 +317,103 @@ export default Object.freeze([
 											case HTML.OL:
 											case HTML.UL:
 											{
-												next();
 												// pickup
+												next();
 												node = ref as AST;
 												continue indent;
 											}
 											default:
 											{
 												// indent level mismatch
-												if (node) {node.children.push(inline());  break indent;} else break stack;
+												if (!node) break stack;
+												node.children.push(inline()); break indent
 											}
 										}
 									}
 									default:
 									{
-										if (node) break indent; else break stack;
+										if (node === null) break stack;
+
+										break indent;
 									}
 								}
 							}
 							continue stack;
 						}
-						case T.OL:
+						case T.BQ:
 						{
 							const ref = node?.children.at(-1) ?? root;
-							
-							if (ref instanceof HTML.OL)
+								
+							if (ref instanceof HTML.BQ)
 							{
 								next();
 								// pickup
 								node = ref;
-								is_list = true;
-							}
-							else if (node)
-							{
-								next();
-								// insert
-								node.children.push(node = new HTML.OL());
-								is_list = true;
-							}
-							else
-							{
-								// // indent level mistmatch
-								// ref.children.push(new HTML.LI(...inline().children));
-								// node = null;
-								break stack;
-							}
-							continue stack;
-						}
-						case T.UL:
-						{
-							const ref = node?.children.at(-1) ?? root;
-							
-							if (ref instanceof HTML.UL)
-							{
-								next();
-								// pickup
-								node = ref;
-								is_list = true;
 							}
 							else if (ref === root)
 							{
 								// oops
 								break stack;
 							}
-							else if (node /* && 0 < node.children.length */)
+							else if (node)
+							{
+								next();
+								// insert
+								node.children.push(node = new HTML.BQ());
+							}
+							continue stack;
+						}
+						case T.OL:
+						{
+							const ref = node?.children.at(-1) ?? root;
+
+							list = true;
+								
+							if (ref instanceof HTML.OL)
+							{
+								next();
+								// pickup
+								node = ref;
+							}
+							else if (node)
+							{
+								next();
+								// insert
+								node.children.push(node = new HTML.OL());
+							}
+							continue stack;
+						}
+						case T.UL:
+						{
+							const ref = node?.children.at(-1) ?? root;
+
+							list = true;
+								
+							if (ref instanceof HTML.UL)
+							{
+								next();
+								// pickup
+								node = ref;
+							}
+							else if (ref === root)
+							{
+								// oops
+								break stack;
+							}
+							else if (node)
 							{
 								next();
 								// insert
 								node.children.push(node = new HTML.UL());
-								is_list = true;
-							}
-							else
-							{
-								// // indent level mistmatch
-								// ref.children.push(new HTML.LI(...inline().children));
-								// node = null;
 							}
 							continue stack;
 						}
 						default:
 						{
-							if (node === null)
-							{
-								break stack;
-							}
-							
+							if (node === null) break stack;
 							const ast = recursive({ peek, next, until: [] });
-
-							if (is_list)
-							{
-								node.children.push(new HTML.LI(...ast.children));
-							}
-							else
-							{
-								node.children.push(ast);
-							}
-							is_list = false;
+							node.children.push(list ? new HTML.LI(...ast.children) : ast);
+							list = false;
 							continue stack;
 						}
 					}
@@ -464,7 +431,7 @@ export default Object.freeze([
 				style:
 				while (true)
 				{
-					const token = comment(); if (until.includes(token as never)) break style;
+					const token = scan(); if (until.includes(token as never)) break style;
 
 					switch (token)
 					{
@@ -501,7 +468,7 @@ export default Object.freeze([
 			inline:
 			while (true)
 			{
-				const token = comment(); if (until.includes(token as never)) break inline;
+				const token = scan(); if (until.includes(token as never)) break inline;
 				
 				examine:
 				switch (token)
