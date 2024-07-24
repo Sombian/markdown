@@ -23,7 +23,7 @@ this project is under heavy development and not yet suitable for production use.
 ### TODO
 
 - [ ] html ctx
-- [ ] sanitize
+- [ ] html sanitize
 
 ### Syntax
 
@@ -72,7 +72,7 @@ this project is under heavy development and not yet suitable for production use.
 ###### Heading 2
 
 ```
-# hello world
+## hello world
 ```
 ->
 ```ts
@@ -83,13 +83,78 @@ this project is under heavy development and not yet suitable for production use.
 <article class="md"><h2>hello world</h2></article>
 ```
 
-- [x] H1
-- [x] H2
-- [x] H3
-- [x] H4
-- [x] H5
-- [x] H6
-- [x] HR
+###### Heading 3
+
+```
+### hello world
+```
+->
+```ts
+["H3", "hello", "SPACE", "world", "BREAK"]
+```
+->
+```html
+<article class="md"><h3>hello world</h3></article>
+```
+
+###### Heading 4
+
+```
+#### hello world
+```
+->
+```ts
+["H4", "hello", "SPACE", "world", "BREAK"]
+```
+->
+```html
+<article class="md"><h4>hello world</h4></article>
+```
+
+###### Heading 5
+
+```
+##### hello world
+```
+->
+```ts
+["H5", "hello", "SPACE", "world", "BREAK"]
+```
+->
+```html
+<article class="md"><h5>hello world</h5></article>
+```
+
+###### Heading 6
+
+```
+###### hello world
+```
+->
+```ts
+["H6", "hello", "SPACE", "world", "BREAK"]
+```
+->
+```html
+<article class="md"><h6>hello world</h6></article>
+```
+
+###### Horizontal Rule
+
+```
+___
+---
+===
+```
+->
+```ts
+["HR_1", "HR_2", "HR_3"]
+```
+->
+```html
+<article class="md"><hr/><hr/><hr/></article>
+```
+
 - [x] BQ
 - [x] OL
 - [x] UL
