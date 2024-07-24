@@ -272,7 +272,6 @@ export default Object.freeze([
 					case T.OL: { next(); return new HTML.OL(); }
 					case T.UL: { next(); return new HTML.UL(); }
 				}
-
 			})
 			();
 
@@ -301,7 +300,6 @@ export default Object.freeze([
 						case T.INDENT_2S:
 						case T.INDENT_4S:
 						{
-
 							const ref = node?.children.at(-1) ?? root;
 
 							if (ref instanceof HTML.OL || ref instanceof HTML.UL)
@@ -320,9 +318,13 @@ export default Object.freeze([
 							continue stack;
 
 						}
-						case T.BQ:
 						case T.OL:
 						case T.UL:
+						{
+							list = true;
+						}
+						// eslint-disable-next-line no-fallthrough
+						case T.BQ:
 						{
 							const ref = node?.children.at(-1) ?? root;
 
@@ -342,8 +344,6 @@ export default Object.freeze([
 							{
 								break stack;
 							}
-							list = token !== T.BQ;
-
 							continue stack;
 
 						}

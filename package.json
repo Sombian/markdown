@@ -1,1 +1,15 @@
-{ "type": "module", "dependencies": { "@types/bun": "^1.1.6" }, "devDependencies": { "eslint": "^9.7.0", "typescript": "^5.5.3", "typescript-eslint": "^7.16.0" } }
+{
+	"name": "arumdown",
+	"version": "1.0.0",
+	"devDependencies":
+	{
+		"@types/node": "^20.14.12",
+		"@types/bun": "^1.1.6",
+		"eslint": "^9.7.0",
+		"typescript": "^5.5.4",
+		"typescript-eslint": "^7.17.0"
+	},
+	"type": "module",
+	"author": "Sombian",
+	"keywords": ["markdown"]
+}
