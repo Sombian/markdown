@@ -4,7 +4,7 @@
 
 please note that *Arumdown* does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet.
 
-one of the key aspects of this project is its simplicity and high performance. it utilizes lookup instead of lookahead whenever possible while traversing through.
+one of the key aspects of this project is its simplicity and high performance, with the overall time complexity of each implementation being O(n).
 
 # Usage
 
