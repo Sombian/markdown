@@ -1,0 +1,28 @@
+{
+	"compilerOptions":
+	{
+		//
+		// alias
+		//
+		"paths":
+		{
+			"@/*": ["./src/*"]
+		},
+		//
+		// core
+		//
+		"jsx": "react-jsx", "target": "esnext", "module": "esnext",
+		//
+		// miscs
+		//
+		"strict": true,
+		"sourceMap": true,
+		"skipLibCheck": true,
+		"noImplicitAny": true,
+		"removeComments": true,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+	},
+	"exclude": ["node_modules"]
+}

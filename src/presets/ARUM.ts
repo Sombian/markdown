@@ -264,20 +264,22 @@ export default Object.freeze([
 
 		function stack()
 		{
+			let is_ol_or_ul = false;
+
 			const root = (() =>
 			{
 				switch (scan())
 				{
 					case T.BQ: { next(); return new HTML.BQ(); }
-					case T.OL: { next(); return new HTML.OL(); }
-					case T.UL: { next(); return new HTML.UL(); }
+					case T.OL: { next(); is_ol_or_ul = true; return new HTML.OL(); }
+					case T.UL: { next(); is_ol_or_ul = true; return new HTML.UL(); }
 				}
 			})
 			();
 
 			if (root)
 			{
-				let [node, list] = [root as null | AST, !(root instanceof HTML.BQ)];
+				let node: null | AST = root;
 
 				stack:
 				while (true)
@@ -289,11 +291,13 @@ export default Object.freeze([
 						case null:
 						case T.BREAK:
 						{
+							// if newline/EOF is found before stack
 							if (node === null) break stack;
 
 							next();
-
+							// breakout
 							node = null;
+
 							continue stack;
 						}
 						case T.INDENT_1T:
@@ -302,43 +306,65 @@ export default Object.freeze([
 						{
 							const ref = node?.children.at(-1) ?? root;
 
-							if (ref instanceof HTML.OL || ref instanceof HTML.UL)
+							switch (ref.constructor)
 							{
-								next();
-								node = ref as AST;
-							}
-							else if (node)
-							{
-								node.children.push(inline());
-							}
-							else
-							{
-								break stack;
+								case HTML.OL:
+								case HTML.UL:
+								{
+									next();
+									// pickup
+									node = ref as AST;
+								}
+								default:
+								{
+									if (node)
+									{
+										// treat as inline
+										node.children.push(inline());
+									}
+									else
+									{
+										break stack;
+									}
+								}
 							}
 							continue stack;
-
 						}
 						case T.OL:
 						case T.UL:
 						{
-							list = true;
+							// update state
+							is_ol_or_ul = true;
 						}
 						// eslint-disable-next-line no-fallthrough
 						case T.BQ:
 						{
 							const ref = node?.children.at(-1) ?? root;
 
-							const HTMLType = token === T.BQ ? HTML.BQ : token === T.OL ? HTML.OL : HTML.UL;
+							const ast = (() =>
+							{
+								switch (token)
+								{
+									case T.BQ: { return HTML.BQ; }
+									case T.OL: { return HTML.OL; }
+									case T.UL: { return HTML.UL; }
+									// how..?
+									default: throw new Error();
+								}
+							})
+							();
 
-							if (ref instanceof HTMLType)
+							if (ref instanceof ast)
 							{
 								next();
+								// pickup
 								node = ref;
 							}
 							else if (node)
 							{
 								next();
-								node.children.push(node = new HTMLType());
+								// insert and pickup
+								node.children.push(node = new ast());
 							}
 							else
 							{
@@ -349,12 +375,21 @@ export default Object.freeze([
 						}
 						default:
 						{
+							// if newline/EOF is found before stack
 							if (node === null) break stack;
 
 							const ast = recursive({ peek, next, until: [] });
-							node.children.push(list ? new HTML.LI(...ast.children) : ast);
 
-							list = false;
+							if (!is_ol_or_ul)
+							{
+								node.children.push(ast);
+							}
+							else
+							{
+								node.children.push(new HTML.LI(...ast.children));
+							}
+							// reset state
+							is_ol_or_ul = false;
 
 							continue stack;
 						}

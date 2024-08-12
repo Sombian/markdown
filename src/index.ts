@@ -7,8 +7,8 @@ import Scanner from "./scanner";
 
 export class Markdown
 {
-	public readonly scanner: Scanner;
-	public readonly parser: Parser;
+	private readonly scanner: Scanner;
+	private readonly parser: Parser;
 
 	constructor
 	(

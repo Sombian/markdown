@@ -6,9 +6,9 @@ interface Route
 
 export enum Context
 {
-	// HTML = "html",
-	BLOCK = "block",
-	INLINE = "inline",
+	// HTML,
+	BLOCK,
+	INLINE,
 }
 
 export abstract class Token
@@ -71,7 +71,7 @@ export default class Scanner
 			{
 				case "all":
 				{
-					return Object.values(Context);
+					return Object.values(Context) as Context[];
 				}
 				case Context.BLOCK:
 				{

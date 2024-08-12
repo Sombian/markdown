@@ -19,12 +19,12 @@ export abstract class AST
 
 export default class Parser
 {
-	private data: ReturnType<typeof Scanner.prototype.scan>; private i: number;
+	private data: ReturnType<Scanner["scan"]> = []; private i: number = 0;
 
 	constructor(private readonly handle: ({ peek, next, until }:
 	{
-		readonly peek: typeof Parser.prototype.peek,
-		readonly next: typeof Parser.prototype.next,
+		readonly peek: Parser["peek"],
+		readonly next: Parser["next"],
 		readonly until: Token[],
 	}
 	) => AST)
@@ -34,7 +34,7 @@ export default class Parser
 
 	public parse(data: typeof this.data)
 	{
-		const root = new (class ROOT extends AST
+		this.data = data; this.i = 0; const root = new (class ROOT extends AST
 		{
 			override render()
 			{
@@ -42,10 +42,6 @@ export default class Parser
 			}
 		})
 		();
-		//
-		// assign
-		//
-		[this.data, this.i] = [data, 0];
 		//
 		// iterate
 		//
@@ -62,7 +58,11 @@ export default class Parser
 			}
 			catch (error)
 			{
-				if (error !== "EOF") console.debug(error);
+				if (error === "EOF") continue;
+
+				console.debug(error);
+
+				break;
 			}
 		}
 		return root;

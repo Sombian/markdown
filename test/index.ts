@@ -2,7 +2,10 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
-import { Markdown, Preset } from "../src";
+import { Preset } from "@/index";
+
+import Parser from "@/parser";
+import Scanner from "@/scanner";
 
 const [input, output] = [path.join(import.meta.dirname, "in.txt"), path.join(import.meta.dirname, "out.html")];
 
@@ -23,17 +26,15 @@ function main()
 		return value;
 	}
 
-	const markdown = new Markdown(...Preset.ARUM);
-
 	Bun.file(input).text().then(async (text) =>
 	{
 		process.stdout.write("\x1Bc");
 
-		const tokens = benchmark("Scanner", () => markdown.scanner.scan(text));
+		const tokens = benchmark("Scanner", () => new Scanner(Preset.ARUM[0]).scan(text));
 	
 		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 	
-		const AST = benchmark("Parser", () => markdown.parser.parse(tokens));
+		const AST = benchmark("Parser", () => new Parser(Preset.ARUM[1]).parse(tokens));
 		
 		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
 	
