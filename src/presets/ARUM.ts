@@ -306,27 +306,20 @@ export default Object.freeze([
 						{
 							const ref = node?.children.at(-1) ?? root;
 
-							switch (ref.constructor)
+							if (ref !instanceof HTML.BQ)
 							{
-								case HTML.OL:
-								case HTML.UL:
-								{
-									next();
-									// pickup
-									node = ref as AST;
-								}
-								default:
-								{
-									if (node)
-									{
-										// treat as inline
-										node.children.push(inline());
-									}
-									else
-									{
-										break stack;
-									}
-								}
+								next();
+								// pickup
+								node = ref as AST;
+							}
+							else if (node)
+							{
+								// treat as inline
+								node.children.push(inline());
+							}
+							else
+							{
+								break stack;
 							}
 							continue stack;
 						}

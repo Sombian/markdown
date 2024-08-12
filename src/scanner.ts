@@ -4,7 +4,7 @@ interface Route
 	[key: string]: Route | Token; default?: Token;
 }
 
-export enum Context
+export const enum Context
 {
 	// HTML,
 	BLOCK,
@@ -65,13 +65,13 @@ export default class Scanner
 			}
 		}
 		*/
-		function routes(ctx: typeof Token.prototype.ctx)
+		function routes(ctx: Token["ctx"])
 		{
 			switch (ctx)
 			{
 				case "all":
 				{
-					return Object.values(Context) as Context[];
+					return [Context.BLOCK, Context.INLINE];
 				}
 				case Context.BLOCK:
 				{
@@ -100,15 +100,18 @@ export default class Scanner
 						{
 							if (node[char] instanceof Token)
 							{
+								// merge branch
 								node = (node[char] = { default: node[char] });
 							}
 							else
 							{
+								// pickup branch
 								node = node[char];
 							}
 						}
 						else
 						{
+							// create branch
 							node = (node[char] = {});
 						}
 					}
@@ -122,11 +125,13 @@ export default class Scanner
 							}
 							else
 							{
+								// merge branch
 								node[char].default = token;
 							}
 						}
 						else
 						{
+							// create end-point
 							node[char] = token;
 						}
 					}
