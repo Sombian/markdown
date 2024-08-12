@@ -332,6 +332,7 @@ export default Object.freeze([
 						// eslint-disable-next-line no-fallthrough
 						case T.BQ:
 						{
+							// @ts-expect-error why..?
 							const ref = node?.children.at(-1) ?? root;
 
 							const ast = (() =>
