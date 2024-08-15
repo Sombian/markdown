@@ -1,4 +1,5 @@
-import { AST } from "../../parser";
+import AST from "@/models/AST";
+
 
 export class ITALIC extends AST
 {

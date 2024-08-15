@@ -1,117 +1,82 @@
-interface Route
-{
-	// @ts-expect-error [key: "default"] is used for fallback
-	[key: string]: Route | Token; default?: Token;
-}
+import Level from "./enums/Level";
 
-export const enum Context
-{
-	// HTML,
-	BLOCK,
-	INLINE,
-}
+import Token from "./models/Token";
 
-export abstract class Token
-{
-	constructor(public readonly ctx: "all" | Context, public readonly code: string)
-	{
-		// TODO: none
-	}
-
-	public abstract get next(): Context;
-}
+type Stream = (Token | string)[];
 
 export default class Scanner
 {
-	private readonly __TABLE__: Record<Context, Route> = {
+	private readonly __TABLE__: Record<Level, Route> = {
 		// auto-generate
-		[Context.BLOCK]: {},
+		[Level.BLOCK]: {},
 		// auto-generate
-		[Context.INLINE]: {},
+		[Level.INLINE]: {},
 	};
+	private state: State;
+	private buffer: Buffer;
+	private stream: Stream;
 
 	constructor(data: Readonly<Token[]>)
 	{
-		/*
-		e.g.
-		// '<='
-		{
-			"<":
-			{
-				"=": <token> // less than or equal to, ≤
-			}
-		}
-
-		// '<=='
-		{
-			"<":
-			{
-				"=":
-				{
-					"=": <token> // fat arrow left, ⇐
-				}
-			}
-		}
-
-		// <merge>
-		{
-			"<":
-			{
-				"=":
-				{
-					"=": <token> // fat arrow left, ⇐
-					default: <token> // less than or equal to, ≤
-				}
-			}
-		}
-		*/
-		function routes(ctx: Token["ctx"])
+		function routes(ctx: typeof Token.prototype.level)
 		{
 			switch (ctx)
 			{
 				case "all":
 				{
-					return [Context.BLOCK, Context.INLINE];
+					return [Level.BLOCK, Level.INLINE];
 				}
-				case Context.BLOCK:
+				case Level.BLOCK:
 				{
-					return [Context.BLOCK];
+					return [Level.BLOCK];
 				}
-				case Context.INLINE:
+				case Level.INLINE:
 				{
-					return [Context.BLOCK, Context.INLINE];
+					return [Level.BLOCK, Level.INLINE];
 				}
 			}
 		}
 
+		//----------------------------------------------//
+		//                                              //
+		// e.g.                                         //
+		//                                              //
+		// (A)                                          //
+		// { "<": { "=": "≤" } }                        //
+		//                                              //
+		// (B)                                          //
+		// { "<": { "=": { "=": "⇐" } } }               //
+		//                                              //
+		// (MERGE)                                      //
+		// { "<": { "=": { "=": "⇐", default: "≤" } } } //
+		//                                              //
+		//----------------------------------------------//
+
 		for (const token of data)
 		{
-			for (const ctx of routes(token.ctx))
+			for (const ctx of routes(token.level))
 			{
 				let node = this.__TABLE__[ctx];
 		
-				for (let i = 0; i < token.code.length; i++)
+				for (let i = 0; i < token.syntax.length; i++)
 				{
-					const char = token.code[i];
+					const char = token.syntax[i];
 			
-					if (i + 1 < token.code.length)
+					if (i + 1 < token.syntax.length)
 					{
 						if (char in node)
 						{
 							if (node[char] instanceof Token)
 							{
-								// merge branch
 								node = (node[char] = { default: node[char] });
 							}
 							else
 							{
-								// pickup branch
 								node = node[char];
 							}
 						}
 						else
 						{
-							// create branch
 							node = (node[char] = {});
 						}
 					}
@@ -121,179 +86,251 @@ export default class Scanner
 						{
 							if (node[char] instanceof Token)
 							{
-								throw new Error(`Token [${node[char]}] and [${token}] has exact code`)
+								throw new Error(`Token [${node[char]}] and [${token}] has exact syntax`)
 							}
 							else
 							{
-								// merge branch
 								node[char].default = token;
 							}
 						}
 						else
 						{
-							// create end-point
 							node[char] = token;
 						}
 					}
 				}
 			}
 		}
+		// init...
+		this.state = null as unknown as State;
+		this.buffer = null as unknown as Buffer;
+		this.stream = null as unknown as Stream;
 	}
 
 	public scan(data: string)
 	{
-		const [main, buffer] = [[] as (string | Token)[], [] as string[]]; let [ctx, node, depth, escape] = [Context.BLOCK, this.__TABLE__[Context.BLOCK], 0, false];
-
-		const handle = (char: string) =>
-		{
-			if (node === null) throw new Error();
-			//
-			// <into the deep>
-			//
-			depth++;
-			//
-			// <examine token>
-			//
-			if (node[char] instanceof Token)
-			{
-				const token = node[char];
-				//
-				// <buffer/flush>
-				//
-				if (depth < buffer.length)
-				{
-					main.push(buffer.join("").slice(0, - depth));
-				}
-				//
-				// <token/build>
-				//
-				main.push(token);
-				//
-				// <state/reset>
-				//
-				[node, depth, buffer.length] = [this.__TABLE__[ctx = token.next], 0, 0];
-			}
-			else
-			{
-				//
-				// <branch/delve>
-				//
-				node = node[char];
-			}
-		}
+		// init...
+		[this.state, this.buffer, this.stream] = [{ node: this.__TABLE__[Level.BLOCK], depth: 0, escape: false }, new Buffer(data.length), []];
 
 		main:
 		for (const char of data.replace(/\r\n?/g, "\n"))
 		{
-			//
-			// <escape>
-			//
-			if (!escape && char === "\\")
+			//-------------------//
+			//                   //
+			// ESCAPE & UNESCAPE //
+			//                   //
+			//-------------------//
+
+			// escape sequence
+			if (!this.state.escape && char === "\\")
 			{
-				//
-				// <state/reset>
-				//
-				[node, depth, escape] = [this.__TABLE__[ctx = Context.INLINE], 0, true];
+				// state::update
+				this.state = { node: this.__TABLE__[Level.INLINE], depth: 0, escape: true };
 
 				continue main;
 			}
-			//
-			// <buffer/consume>
-			//
-			buffer.push(char);
-			//
-			// <unescape>
-			//
-			if (escape)
+			// buffer::build
+			this.buffer.write(char);
+
+			// unescape sequence
+			if (this.state.escape)
 			{
-				//
-				// <state/reset>
-				//
-				[node, depth, escape] = [this.__TABLE__[ctx = Context.INLINE], 0, false];
+				// state::update
+				this.state = { node: this.__TABLE__[Level.INLINE], depth: 0, escape: false };
 
 				continue main;
 			}
-			//
-			// <branch/delve>
-			//
-			if (char in node)
+
+			//----------//
+			//          //
+			// SCANNING //
+			//          //
+			//----------//
+
+			// delve branch
+			if (char in this.state.node)
 			{
-				handle(char);
+				this.build(char);
 			}
 			else
 			{
-				if (node.default)
-				{
-					const token = node.default;
-					//
-					// <ctx/switch>
-					//
-					ctx = token.next;
-					//
-					// <buffer/manipulate>
-					//
-					if (depth < buffer.length - 0)
-					{
-						//
-						// <buffer/manipulate>
-						//
-						if (depth < buffer.length - 1)
-						{
-							/*
-							e.g. token=<ITALIC { grammar: "*" }>, depth=1
+				let level: Nullable<Level> = null;
 
-							(from)
-							buffer=["<char>", "<char>", "<char>", "*", "<CHARACTER>"]
-							->
-							(to)
-							buffer=["*", "<CHARACTER>"]
-							*/
-							main.push(buffer.splice(0, buffer.length - depth - 1).join(""));
+				// handle fallback
+				if (this.state.node.default)
+				{
+					const token = this.state.node.default;
+
+					level = token.next;
+
+					if (this.state.depth < this.buffer.size - 0)
+					{
+						if (this.state.depth < this.buffer.size - 1)
+						{
+							//---------------------------------------------------------//
+							//                                                         //
+							// e.g. token=(ITALIC { syntax: "*" }), depth=1            //
+							//                                                         //
+							// (BEFORE)                                                //
+							// buffer -> ["<char>", "<char>", "<char>", "*", "<char>"] //
+							//                                                         //
+							// (AFTER)                                                 //
+							// buffer -> ["*", "<char>"]                               //
+							//                                                         //
+							//---------------------------------------------------------//
+
+							// stream::build & buffer::modify
+							this.stream.push(this.buffer.splice(0, this.buffer.size - this.state.depth - 1));
 						}
-						/*
-						e.g. token=<ITALIC { grammar: "*" }>, depth=1
-					
-						(from)
-						buffer=["*", "<CHARACTER>"]
-						->
-						(to)
-						buffer=["<CHARACTER>"]
-						*/
-						buffer.splice(0, depth);
+						//----------------------------------------------//
+						//                                              //
+						// e.g. token=(ITALIC { syntax: "*" }), depth=1 //
+						//                                              //
+						// (BEFORE)                                     //
+						// buffer -> ["*", "<char>"]                    //
+						//                                              //
+						// (AFTER)                                      //
+						// buffer -> ["<char>"]                         //
+						//                                              //
+						//----------------------------------------------//
+
+						// buffer::modify
+						this.buffer.splice(0, this.state.depth);
 					}
-					//
-					// <token/build>
-					//
-					main.push(token);
+					// stream::build
+					this.stream.push(token);
 				}
-				else
+				// state::update
+				[this.state.node, this.state.depth] = [this.__TABLE__[level ?? Level.INLINE], 0];
+
+				// delve branch
+				if (char in this.state.node)
 				{
-					//
-					// <ctx/switch>
-					//
-					ctx = Context.INLINE;
-				}
-				//
-				// <state/reset>
-				//
-				[node, depth] = [this.__TABLE__[ctx], 0];
-				//
-				// <branch/delve>
-				//
-				if (char in node)
-				{
-					handle(char);
+					this.build(char);
 				}
 			}
 		}
-		//
-		// <buffer/flush>
-		//
-		if (0 < buffer.length)
+		// if buffer is not empty
+		if (0 < this.buffer.size)
 		{
-			main.push(buffer.join(""));
+			// stream::build
+			this.stream.push(this.buffer.toString());
 		}
-		
-		return main;
+		return this.stream;
 	}
+
+	private build(char: string)
+	{
+		// state::update
+		this.state.depth++;
+
+		if (this.state.node[char] instanceof Token)
+		{
+			const token = this.state.node[char];
+
+			if (this.state.depth < this.buffer.size)
+			{
+				// stream::build && buffer::modify
+				this.stream.push(this.buffer.slice(0, this.buffer.size - this.state.depth));
+			}
+			// stream::build
+			this.stream.push(token);
+
+			// buffer::clear
+			this.buffer.clear();
+
+			// state::update
+			[this.state.node, this.state.depth] = [this.__TABLE__[token.next], 0];
+		}
+		// delve branch
+		else
+		{
+			// state::update
+			this.state.node = this.state.node[char];
+		}
+	}
+}
+
+interface State
+{
+	node: Route;
+	depth: number;
+	escape: boolean;
+}
+
+class Buffer
+{
+	private readonly u16a: Uint16Array; private i = 0;
+
+	constructor(capacity: number)
+	{
+		this.u16a = new Uint16Array(capacity);
+	}
+
+	public write(data: string)
+	{
+		if (this.u16a.length < this.i + data.length)
+		{
+			throw new Error("Buffer is full");
+		}
+		// append
+		this.u16a.set([...data].map((char) => char.charCodeAt(0)), this.i);
+		// offset
+		this.i += data.length;
+	}
+
+	public slice(start: number, count: number)
+	{
+		if (start < 0 || count < 0) throw new Error("Invalid Range");
+
+		const clamp = Math.min(start + count, this.i - 1);
+
+		const r1 = this.u16a.subarray(start, clamp);
+
+		return String.fromCharCode(...r1);
+	}
+
+	public splice(start: number, count: number)
+	{
+		if (start < 0 || count < 0) throw new Error("Invalid Range");
+
+		const clamp = Math.min(start + count, this.i - 1);
+
+		const [r1, r2] = [
+			this.u16a.subarray(start, clamp),
+			this.u16a.subarray(clamp, this.i),
+		];
+		// shift
+		this.u16a.set(r2, start);
+		// offset
+		this.i -= count;
+
+		return String.fromCharCode(...r1);
+	}
+
+	public clear()
+	{
+		this.i = 0;
+	}
+
+	public get size()
+	{
+		return this.i;
+	}
+
+	public get capacity()
+	{
+		return this.u16a.length;
+	}
+
+	public toString()
+	{
+		return String.fromCharCode(...this.u16a.subarray(0, this.i));
+	}
+}
+
+interface Route
+{
+	// @ts-expect-error [key: "default"] is used for fallback
+	[key: string]: Route | Token; default?: Token;
 }

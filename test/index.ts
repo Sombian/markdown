@@ -34,17 +34,17 @@ function main()
 	
 		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 	
-		const AST = benchmark("Parser", () => new Parser(Preset.ARUM[1]).parse(tokens));
+		// const AST = benchmark("Parser", () => new Parser(Preset.ARUM[1]).parse(tokens));
 		
-		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
+		// console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
 	
-		const HTML = benchmark("Render", () => AST.render());
+		// const HTML = benchmark("Render", () => AST.render());
 	
-		console.debug("\n", util.inspect(HTML, { depth: null, colors: true }), "\n");
+		// console.debug("\n", util.inspect(HTML, { depth: null, colors: true }), "\n");
 
-		const bytes = await Bun.write(output, HTML);
+		// const bytes = await Bun.write(output, HTML);
 
-		console.debug(`\x1b[4m${output}\x1b[0m ~ ${bytes}bytes`);
+		// console.debug(`\x1b[4m${output}\x1b[0m ~ ${bytes}bytes`);
 	});
 }
 

@@ -1,18 +1,25 @@
-import { Markdown } from ".."; import { Token, Context } from "../scanner"; import { AST } from "../parser"; import * as HTML from "../html";
+import { Markdown } from "..";
+
+import AST from "@/models/AST";
+import Token from "@/models/Token";
+
+import Level from "@/enums/Level";
+
+import * as HTML from "../blocks";
 
 abstract class impl extends Token
 {
 	override get next()
 	{
-		switch (this.code.at(-1))
+		switch (this.syntax.at(-1))
 		{
 			case "\n":
 			{
-				return Context.BLOCK;
+				return Level.BLOCK;
 			}
 			default:
 			{
-				return Context.INLINE;
+				return Level.INLINE;
 			}
 		}
 	}
@@ -33,25 +40,25 @@ const T = Object.freeze(
 	// block
 	//
 	H1: new (class H1 extends impl {})
-	(Context.BLOCK, "#".repeat(1) + "\u0020"),
+	(Level.BLOCK, "#".repeat(1) + "\u0020"),
 	H2: new (class H2 extends impl {})
-	(Context.BLOCK, "#".repeat(2) + "\u0020"),
+	(Level.BLOCK, "#".repeat(2) + "\u0020"),
 	H3: new (class H3 extends impl {})
-	(Context.BLOCK, "#".repeat(3) + "\u0020"),
+	(Level.BLOCK, "#".repeat(3) + "\u0020"),
 	H4: new (class H4 extends impl {})
-	(Context.BLOCK, "#".repeat(4) + "\u0020"),
+	(Level.BLOCK, "#".repeat(4) + "\u0020"),
 	H5: new (class H5 extends impl {})
-	(Context.BLOCK, "#".repeat(5) + "\u0020"),
+	(Level.BLOCK, "#".repeat(5) + "\u0020"),
 	H6: new (class H6 extends impl {})
-	(Context.BLOCK, "#".repeat(6) + "\u0020"),
+	(Level.BLOCK, "#".repeat(6) + "\u0020"),
 	CB: new (class CB extends impl {})
-	(Context.BLOCK, "```"),
+	(Level.BLOCK, "```"),
 	HR_1: new (class HR_1 extends impl {})
-	(Context.BLOCK, "___" + "\n"),
+	(Level.BLOCK, "___" + "\n"),
 	HR_2: new (class HR_2 extends impl {})
-	(Context.BLOCK, "---" + "\n"),
+	(Level.BLOCK, "---" + "\n"),
 	HR_3: new (class HR_3 extends impl {})
-	(Context.BLOCK, "===" + "\n"),
+	(Level.BLOCK, "===" + "\n"),
 	//
 	// stack
 	//
@@ -59,99 +66,99 @@ const T = Object.freeze(
 	{
 		override get next()
 		{
-			return Context.BLOCK;
+			return Level.BLOCK;
 		}
 	})
-	(Context.BLOCK, "> "),
+	(Level.BLOCK, "> "),
 	OL: new (class OL extends impl
 	{
 		override get next()
 		{
-			return Context.BLOCK;
+			return Level.BLOCK;
 		}
 	})
-	(Context.BLOCK, "- "),
+	(Level.BLOCK, "- "),
 	UL: new (class UL extends impl
 	{
 		override get next()
 		{
-			return Context.BLOCK;
+			return Level.BLOCK;
 		}
 	})
-	(Context.BLOCK, "~ "),
+	(Level.BLOCK, "~ "),
 	INDENT_1T: new (class INDENT_1T extends impl
 	{
 		override get next()
 		{
-			return Context.BLOCK;
+			return Level.BLOCK;
 		}
 	})
-	(Context.BLOCK, "\u0009".repeat(1)),
+	(Level.BLOCK, "\u0009".repeat(1)),
 	INDENT_2S: new (class INDENT_2S extends impl
 	{
 		override get next()
 		{
-			return Context.BLOCK;
+			return Level.BLOCK;
 		}
 	})
-	(Context.BLOCK, "\u0020".repeat(2)),
+	(Level.BLOCK, "\u0020".repeat(2)),
 	INDENT_4S: new (class INDENT_4S extends impl
 	{
 		override get next()
 		{
-			return Context.BLOCK;
+			return Level.BLOCK;
 		}
 	})
-	(Context.BLOCK, "\u0020".repeat(4)),
+	(Level.BLOCK, "\u0020".repeat(4)),
 	//
 	// inline
 	//
 	SPACE: new (class SPACE extends impl {})
-	(Context.INLINE, " "),
+	(Level.INLINE, " "),
 	CODE: new (class CODE extends impl {})
-	(Context.INLINE, "`"),
+	(Level.INLINE, "`"),
 	BOLD: new (class BOLD extends impl {})
-	(Context.INLINE, "**"),
+	(Level.INLINE, "**"),
 	ITALIC: new (class ITALIC extends impl {})
-	(Context.INLINE, "*"),
+	(Level.INLINE, "*"),
 	STRIKE: new (class STRIKE extends impl {})
-	(Context.INLINE, "~~"),
+	(Level.INLINE, "~~"),
 	UNDERLINE: new (class UNDERLINE extends impl {})
-	(Context.INLINE, "__"),
+	(Level.INLINE, "__"),
 	UNCHECKED_BOX: new (class UNCHECKED_BOX extends impl {})
-	(Context.INLINE, "[ ]"),
+	(Level.INLINE, "[ ]"),
 	CHECKED_BOX: new (class CHECKED_BOX extends impl {})
-	(Context.INLINE, "[x]"),
+	(Level.INLINE, "[x]"),
 	ARROW_ALL: new (class ARROW_ALL extends impl {})
-	(Context.INLINE, "<->"),
+	(Level.INLINE, "<->"),
 	ARROW_LEFT: new (class ARROW_LEFT extends impl {})
-	(Context.INLINE, "<-"),
+	(Level.INLINE, "<-"),
 	ARROW_RIGHT: new (class ARROW_RIGHT extends impl {})
-	(Context.INLINE, "->"),
+	(Level.INLINE, "->"),
 	FAT_ARROW_ALL: new (class FAT_ARROW_ALL extends impl {})
-	(Context.INLINE, "<=>"),
+	(Level.INLINE, "<=>"),
 	FAT_ARROW_LEFT: new (class FAT_ARROW_LEFT extends impl {})
-	(Context.INLINE, "<=="),
+	(Level.INLINE, "<=="),
 	FAT_ARROW_RIGHT: new (class FAT_ARROW_RIGHT extends impl {})
-	(Context.INLINE, "=>"),
+	(Level.INLINE, "=>"),
 	MATH_APX: new (class MATH_APX extends impl {})
-	(Context.INLINE, "~="),
+	(Level.INLINE, "~="),
 	MATH_NET: new (class MATH_NET extends impl {})
-	(Context.INLINE, "!="),
+	(Level.INLINE, "!="),
 	MATH_LTOET: new (class MATH_LTOET extends impl {})
-	(Context.INLINE, "<="),
+	(Level.INLINE, "<="),
 	MATH_GTOET: new (class MATH_GTOET extends impl {})
-	(Context.INLINE, ">="),
+	(Level.INLINE, ">="),
 	EXCLAMATION: new (class EXCLAMATION extends impl {})
-	(Context.INLINE, "!"),
+	(Level.INLINE, "!"),
 	BRACKET_L: new (class BRACKET_L extends impl {})
-	(Context.INLINE, "["),
+	(Level.INLINE, "["),
 	BRACKET_R: new (class BRACKET_R extends impl {})
-	(Context.INLINE, "]"),	
+	(Level.INLINE, "]"),	
 	PAREN_L: new (class PAREN_L extends impl {})
-	(Context.INLINE, "("),
+	(Level.INLINE, "("),
 	PAREN_R: new (class PAREN_R extends impl {})
-	(Context.INLINE, ")"),
+	(Level.INLINE, ")"),
 });
 
 export default Object.freeze([
@@ -215,7 +222,7 @@ export default Object.freeze([
 							return new HTML.BR();
 						}
 						// edge case - inline
-						if (token.ctx === Context.INLINE)
+						if (token.ctx === Level.INLINE)
 						{
 							return new HTML.BR();
 						}
@@ -259,138 +266,128 @@ export default Object.freeze([
 				{
 					next(); return new HTML.HR(/* leaf node */);
 				}
-			}
-		}
-
-		function stack()
-		{
-			let is_ol_or_ul = false;
-
-			const root = (() =>
-			{
-				switch (scan())
+				case T.BQ:
+				case T.OL:
+				case T.UL:
 				{
-					case T.BQ: { next(); return new HTML.BQ(); }
-					case T.OL: { next(); is_ol_or_ul = true; return new HTML.OL(); }
-					case T.UL: { next(); is_ol_or_ul = true; return new HTML.UL(); }
-				}
-			})
-			();
+					let LI = false;
 
-			if (root)
-			{
-				let node: null | AST = root;
-
-				stack:
-				while (true)
-				{
-					const token = scan();
-
-					switch (token)
+					const root = (() =>
 					{
-						case null:
-						case T.BREAK:
+						switch (scan())
 						{
-							// if newline/EOF is found before stack
-							if (node === null) break stack;
-
-							next();
-							// breakout
-							node = null;
-
-							continue stack;
+							case T.BQ: { next(); return new HTML.BQ(); }
+							case T.OL: { next(); LI = true; return new HTML.OL(); }
+							case T.UL: { next(); LI = true; return new HTML.UL(); }
 						}
-						case T.INDENT_1T:
-						case T.INDENT_2S:
-						case T.INDENT_4S:
+					})()!;
+		
+					let node: Nullable<AST> = root;
+		
+					stack:
+					while (true)
+					{
+						const token = scan();
+	
+						lookup:
+						switch (token)
 						{
-							const ref = node?.children.at(-1) ?? root;
-
-							if (ref !instanceof HTML.BQ)
+							case null:
+							case T.BREAK:
 							{
+								// if newline/EOF is found before stack
+								if (node === null) break stack;
+	
 								next();
-								// pickup
-								node = ref as AST;
+								// breakout
+								node = null;
+	
+								break lookup;
 							}
-							else if (node)
+							case T.INDENT_1T:
+							case T.INDENT_2S:
+							case T.INDENT_4S:
 							{
-								// treat as inline
-								node.children.push(inline());
-							}
-							else
-							{
-								break stack;
-							}
-							continue stack;
-						}
-						case T.OL:
-						case T.UL:
-						{
-							// update state
-							is_ol_or_ul = true;
-						}
-						// eslint-disable-next-line no-fallthrough
-						case T.BQ:
-						{
-							// @ts-expect-error why..?
-							const ref = node?.children.at(-1) ?? root;
-
-							const ast = (() =>
-							{
-								switch (token)
+								const ref = node?.children.at(-1) ?? root;
+	
+								if (ref !instanceof HTML.BQ)
 								{
-									case T.BQ: { return HTML.BQ; }
-									case T.OL: { return HTML.OL; }
-									case T.UL: { return HTML.UL; }
-									// how..?
-									default: throw new Error();
+									next();
+									// pickup
+									node = ref as AST;
 								}
-							})
-							();
-
-							if (ref instanceof ast)
-							{
-								next();
-								// pickup
-								node = ref;
+								else if (node)
+								{
+									// treat as inline
+									node.children.push(inline());
+								}
+								else
+								{
+									break stack;
+								}
+								break lookup;
 							}
-							else if (node)
+							case T.OL:
+							case T.UL:
 							{
-								next();
-								// insert and pickup
-								node.children.push(node = new ast());
+								LI = true;
 							}
-							else
+							// eslint-disable-next-line no-fallthrough
+							case T.BQ:
 							{
-								break stack;
+								const ref = node?.children.at(-1) ?? root;
+	
+								const ast = (() =>
+								{
+									switch (token)
+									{
+										case T.BQ: { return HTML.BQ; }
+										case T.OL: { return HTML.OL; }
+										case T.UL: { return HTML.UL; }
+									}
+								})()!;
+	
+								if (ref instanceof ast)
+								{
+									next();
+									// pickup
+									node = ref;
+								}
+								else if (node)
+								{
+									next();
+									// insert and pickup
+									node.children.push(node = new ast());
+								}
+								else
+								{
+									break stack;
+								}
+								break lookup;
 							}
-							continue stack;
-
+							default:
+							{
+								// if newline/EOF is found before stack
+								if (node === null) break stack;
+	
+								const ast = recursive({ peek, next, until: [] });
+	
+								if (!LI)
+								{
+									node.children.push(ast);
+								}
+								else
+								{
+									node.children.push(new HTML.LI(...ast.children));
+								}
+								break lookup;
+							}
 						}
-						default:
-						{
-							// if newline/EOF is found before stack
-							if (node === null) break stack;
-
-							const ast = recursive({ peek, next, until: [] });
-
-							if (!is_ol_or_ul)
-							{
-								node.children.push(ast);
-							}
-							else
-							{
-								node.children.push(new HTML.LI(...ast.children));
-							}
-							// reset state
-							is_ol_or_ul = false;
-
-							continue stack;
-						}
+						LI = false;
 					}
+					return root;
 				}
 			}
-			return root;
 		}
 
 		function inline()
@@ -489,6 +486,47 @@ export default Object.freeze([
 						
 						break examine;
 					}
+					// macro
+					case T.ARROW_ALL:
+					{
+						next(); ast.children.push("↔"); break examine;
+					}
+					case T.ARROW_LEFT:
+					{
+						next(); ast.children.push("←"); break examine;
+					}
+					case T.ARROW_RIGHT:
+					{
+						next(); ast.children.push("→"); break examine;
+					}
+					case T.FAT_ARROW_ALL:
+					{
+						next(); ast.children.push("⇔"); break examine;
+					}
+					case T.FAT_ARROW_LEFT:
+					{
+						next(); ast.children.push("⇐"); break examine;
+					}
+					case T.FAT_ARROW_RIGHT:
+					{
+						next(); ast.children.push("⇒"); break examine;
+					}
+					case T.MATH_APX:
+					{
+						next(); ast.children.push("≈"); break examine;
+					}
+					case T.MATH_NET:
+					{
+						next(); ast.children.push("≠"); break examine;
+					}
+					case T.MATH_LTOET:
+					{
+						next(); ast.children.push("≤"); break examine;
+					}
+					case T.MATH_GTOET:
+					{
+						next(); ast.children.push("≥"); break examine;
+					}
 					default:
 					{
 						if (typeof token === "string")
@@ -497,7 +535,7 @@ export default Object.freeze([
 						}
 						else
 						{
-							next(); ast.children.push(token.code);
+							next(); ast.children.push(token.syntax);
 						}
 						break examine;
 					}
@@ -505,6 +543,6 @@ export default Object.freeze([
 			}
 			return ast;
 		}
-		return core() ?? block() ?? stack() ?? inline();
+		return block() ?? inline();
 	},
 ] satisfies ConstructorParameters<typeof Markdown>);

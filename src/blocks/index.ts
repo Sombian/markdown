@@ -1,6 +1,8 @@
-//
-// block
-//
+//-------//
+//       //
+// BLOCK //
+//       //
+//-------//
 export * from "./block/bq";
 export * from "./block/br";
 export * from "./block/cb";
@@ -16,9 +18,11 @@ export * from "./block/li";
 export * from "./block/ol";
 export * from "./block/pr";
 export * from "./block/ul";
-//
-// inline
-//
+//--------//
+//        //
+// INLINE //
+//        //
+//--------//
 export * from "./inline/bold";
 export * from "./inline/code";
 export * from "./inline/href";
