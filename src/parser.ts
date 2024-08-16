@@ -47,7 +47,7 @@ export default class Parser
 			{
 				if (error === "EOF") continue;
 
-				console.debug(error);
+				console.error(error);
 
 				break;
 			}
@@ -59,7 +59,7 @@ export default class Parser
 	{
 		if (type && this.data[this.i] !== type)
 		{
-			throw new Error(`Unexpected token found at position ${this.i}; ${{ expect: type.constructor.name, found: this.data[this.i].constructor.name }}`);
+			throw new Error(`Unexpected token found at position ${this.i}`);
 		}
 		return this.i in this.data ? this.data[this.i] : null;
 	}
@@ -68,7 +68,7 @@ export default class Parser
 	{
 		if (type && this.data[this.i] !== type)
 		{
-			throw new Error(`Unexpected token found at position ${this.i}; ${{ expect: type.constructor.name, found: this.data[this.i].constructor.name }}`);
+			throw new Error(`Unexpected token found at position ${this.i}`);
 		}
 		return this.i in this.data ? this.data[this.i++] : null;
 	}

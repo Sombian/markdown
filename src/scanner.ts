@@ -260,11 +260,18 @@ interface State
 
 class Buffer
 {
-	private readonly u16a: Uint16Array; private i = 0;
+	// lazy init
+	private static DECODER: TextDecoder;
+	// stores binary data
+	private readonly u16a: Uint16Array;
+	// pointer to end of string
+	private i = 0;
 
 	constructor(capacity: number)
 	{
 		this.u16a = new Uint16Array(capacity);
+
+		Buffer.DECODER ??= new TextDecoder("utf-16");
 	}
 
 	public write(data: string)
@@ -273,8 +280,11 @@ class Buffer
 		{
 			throw new Error("Buffer is full");
 		}
-		// append
-		this.u16a.set([...data].map((char) => char.charCodeAt(0)), this.i);
+		// write
+		for (let j = 0; j < data.length; j++)
+		{
+			this.u16a[this.i + j] = data.charCodeAt(j);
+		}
 		// offset
 		this.i += data.length;
 	}
@@ -283,29 +293,30 @@ class Buffer
 	{
 		if (start < 0 || count < 0) throw new Error("Invalid Range");
 
-		const clamp = Math.min(start + count, this.i - 1);
+		const clamp = Math.min(start + count, this.i);
 
 		const r1 = this.u16a.subarray(start, clamp);
 
-		return String.fromCharCode(...r1);
+		return Buffer.DECODER.decode(r1);
 	}
 
 	public splice(start: number, count: number)
 	{
 		if (start < 0 || count < 0) throw new Error("Invalid Range");
 
-		const clamp = Math.min(start + count, this.i - 1);
+		const clamp = Math.min(start + count, this.i);
 
 		const [r1, r2] = [
 			this.u16a.subarray(start, clamp),
 			this.u16a.subarray(clamp, this.i),
 		];
+		const slice = Buffer.DECODER.decode(r1);
 		// shift
 		this.u16a.set(r2, start);
 		// offset
 		this.i -= count;
 
-		return String.fromCharCode(...r1);
+		return slice;
 	}
 
 	public clear()
@@ -325,7 +336,7 @@ class Buffer
 
 	public toString()
 	{
-		return String.fromCharCode(...this.u16a.subarray(0, this.i));
+		return Buffer.DECODER.decode(this.u16a.subarray(0, this.i));
 	}
 }
 
