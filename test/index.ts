@@ -2,10 +2,10 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
-import { Preset } from "@/index";
-
 import Parser from "@/parser";
 import Scanner from "@/scanner";
+
+import { Preset } from "@/index";
 
 const [input, output] = [path.join(import.meta.dirname, "in.txt"), path.join(import.meta.dirname, "out.html")];
 
@@ -26,17 +26,17 @@ function main()
 		return value;
 	}
 
-	const [P1, P2] = Preset.ARUM;
+	const [p1, p2] = Preset.ARUM;
 
 	Bun.file(input).text().then(async (text) =>
 	{
 		process.stdout.write("\x1Bc");
 
-		const tokens = benchmark("Scanner", () => new Scanner(P1).scan(text));
+		const tokens = benchmark("Scanner", () => new Scanner(p1).scan(text));
 	
 		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 	
-		const AST = benchmark("Parser", () => new Parser(P2).parse(tokens));
+		const AST = benchmark("Parser", () => new Parser(p2).parse(tokens));
 		
 		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
 	

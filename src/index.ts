@@ -1,9 +1,9 @@
-import ARUM from "./presets/ARUM";
-// import GITHUB from "./presets/GITHUB";
-// import OBSIDIAN from "./presets/OBSIDIAN";
+import ARUM from "@/presets/ARUM";
+// import GITHUB from "@/presets/GITHUB";
+// import OBSIDIAN from "@/presets/OBSIDIAN";
 
-import Parser from "./parser";
-import Scanner from "./scanner";
+import Parser from "@/parser";
+import Scanner from "@/scanner";
 
 export class Markdown
 {

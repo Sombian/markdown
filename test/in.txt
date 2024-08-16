@@ -2,3 +2,7 @@
 ![alias]()
 ![](link)
 ![]()
+
+![](https://www.youtube.com/watch?v=Nt3gpzQh0ps)
+
+![](https://gist.github.com/milanaryal/e9d558eae37b0aba9faeb4cbf061e970)

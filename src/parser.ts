@@ -1,8 +1,7 @@
+import Scanner from "@/scanner";
 
-import AST from "./models/AST";
-import Token from "./models/Token";
-
-import Scanner from "./scanner";
+import AST from "@/models/AST";
+import Token from "@/models/Token";
 
 export default class Parser
 {

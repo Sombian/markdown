@@ -5,23 +5,27 @@ import Token from "@/models/Token";
 
 import Level from "@/enums/Level";
 
-import * as HTML from "../blocks";
+import * as HTML from "@/render";
 
 abstract class impl extends Token
 {
-	override get next()
+	constructor(lvl: ConstructorParameters<typeof Token>[0], syntax: ConstructorParameters<typeof Token>[1], next?: ConstructorParameters<typeof Token>[2])
 	{
-		switch (this.syntax.at(-1))
+		super(lvl, syntax, next ?? (() =>
 		{
-			case "\n":
+			switch (syntax.at(-1))
 			{
-				return Level.BLOCK;
+				case "\n":
+				{
+					return Level.BLOCK;
+				}
+				default:
+				{
+					return Level.INLINE;
+				}
 			}
-			default:
-			{
-				return Level.INLINE;
-			}
-		}
+		})
+		());
 	}
 }
 
@@ -62,54 +66,18 @@ const T = Object.freeze(
 	//
 	// stack
 	//
-	BQ: new (class BQ extends impl
-	{
-		override get next()
-		{
-			return Level.BLOCK;
-		}
-	})
-	(Level.BLOCK, "> "),
-	OL: new (class OL extends impl
-	{
-		override get next()
-		{
-			return Level.BLOCK;
-		}
-	})
-	(Level.BLOCK, "- "),
-	UL: new (class UL extends impl
-	{
-		override get next()
-		{
-			return Level.BLOCK;
-		}
-	})
-	(Level.BLOCK, "~ "),
-	INDENT_1T: new (class INDENT_1T extends impl
-	{
-		override get next()
-		{
-			return Level.BLOCK;
-		}
-	})
-	(Level.BLOCK, "\u0009".repeat(1)),
-	INDENT_2S: new (class INDENT_2S extends impl
-	{
-		override get next()
-		{
-			return Level.BLOCK;
-		}
-	})
-	(Level.BLOCK, "\u0020".repeat(2)),
-	INDENT_4S: new (class INDENT_4S extends impl
-	{
-		override get next()
-		{
-			return Level.BLOCK;
-		}
-	})
-	(Level.BLOCK, "\u0020".repeat(4)),
+	BQ: new (class BQ extends impl { })
+	(Level.BLOCK, "> ", Level.BLOCK),
+	OL: new (class OL extends impl { })
+	(Level.BLOCK, "- ", Level.BLOCK),
+	UL: new (class UL extends impl { })
+	(Level.BLOCK, "~ ", Level.BLOCK),
+	INDENT_1T: new (class INDENT_1T extends impl { })
+	(Level.BLOCK, "\u0009".repeat(1), Level.BLOCK),
+	INDENT_2S: new (class INDENT_2S extends impl { })
+	(Level.BLOCK, "\u0020".repeat(2), Level.BLOCK),
+	INDENT_4S: new (class INDENT_4S extends impl { })
+	(Level.BLOCK, "\u0020".repeat(4), Level.BLOCK),
 	//
 	// inline
 	//
@@ -220,7 +188,7 @@ export default Object.freeze([
 						return new HTML.BR();
 					}
 					// edge case - inline
-					if (t.level === Level.INLINE)
+					if (t.lvl === Level.INLINE)
 					{
 						return new HTML.BR();
 					}
@@ -271,7 +239,8 @@ export default Object.freeze([
 						case T.OL: { next(); LI = true; return new HTML.OL(); }
 						case T.UL: { next(); LI = true; return new HTML.UL(); }
 					}
-				})()!;
+				})
+				()!;
 		
 				let node: Nullable<AST> = root;
 		
@@ -311,14 +280,15 @@ export default Object.freeze([
 								case HTML.UL:
 								{
 									// pickup
-									next(); node = ast as AST; break build;
+									next(); node = ast as AST; break;
 								}
 								default:
 								{
 									// insert
-									node.children.push(inline()); break build;
+									node.children.push(inline()); break;
 								}
 							}
+							break build;
 						}
 						case T.BQ:
 						case T.OL:
@@ -335,7 +305,8 @@ export default Object.freeze([
 									case T.OL: { return HTML.OL; }
 									case T.UL: { return HTML.UL; }
 								}
-							})()!;
+							})
+							()!;
 							
 							if (ast instanceof type)
 							{
@@ -434,6 +405,77 @@ export default Object.freeze([
 					{
 						break inline;
 					}
+					//---------//
+					//         //
+					// COMPLEX //
+					//         //
+					//---------//
+					case T.EXCLAMATION:
+					{
+						const fallback: string[] = [];
+						try
+						{
+							let alt: ConstructorParameters<typeof HTML.EM>[0];
+							let src: ConstructorParameters<typeof HTML.EM>[1];
+
+							fallback.push(next(T.EXCLAMATION)!.toString());
+							fallback.push(next(T.BRACKET_L)!.toString());
+
+							const t1 = peek(); if (t1 === null) throw new Error(); if (typeof t1 === "string") { alt = t1; next(); };
+
+							fallback.push(next(T.BRACKET_R)!.toString());
+							fallback.push(next(T.PAREN_L)!.toString());
+
+							const t2 = peek(); if (t1 === null) throw new Error(); if (typeof t2 === "string") { src = t2; next(); };
+
+							fallback.push(next(T.PAREN_R)!.toString());
+
+							ast.children.push(new HTML.EM(alt! ?? "", src! ?? ""));
+						}
+						catch
+						{
+							if (0 < fallback.length)
+							{
+								ast.children.push(...fallback);
+							}
+						}
+						break build;
+					}
+					case T.BRACKET_L:
+					{
+						const fallback: string[] = [];
+						try
+						{
+							let text: ConstructorParameters<typeof HTML.HREF>[0];
+							let href: ConstructorParameters<typeof HTML.HREF>[1];
+
+							fallback.push(next(T.BRACKET_L)!.toString());
+
+							const t1 = peek(); if (t1 === null) throw new Error(); if (typeof t1 === "string") { text = t1; next(); };
+
+							fallback.push(next(T.BRACKET_R)!.toString());
+							fallback.push(next(T.PAREN_L)!.toString());
+
+							const t2 = peek(); if (t1 === null) throw new Error(); if (typeof t2 === "string") { href = t2; next(); };
+
+							fallback.push(next(T.PAREN_R)!.toString());
+
+							ast.children.push(new HTML.HREF(text! ?? "", href! ?? ""));
+						}
+						catch
+						{
+							if (0 < fallback.length)
+							{
+								ast.children.push(...fallback);
+							}
+						}
+						break build;
+					}
+					//-------//
+					//       //
+					// STYLE //
+					//       //
+					//-------//
 					case T.BOLD:
 					{
 						next(); const node = style(new HTML.BOLD(), T.BOLD);
@@ -474,7 +516,19 @@ export default Object.freeze([
 						
 						break build;
 					}
-					// macro
+					case T.CHECKED_BOX:
+					{
+						next(); ast.children.push(new HTML.TODO(true)); break build;
+					}
+					case T.UNCHECKED_BOX:
+					{
+						next(); ast.children.push(new HTML.TODO(false)); break build;
+					}
+					//-------//
+					//       //
+					// MACRO //
+					//       //
+					//-------//
 					case T.ARROW_ALL:
 					{
 						next(); ast.children.push("↔"); break build;
@@ -515,7 +569,11 @@ export default Object.freeze([
 					{
 						next(); ast.children.push("≥"); break build;
 					}
-					// others
+					//-------//
+					//       //
+					// OTHER //
+					//       //
+					//-------//
 					default:
 					{
 						if (typeof t === "string")

@@ -1,6 +1,6 @@
-import Level from "./enums/Level";
+import Level from "@/enums/Level";
 
-import Token from "./models/Token";
+import Token from "@/models/Token";
 
 type Stream = (Token | string)[];
 
@@ -18,7 +18,7 @@ export default class Scanner
 
 	constructor(data: Readonly<Token[]>)
 	{
-		function routes(ctx: typeof Token.prototype.level)
+		function routes(ctx: typeof Token.prototype.lvl)
 		{
 			switch (ctx)
 			{
@@ -54,7 +54,7 @@ export default class Scanner
 
 		for (const token of data)
 		{
-			for (const ctx of routes(token.level))
+			for (const ctx of routes(token.lvl))
 			{
 				let node = this.__TABLE__[ctx];
 		
@@ -261,7 +261,7 @@ interface State
 class Buffer
 {
 	// lazy init
-	private static DECODER: TextDecoder;
+	private static DC: TextDecoder;
 	// stores binary data
 	private readonly u16a: Uint16Array;
 	// pointer to end of string
@@ -271,7 +271,7 @@ class Buffer
 	{
 		this.u16a = new Uint16Array(capacity);
 
-		Buffer.DECODER ??= new TextDecoder("utf-16");
+		Buffer.DC ??= new TextDecoder("utf-16");
 	}
 
 	public write(data: string)
@@ -297,7 +297,7 @@ class Buffer
 
 		const r1 = this.u16a.subarray(start, clamp);
 
-		return Buffer.DECODER.decode(r1);
+		return Buffer.DC.decode(r1);
 	}
 
 	public splice(start: number, count: number)
@@ -310,7 +310,7 @@ class Buffer
 			this.u16a.subarray(start, clamp),
 			this.u16a.subarray(clamp, this.i),
 		];
-		const slice = Buffer.DECODER.decode(r1);
+		const slice = Buffer.DC.decode(r1);
 		// shift
 		this.u16a.set(r2, start);
 		// offset
@@ -336,7 +336,7 @@ class Buffer
 
 	public toString()
 	{
-		return Buffer.DECODER.decode(this.u16a.subarray(0, this.i));
+		return Buffer.DC.decode(this.u16a.subarray(0, this.i));
 	}
 }
 
