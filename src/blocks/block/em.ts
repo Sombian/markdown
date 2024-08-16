@@ -1,6 +1,5 @@
 import AST from "@/models/AST";
 
-
 export class EM extends AST
 {
 	constructor(private readonly alt: string, private readonly src: string)

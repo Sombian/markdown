@@ -281,7 +281,7 @@ class Buffer
 			throw new Error("Buffer is full");
 		}
 		// write
-		for (let j = 0; j < data.length; j++)
+		for (let j = 0; j < data.length; ++j)
 		{
 			this.u16a[this.i + j] = data.charCodeAt(j);
 		}

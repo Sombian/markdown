@@ -1,6 +1,5 @@
 import AST from "@/models/AST";
 
-
 export class LI extends AST
 {
 	override render()

@@ -1,6 +1,5 @@
 import AST from "@/models/AST";
 
-
 export class H1 extends AST
 {
 	override render()

@@ -1,6 +1,5 @@
 import AST from "@/models/AST";
 
-
 export class TODO extends AST
 {
 	constructor(private readonly complete: boolean)

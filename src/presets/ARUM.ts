@@ -171,14 +171,16 @@ export default Object.freeze([
 	//
 	function recursive({ peek, next, until }): AST
 	{
-		function scan()
+		function lookup()
 		{
-			switch (peek())
+			const t = peek();
+
+			switch (t)
 			{
 				case T.COMMENT_L:
 				{
 					next();
-			
+
 					comment:
 					while (true)
 					{
@@ -197,196 +199,186 @@ export default Object.freeze([
 					break;
 				}
 			}
-			return peek();
+			return t;
 		}
 
-		function core()
+		switch (lookup())
 		{
-			switch (scan())
+			case null:
 			{
-				case null:
-				{
-					throw "EOF";
-				}
-				case T.BREAK:
-				{
-					next();
-		
-					const token = scan();
-		
-					if (token instanceof impl)
-					{
-						// edge case - itself
-						if (token === T.BREAK)
-						{
-							return new HTML.BR();
-						}
-						// edge case - inline
-						if (token.ctx === Level.INLINE)
-						{
-							return new HTML.BR();
-						}
-					}
-					return recursive({ peek, next, until: [] });
-				}
+				throw "EOF";
 			}
-		}
-
-		function block()
-		{
-			switch (scan())
+			case T.BREAK:
 			{
-				case T.H1:
-				{
-					next(); return new HTML.H1(...inline().children);
-				}
-				case T.H2:
-				{
-					next(); return new HTML.H2(...inline().children);
-				}
-				case T.H3:
-				{
-					next(); return new HTML.H3(...inline().children);
-				}
-				case T.H4:
-				{
-					next(); return new HTML.H4(...inline().children);
-				}
-				case T.H5:
-				{
-					next(); return new HTML.H5(...inline().children);
-				}
-				case T.H6:
-				{
-					next(); return new HTML.H6(...inline().children);
-				}
-				case T.HR_1:
-				case T.HR_2:
-				case T.HR_3:
-				{
-					next(); return new HTML.HR(/* leaf node */);
-				}
-				case T.BQ:
-				case T.OL:
-				case T.UL:
-				{
-					let LI = false;
+				next(); const t = lookup();
 
-					const root = (() =>
+				if (t instanceof Token)
+				{
+					// edge case - itself
+					if (t === T.BREAK)
 					{
-						switch (scan())
-						{
-							case T.BQ: { next(); return new HTML.BQ(); }
-							case T.OL: { next(); LI = true; return new HTML.OL(); }
-							case T.UL: { next(); LI = true; return new HTML.UL(); }
-						}
-					})()!;
-		
-					let node: Nullable<AST> = root;
-		
-					stack:
-					while (true)
-					{
-						const token = scan();
-	
-						lookup:
-						switch (token)
-						{
-							case null:
-							case T.BREAK:
-							{
-								// if newline/EOF is found before stack
-								if (node === null) break stack;
-	
-								next();
-								// breakout
-								node = null;
-	
-								break lookup;
-							}
-							case T.INDENT_1T:
-							case T.INDENT_2S:
-							case T.INDENT_4S:
-							{
-								const ref = node?.children.at(-1) ?? root;
-	
-								if (ref !instanceof HTML.BQ)
-								{
-									next();
-									// pickup
-									node = ref as AST;
-								}
-								else if (node)
-								{
-									// treat as inline
-									node.children.push(inline());
-								}
-								else
-								{
-									break stack;
-								}
-								break lookup;
-							}
-							case T.OL:
-							case T.UL:
-							{
-								LI = true;
-							}
-							// eslint-disable-next-line no-fallthrough
-							case T.BQ:
-							{
-								const ref = node?.children.at(-1) ?? root;
-	
-								const ast = (() =>
-								{
-									switch (token)
-									{
-										case T.BQ: { return HTML.BQ; }
-										case T.OL: { return HTML.OL; }
-										case T.UL: { return HTML.UL; }
-									}
-								})()!;
-	
-								if (ref instanceof ast)
-								{
-									next();
-									// pickup
-									node = ref;
-								}
-								else if (node)
-								{
-									next();
-									// insert and pickup
-									node.children.push(node = new ast());
-								}
-								else
-								{
-									break stack;
-								}
-								break lookup;
-							}
-							default:
-							{
-								// if newline/EOF is found before stack
-								if (node === null) break stack;
-	
-								const ast = recursive({ peek, next, until: [] });
-	
-								if (!LI)
-								{
-									node.children.push(ast);
-								}
-								else
-								{
-									node.children.push(new HTML.LI(...ast.children));
-								}
-								break lookup;
-							}
-						}
-						LI = false;
+						return new HTML.BR();
 					}
-					return root;
+					// edge case - inline
+					if (t.level === Level.INLINE)
+					{
+						return new HTML.BR();
+					}
 				}
+				return recursive({ peek, next, until: [] });
+			}
+			case T.H1:
+			{
+				next(); return new HTML.H1(...inline().children);
+			}
+			case T.H2:
+			{
+				next(); return new HTML.H2(...inline().children);
+			}
+			case T.H3:
+			{
+				next(); return new HTML.H3(...inline().children);
+			}
+			case T.H4:
+			{
+				next(); return new HTML.H4(...inline().children);
+			}
+			case T.H5:
+			{
+				next(); return new HTML.H5(...inline().children);
+			}
+			case T.H6:
+			{
+				next(); return new HTML.H6(...inline().children);
+			}
+			case T.HR_1:
+			case T.HR_2:
+			case T.HR_3:
+			{
+				next(); return new HTML.HR(/* leaf node */);
+			}
+			case T.BQ:
+			case T.OL:
+			case T.UL:
+			{
+				let LI = false;
+
+				const root = (() =>
+				{
+					switch (lookup())
+					{
+						case T.BQ: { next(); return new HTML.BQ(); }
+						case T.OL: { next(); LI = true; return new HTML.OL(); }
+						case T.UL: { next(); LI = true; return new HTML.UL(); }
+					}
+				})()!;
+		
+				let node: Nullable<AST> = root;
+		
+				stack:
+				while (true)
+				{
+					const t = lookup();
+	
+					build:
+					switch (t)
+					{
+						case null:
+						case T.BREAK:
+						{
+							// if EOF/BR is found before BQ/OL/UL
+							if (node === null) break stack;
+	
+							next();
+							node = null;
+							break build;
+						}
+						case T.INDENT_1T:
+						case T.INDENT_2S:
+						case T.INDENT_4S:
+						{
+							// if indent is found before BQ/OL/UL
+							if (node === null)
+							{
+								break stack;
+							}
+							// get the most recent working node
+							const ast = node.children.at(-1) ?? root;
+
+							switch (ast.constructor)
+							{
+								case HTML.OL:
+								case HTML.UL:
+								{
+									// pickup
+									next(); node = ast as AST; break build;
+								}
+								default:
+								{
+									// insert
+									node.children.push(inline()); break build;
+								}
+							}
+						}
+						case T.BQ:
+						case T.OL:
+						case T.UL:
+						{
+							// get the most recent working node
+							const ast = node?.children.at(-1) ?? root;
+
+							const type = (() =>
+							{
+								switch (t)
+								{
+									case T.BQ: { return HTML.BQ; }
+									case T.OL: { return HTML.OL; }
+									case T.UL: { return HTML.UL; }
+								}
+							})()!;
+							
+							if (ast instanceof type)
+							{
+								// pickup
+								next(); node = ast as AST;
+							}
+							else if (node)
+							{
+								// create diff type of stack as child
+								next(); node.children.push(node = new type());
+							}
+							else
+							{
+								// if diff type of stack is found before its kind
+								break stack;
+							}
+							break build;
+						}
+						default:
+						{
+							// if inline is found before stack
+							if (node === null) break stack;
+	
+							const ast = recursive({ peek, next, until: [] });
+	
+							if (!LI)
+							{
+								node.children.push(ast);
+							}
+							else
+							{
+								node.children.push(new HTML.LI(...ast.children));
+							}
+							break build;
+						}
+					}
+					LI = false;
+				}
+				return root;
+			}
+			default:
+			{
+				return inline();
 			}
 		}
 
@@ -394,14 +386,14 @@ export default Object.freeze([
 		{
 			const ast = new HTML.PR();
 
-			function style(ast: AST, closing: Token)
+			function style(node: AST, closing: Token)
 			{
 				style:
 				while (true)
 				{
-					const token = scan(); if (until.includes(token as never)) break style;
+					const t = lookup(); if (until.includes(t as never)) break style;
 
-					switch (token)
+					switch (t)
 					{
 						case null:
 						case T.BREAK:
@@ -414,32 +406,28 @@ export default Object.freeze([
 						}
 						default:
 						{
-							if (typeof token === "string")
+							if (typeof t === "string")
 							{
-								ast.children.push(next() as string);
+								node.children.push(next() as string);
 							}
 							else
 							{
-								ast.children.push(...recursive(
-								{
-									peek, next, until: [...until, closing]
-								}
-								).children);
+								node.children.push(...recursive({ peek, next, until: [...until, closing] }).children);
 							}
 							continue style;
 						}
 					}
 				}
-				return ast;
+				return node;
 			}
 
 			inline:
 			while (true)
 			{
-				const token = scan(); if (until.includes(token as never)) break inline;
+				const t = lookup(); if (until.includes(t as never)) break inline;
 				
-				examine:
-				switch (token)
+				build:
+				switch (t)
 				{
 					case null:
 					case T.BREAK:
@@ -448,101 +436,101 @@ export default Object.freeze([
 					}
 					case T.BOLD:
 					{
-						next(); const ast = style(new HTML.BOLD(), T.BOLD);
+						next(); const node = style(new HTML.BOLD(), T.BOLD);
 						
-						if (0 < ast.children.length) ast.children.push(ast);
+						if (0 < node.children.length) ast.children.push(node);
 						
-						break examine;
+						break build;
 					}
 					case T.CODE:
 					{
-						next(); const ast = style(new HTML.CODE(), T.CODE);
+						next(); const node = style(new HTML.CODE(), T.CODE);
 						
-						if (0 < ast.children.length) ast.children.push(ast);
+						if (0 < node.children.length) ast.children.push(node);
 						
-						break examine;
+						break build;
 					}
 					case T.ITALIC:
 					{
-						next(); const ast = style(new HTML.ITALIC(), T.ITALIC);
+						next(); const node = style(new HTML.ITALIC(), T.ITALIC);
 						
-						if (0 < ast.children.length) ast.children.push(ast);
+						if (0 < node.children.length) ast.children.push(node);
 						
-						break examine;
+						break build;
 					}
 					case T.STRIKE:
 					{
-						next(); const ast = style(new HTML.STRIKE(), T.STRIKE);
+						next(); const node = style(new HTML.STRIKE(), T.STRIKE);
 						
-						if (0 < ast.children.length) ast.children.push(ast);
+						if (0 < node.children.length) ast.children.push(node);
 						
-						break examine;
+						break build;
 					}
 					case T.UNDERLINE:
 					{
-						next(); const ast = style(new HTML.UNDERLINE(), T.UNDERLINE);
+						next(); const node = style(new HTML.UNDERLINE(), T.UNDERLINE);
 						
-						if (0 < ast.children.length) ast.children.push(ast);
+						if (0 < node.children.length) ast.children.push(node);
 						
-						break examine;
+						break build;
 					}
 					// macro
 					case T.ARROW_ALL:
 					{
-						next(); ast.children.push("↔"); break examine;
+						next(); ast.children.push("↔"); break build;
 					}
 					case T.ARROW_LEFT:
 					{
-						next(); ast.children.push("←"); break examine;
+						next(); ast.children.push("←"); break build;
 					}
 					case T.ARROW_RIGHT:
 					{
-						next(); ast.children.push("→"); break examine;
+						next(); ast.children.push("→"); break build;
 					}
 					case T.FAT_ARROW_ALL:
 					{
-						next(); ast.children.push("⇔"); break examine;
+						next(); ast.children.push("⇔"); break build;
 					}
 					case T.FAT_ARROW_LEFT:
 					{
-						next(); ast.children.push("⇐"); break examine;
+						next(); ast.children.push("⇐"); break build;
 					}
 					case T.FAT_ARROW_RIGHT:
 					{
-						next(); ast.children.push("⇒"); break examine;
+						next(); ast.children.push("⇒"); break build;
 					}
 					case T.MATH_APX:
 					{
-						next(); ast.children.push("≈"); break examine;
+						next(); ast.children.push("≈"); break build;
 					}
 					case T.MATH_NET:
 					{
-						next(); ast.children.push("≠"); break examine;
+						next(); ast.children.push("≠"); break build;
 					}
 					case T.MATH_LTOET:
 					{
-						next(); ast.children.push("≤"); break examine;
+						next(); ast.children.push("≤"); break build;
 					}
 					case T.MATH_GTOET:
 					{
-						next(); ast.children.push("≥"); break examine;
+						next(); ast.children.push("≥"); break build;
 					}
+					// others
 					default:
 					{
-						if (typeof token === "string")
+						if (typeof t === "string")
 						{
-							next(); ast.children.push(token);
+							next(); ast.children.push(t);
 						}
 						else
 						{
-							next(); ast.children.push(token.syntax);
+							next(); ast.children.push(t.syntax);
 						}
-						break examine;
+						break build;
 					}
 				}
 			}
 			return ast;
 		}
-		return block() ?? inline();
 	},
 ] satisfies ConstructorParameters<typeof Markdown>);

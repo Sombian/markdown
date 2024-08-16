@@ -1,6 +1,5 @@
 import AST from "@/models/AST";
 
-
 export class STRIKE extends AST
 {
 	override render()
@@ -8,3 +7,4 @@ export class STRIKE extends AST
 		return `<s>${this.body}</s>`;
 	}
 }
+ 

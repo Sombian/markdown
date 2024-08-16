@@ -26,25 +26,27 @@ function main()
 		return value;
 	}
 
+	const [P1, P2] = Preset.ARUM;
+
 	Bun.file(input).text().then(async (text) =>
 	{
 		process.stdout.write("\x1Bc");
 
-		const tokens = benchmark("Scanner", () => new Scanner(Preset.ARUM[0]).scan(text));
+		const tokens = benchmark("Scanner", () => new Scanner(P1).scan(text));
 	
 		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 	
-		// const AST = benchmark("Parser", () => new Parser(Preset.ARUM[1]).parse(tokens));
+		const AST = benchmark("Parser", () => new Parser(P2).parse(tokens));
 		
-		// console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
+		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
 	
-		// const HTML = benchmark("Render", () => AST.render());
+		const HTML = benchmark("Render", () => AST.render());
 	
-		// console.debug("\n", util.inspect(HTML, { depth: null, colors: true }), "\n");
+		console.debug("\n", util.inspect(HTML, { depth: null, colors: true }), "\n");
 
-		// const bytes = await Bun.write(output, HTML);
+		const bytes = await Bun.write(output, HTML);
 
-		// console.debug(`\x1b[4m${output}\x1b[0m ~ ${bytes}bytes`);
+		console.debug(`\x1b[4m${output}\x1b[0m ~ ${bytes}bytes`);
 	});
 }
 
