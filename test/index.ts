@@ -53,4 +53,4 @@ declare global
 	var watcher: fs.FSWatcher;
 }
 
-global.watcher ??= fs.watch(input, main); process.on("SIGINT", () => { globalThis?.watcher.close(); process.exit(0); });
+global.watcher ??= fs.watch(input, main); process.on("SIGINT", () => { global.watcher.close(); process.exit(0); });

@@ -437,7 +437,7 @@ export default Object.freeze([
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
-							ast.children.push(new HTML.EM(alt! ?? "", src! ?? ""));
+							ast.children.push(new HTML.EM(alt, src));
 						}
 						catch
 						{
@@ -464,7 +464,7 @@ export default Object.freeze([
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
-							ast.children.push(new HTML.BACKLINK(text! ?? "", href! ?? ""));
+							ast.children.push(new HTML.BACKLINK(text, href));
 						}
 						catch
 						{

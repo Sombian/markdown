@@ -2,7 +2,7 @@ import AST from "../../models/ast";
 
 export class BACKLINK extends AST
 {
-	constructor(private readonly text: string, private readonly href: string)
+	constructor(private readonly text?: string, private readonly href?: string)
 	{
 		super();
 	}
