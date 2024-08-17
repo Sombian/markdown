@@ -4,7 +4,7 @@
 [![downloads](https://badgen.net/npm/dt/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
 [![install size](https://packagephobia.com/badge?p=@sombian/markdown)](https://packagephobia.com/result?p=@sombian/markdown)
 
-```bash
+```sh
 npm i @sombian/markdown
 ```
 
@@ -24,9 +24,11 @@ const markdown = new Markdown(...Presets.NekoNote);
 console.debug(markdown.run("# hello *world*"));
 ```
 
-## Presets.NekoNote
+## Presets - `NekoNote`
 
-whilst **NekoNote** indeed adopts many existing markdown grammars, it differs from regular markdown in several ways. furthermore, **NekoNote** is not meant to be used in any situation, but rather as a template that illustrates how to write a preset of your own. please be aware that **NekoNote** does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet. these will be available after the project reaches the ready-for-production stage.
+whilst **NekoNote** indeed adopts many existing markdown grammars, it differs from regular markdown in several ways. furthermore, it is not meant to be used in any situation, but rather as a template that illustrates how to write a preset of your own.
+
+please be aware that **NekoNote** does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet. these will be available after the project reaches the ready-for-production stage.
 
 
 ###### Escape
