@@ -102,9 +102,7 @@ export default class Scanner
 			}
 		}
 		// init...
-		this.state = null as unknown as State;
-		this.buffer = null as unknown as Buffer;
-		this.stream = null as unknown as Chunk[];
+		[this.state, this.buffer, this.stream] = [null as unknown as State, null as unknown as Buffer, null as unknown as Chunk[]];
 	}
 
 	public scan(data: string)
@@ -216,7 +214,14 @@ export default class Scanner
 			// stream::build
 			this.stream.push(this.buffer.toString());
 		}
-		return this.stream;
+		// save
+		const output = this.stream;
+
+		// init...
+		[this.state, this.buffer, this.stream] = [null as unknown as State, null as unknown as Buffer, null as unknown as Chunk[]];
+
+		// emit
+		return output;
 	}
 
 	private build(char: string)
