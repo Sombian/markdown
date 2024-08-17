@@ -30,7 +30,6 @@ whilst **NekoNote** builds on existing markdown grammars, it differs from regula
 
 please be aware that **NekoNote** does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet. these will be available after the project reaches the ready-for-production stage.
 
-
 ###### Escape
 
 ```
