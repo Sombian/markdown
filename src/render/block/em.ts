@@ -25,6 +25,6 @@ export class EM extends AST
 				return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${groups[1]}" title="${this.alt}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 			}
 		}
-		return `<img alt="${this.alt}" src="${this.src}">`;
+		return `<img alt="${this.alt ?? ""}" src="${this.src ?? ""}">`;
 	}
 }

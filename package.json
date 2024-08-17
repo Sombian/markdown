@@ -9,7 +9,7 @@
 	},
 	"files":
 	[
-		"dist"
+		"out"
 	],
 	"exports":
 	{
@@ -42,6 +42,6 @@
 	},
 	"type": "module",
 	"author": "Sombian",
-	"version": "1.0.4",
+	"version": "1.0.6",
 	"keywords": ["markdown"]
 }
