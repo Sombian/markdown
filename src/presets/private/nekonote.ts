@@ -237,11 +237,11 @@ export default Object.freeze([
 
 				const root = (() =>
 				{
-					switch (peek())
+					switch (next())
 					{
-						case T.BQ: { next(); return new HTML.BQ(); }
-						case T.OL: { next(); LI = true; return new HTML.OL(); }
-						case T.UL: { next(); LI = true; return new HTML.UL(); }
+						case T.BQ: { return new HTML.BQ(); }
+						case T.OL: { LI = true; return new HTML.OL(); }
+						case T.UL: { LI = true; return new HTML.UL(); }
 					}
 				})
 				()!;
