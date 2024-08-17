@@ -1,6 +1,5 @@
 const enum Level
 {
-	// HTML,
 	BLOCK,
 	INLINE,
 }

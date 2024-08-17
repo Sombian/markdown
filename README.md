@@ -10,7 +10,7 @@ npm i @sombian/markdown
 
 **@sombian/markdown** is my take on modernizing markdown syntax.
 
-this project focuses on high performance, modularity, and, most importantly, simplicity.
+this project focuses on high performance, modularity, and, above all, simplicity.
 
 # Usage
 

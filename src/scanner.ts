@@ -6,7 +6,7 @@ type Chunk = Token | string;
 
 export default class Scanner
 {
-	private readonly __TABLE__: Record<Level, Route> = {
+	private readonly TRIE: Record<Level, Route> = {
 		// auto-generate
 		[Level.BLOCK]: {},
 		// auto-generate
@@ -56,7 +56,7 @@ export default class Scanner
 		{
 			for (const ctx of routes(token.lvl))
 			{
-				let node = this.__TABLE__[ctx];
+				let node = this.TRIE[ctx];
 		
 				for (let i = 0; i < token.syntax.length; i++)
 				{
@@ -110,7 +110,7 @@ export default class Scanner
 	public scan(data: string)
 	{
 		// init...
-		[this.state, this.buffer, this.stream] = [{ node: this.__TABLE__[Level.BLOCK], depth: 0, escape: false }, new Buffer(data.length), []];
+		[this.state, this.buffer, this.stream] = [{ node: this.TRIE[Level.BLOCK], depth: 0, escape: false }, new Buffer(data.length), []];
 
 		main:
 		for (const char of data.replace(/\r\n?/g, "\n"))
@@ -125,7 +125,7 @@ export default class Scanner
 			if (!this.state.escape && char === "\\")
 			{
 				// state::update
-				this.state = { node: this.__TABLE__[Level.INLINE], depth: 0, escape: true };
+				this.state = { node: this.TRIE[Level.INLINE], depth: 0, escape: true };
 
 				continue main;
 			}
@@ -136,7 +136,7 @@ export default class Scanner
 			if (this.state.escape)
 			{
 				// state::update
-				this.state = { node: this.__TABLE__[Level.INLINE], depth: 0, escape: false };
+				this.state = { node: this.TRIE[Level.INLINE], depth: 0, escape: false };
 
 				continue main;
 			}
@@ -201,7 +201,7 @@ export default class Scanner
 					this.stream.push(token);
 				}
 				// state::update
-				[this.state.node, this.state.depth] = [this.__TABLE__[level ?? Level.INLINE], 0];
+				[this.state.node, this.state.depth] = [this.TRIE[level ?? Level.INLINE], 0];
 
 				// delve branch
 				if (char in this.state.node)
@@ -240,7 +240,7 @@ export default class Scanner
 			this.buffer.clear();
 
 			// state::update
-			[this.state.node, this.state.depth] = [this.__TABLE__[token.next], 0];
+			[this.state.node, this.state.depth] = [this.TRIE[token.next], 0];
 		}
 		// delve branch
 		else
