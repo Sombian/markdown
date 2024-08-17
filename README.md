@@ -26,7 +26,7 @@ console.debug(markdown.run("# hello *world*"));
 
 ## Presets - `NekoNote`
 
-whilst **NekoNote** indeed adopts many existing markdown grammars, it differs from regular markdown in several ways. furthermore, it is not meant to be used in any situation, but rather as a template that illustrates how to write a preset of your own.
+whilst **NekoNote** builds on existing markdown grammars, it differs from regular markdown in several ways. also, rather than offering a universal solution, it serves as a template that illustrates how to write your own preset.
 
 please be aware that **NekoNote** does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet. these will be available after the project reaches the ready-for-production stage.
 
