@@ -1,6 +1,6 @@
-import AST from "@/models/AST";
+import AST from "../../models/ast";
 
-export class HREF extends AST
+export class BACKLINK extends AST
 {
 	constructor(private readonly text: string, private readonly href: string)
 	{

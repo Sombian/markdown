@@ -1,17 +1,15 @@
 # About
 
-*Arumdown* is my take on modernizing *Markdown* syntax. it features a modular design, allowing you to modify the grammar with ease.
+@sombian/markdown is my take on modernizing Markdown syntax. it features a modular design, allowing you to modify the grammar with ease.
 
-please note that *Arumdown* does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet.
+please note that @sombian/markdown does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet.
 
 one of the key aspects of this project is its simplicity and high performance, with the overall time complexity of each implementation being O(n).
 
 # Usage
 
 ```ts
-import { Markdown, Preset } from "<path>";
-
-const markdown = new Markdown(...Preset.ARUM);
+const markdown = new Markdown(...Presets.NekoNote);
 
 console.debug(markdown.run("# hello world"));
 ```
@@ -22,8 +20,7 @@ this project is under heavy development and not yet suitable for production use.
 
 ### TODO
 
-- [ ] html ctx
-- [ ] html sanitize
+- [ ] sanitize
 
 ### Syntax
 
@@ -155,14 +152,4 @@ ___
 <article class="md"><hr/><hr/><hr/></article>
 ```
 
-- [x] BQ
-- [x] OL
-- [x] UL
-- [ ] CB
-- [ ] EM
-- [x] bold
-- [x] code
-- [x] italic
-- [ ] hyperlink
-- [x] underline
-- [x] strikethrough
+...and more

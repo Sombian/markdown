@@ -1,11 +1,11 @@
-import { Markdown } from "..";
+import { Markdown } from "../../";
 
-import AST from "@/models/AST";
-import Token from "@/models/Token";
+import AST from "../../models/ast";
+import Token from "../../models/token";
 
-import Level from "@/enums/Level";
+import Level from "../../enums/level";
 
-import * as HTML from "@/render";
+import * as HTML from "../../render";
 
 abstract class impl extends Token
 {
@@ -93,10 +93,10 @@ const T = Object.freeze(
 	(Level.INLINE, "~~"),
 	UNDERLINE: new (class UNDERLINE extends impl {})
 	(Level.INLINE, "__"),
-	UNCHECKED_BOX: new (class UNCHECKED_BOX extends impl {})
-	(Level.INLINE, "[ ]"),
 	CHECKED_BOX: new (class CHECKED_BOX extends impl {})
 	(Level.INLINE, "[x]"),
+	UNCHECKED_BOX: new (class UNCHECKED_BOX extends impl {})
+	(Level.INLINE, "[ ]"),
 	ARROW_ALL: new (class ARROW_ALL extends impl {})
 	(Level.INLINE, "<->"),
 	ARROW_LEFT: new (class ARROW_LEFT extends impl {})
@@ -130,13 +130,17 @@ const T = Object.freeze(
 });
 
 export default Object.freeze([
-	//
-	// tokens
-	//
+	//---------//
+	//         //
+	// SCANNER //
+	//         //
+	//---------//
 	Object.freeze(Object.values(T)),
-	//
-	// handle
-	//
+	//--------//
+	//        //
+	// PARSER //
+	//        //
+	//--------//
 	function recursive({ peek, next, until }): AST
 	{
 		function lookup()
@@ -233,7 +237,7 @@ export default Object.freeze([
 
 				const root = (() =>
 				{
-					switch (lookup())
+					switch (peek())
 					{
 						case T.BQ: { next(); return new HTML.BQ(); }
 						case T.OL: { next(); LI = true; return new HTML.OL(); }
@@ -308,19 +312,22 @@ export default Object.freeze([
 							})
 							()!;
 							
+							// if token and ast type is equal
 							if (ast instanceof type)
 							{
 								// pickup
 								next(); node = ast as AST;
 							}
+							// if token and ast type is not equal
 							else if (node)
 							{
-								// create diff type of stack as child
+								// delve
 								next(); node.children.push(node = new type());
 							}
+							// if diff type of stack is found before its kind
 							else
 							{
-								// if diff type of stack is found before its kind
+								// exit
 								break stack;
 							}
 							break build;
@@ -434,10 +441,7 @@ export default Object.freeze([
 						}
 						catch
 						{
-							if (0 < fallback.length)
-							{
-								ast.children.push(...fallback);
-							}
+							ast.children.push(...fallback);
 						}
 						break build;
 					}
@@ -446,8 +450,8 @@ export default Object.freeze([
 						const fallback: string[] = [];
 						try
 						{
-							let text: ConstructorParameters<typeof HTML.HREF>[0];
-							let href: ConstructorParameters<typeof HTML.HREF>[1];
+							let text: ConstructorParameters<typeof HTML.BACKLINK>[0];
+							let href: ConstructorParameters<typeof HTML.BACKLINK>[1];
 
 							fallback.push(next(T.BRACKET_L)!.toString());
 
@@ -460,14 +464,11 @@ export default Object.freeze([
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
-							ast.children.push(new HTML.HREF(text! ?? "", href! ?? ""));
+							ast.children.push(new HTML.BACKLINK(text! ?? "", href! ?? ""));
 						}
 						catch
 						{
-							if (0 < fallback.length)
-							{
-								ast.children.push(...fallback);
-							}
+							ast.children.push(...fallback);
 						}
 						break build;
 					}

@@ -2,10 +2,7 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
-import Parser from "@/parser";
-import Scanner from "@/scanner";
-
-import { Preset } from "@/index";
+import { Scanner, Parser, Presets } from "../src";
 
 const [input, output] = [path.join(import.meta.dirname, "in.txt"), path.join(import.meta.dirname, "out.html")];
 
@@ -26,7 +23,7 @@ function main()
 		return value;
 	}
 
-	const [p1, p2] = Preset.ARUM;
+	const [p1, p2] = Presets.NekoNote;
 
 	Bun.file(input).text().then(async (text) =>
 	{
@@ -56,4 +53,4 @@ declare global
 	var watcher: fs.FSWatcher;
 }
 
-globalThis.watcher ??= fs.watch(input, main); process.on("SIGINT", () => { globalThis?.watcher.close(); process.exit(0); });
+global.watcher ??= fs.watch(input, main); process.on("SIGINT", () => { globalThis?.watcher.close(); process.exit(0); });

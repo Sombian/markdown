@@ -1,11 +1,8 @@
-import ARUM from "@/presets/ARUM";
-// import GITHUB from "@/presets/GITHUB";
-// import OBSIDIAN from "@/presets/OBSIDIAN";
+import Parser from "./parser";
+import Scanner from "./scanner";
+import Presets from "./presets";
 
-import Parser from "@/parser";
-import Scanner from "@/scanner";
-
-export class Markdown
+class Markdown
 {
 	private readonly scanner: Scanner;
 	private readonly parser: Parser;
@@ -26,14 +23,4 @@ export class Markdown
 	}
 }
 
-export abstract class Preset
-{
-	public static readonly ARUM = ARUM;
-	public static readonly GITHUB = null;
-	public static readonly OBSIDIAN = null;
-
-	private constructor()
-	{
-		// final
-	}
-}
+export { Markdown, Parser, Scanner, Presets };

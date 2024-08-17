@@ -1,6 +1,6 @@
-import Level from "@/enums/Level";
+import Level from "./enums/level";
 
-import Token from "@/models/Token";
+import Token from "./models/token";
 
 type Stream = (Token | string)[];
 

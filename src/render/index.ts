@@ -26,10 +26,10 @@ export * from "./block/ul";
 //        //
 //--------//
 
-export * from "./inline/todo";
 export * from "./inline/bold";
 export * from "./inline/code";
-export * from "./inline/href";
 export * from "./inline/italic";
-export * from "./inline/strike";
 export * from "./inline/underline";
+export * from "./inline/strike";
+export * from "./inline/backlink";
+export * from "./inline/todo";

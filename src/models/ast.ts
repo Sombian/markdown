@@ -1,6 +1,8 @@
+type Child = AST | string;
+
 export default abstract class AST
 {
-	public readonly children: (AST | string)[];
+	public readonly children: Child[];
 
 	constructor(...children: typeof this.children)
 	{

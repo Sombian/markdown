@@ -1,10 +1,40 @@
 {
+	"name": "@sombian/markdown",
+	"main": "out/cjs/index.js",
+	"module": "out/mjs/index.js",
 	"scripts":
 	{
+		"build": "tsc --p tsconfig.cjs.json && tsc --p tsconfig.mjs.json",
 		"debug": "bun --hot ./test/index.ts"
+	},
+	"files":
+	[
+		"dist"
+	],
+	"exports":
+	{
+		".":
+		{
+			"import":
+			{
+				"types": "./out/mjs/index.d.ts",
+				"default": "./out/mjs/index.js"
+			},
+			"require":
+			{
+				"types": "./out/cjs/index.d.ts",
+				"default": "./out/cjs/index.js"
+			}
+		}
+	},
+	"repository":
+	{
+		"type": "git",
+		"url": "git+https://github.com/Sombian/markdown.git"
 	},
 	"devDependencies":
 	{
+		"@types/node": "22.4.0",
 		"@types/bun": "^1.1.6",
 		"eslint": "^9.9.0",
 		"typescript": "^5.5.4",
@@ -12,5 +42,6 @@
 	},
 	"type": "module",
 	"author": "Sombian",
+	"version": "1.0.0",
 	"keywords": ["markdown"]
 }

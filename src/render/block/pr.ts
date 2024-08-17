@@ -1,4 +1,4 @@
-import AST from "@/models/AST";
+import AST from "../../models/ast";
 
 export class PR extends AST
 {
