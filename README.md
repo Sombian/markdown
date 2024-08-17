@@ -1,28 +1,33 @@
 # About
 
-@sombian/markdown is my take on modernizing Markdown syntax. it features a modular design, allowing you to modify the grammar with ease.
+[![npm](https://badgen.net/npm/v/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
+[![downloads](https://badgen.net/npm/dt/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
+[![install size](https://packagephobia.com/badge?p=@sombian/markdown)](https://packagephobia.com/result?p=@sombian/markdown)
 
-please note that @sombian/markdown does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet.
+```bash
+npm i @sombian/markdown
+```
 
-one of the key aspects of this project is its simplicity and high performance, with the overall time complexity of each implementation being O(n).
+**@sombian/markdown** is my take on modernizing markdown syntax.
+
+this project focuses on high performance, modularity, and, most importantly, simplicity.
 
 # Usage
 
+> this project is under heavy development and not yet suitable for production use.
+
 ```ts
+import { Markdown, Presets } from "@sombian/markdown";
+
 const markdown = new Markdown(...Presets.NekoNote);
 
-console.debug(markdown.run("# hello world"));
+console.debug(markdown.run("# hello *world*"));
 ```
 
-# Features
+## Presets.NekoNote
 
-this project is under heavy development and not yet suitable for production use.
+whilst **NekoNote** indeed adopts many existing markdown grammars, it differs from regular markdown in several ways. furthermore, **NekoNote** is not meant to be used in any situation, but rather as a template that illustrates how to write a preset of your own. please be aware that **NekoNote** does not support every feature specified in the markdown spec, nor does it provide its own formal spec yet. these will be available after the project reaches the ready-for-production stage.
 
-### TODO
-
-- [ ] sanitize
-
-### Syntax
 
 ###### Escape
 
@@ -34,6 +39,7 @@ this project is under heavy development and not yet suitable for production use.
 ["H1", "hello", "SPACE", "*world", "ITALIC", "BREAK"]
 ```
 ->
+
 ```html
 <article class="md"><h1>hello *world</h1></article>
 ```
