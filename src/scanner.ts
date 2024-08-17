@@ -2,7 +2,7 @@ import Level from "./enums/level";
 
 import Token from "./models/token";
 
-type Stream = (Token | string)[];
+type Chunk = Token | string;
 
 export default class Scanner
 {
@@ -14,7 +14,7 @@ export default class Scanner
 	};
 	private state: State;
 	private buffer: Buffer;
-	private stream: Stream;
+	private stream: Chunk[];
 
 	constructor(data: Readonly<Token[]>)
 	{
@@ -104,7 +104,7 @@ export default class Scanner
 		// init...
 		this.state = null as unknown as State;
 		this.buffer = null as unknown as Buffer;
-		this.stream = null as unknown as Stream;
+		this.stream = null as unknown as Chunk[];
 	}
 
 	public scan(data: string)

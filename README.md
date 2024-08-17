@@ -24,7 +24,7 @@ const markdown = new Markdown(...Presets.NekoNote);
 console.debug(markdown.run("# hello *world*"));
 ```
 
-# Presets - `NekoNote`
+## Presets.`NekoNote`
 
 whilst **NekoNote** builds on existing markdown grammars, it differs from regular markdown in several ways. also, rather than offering a universal solution, it serves as a template that illustrates how to write your own preset.
 

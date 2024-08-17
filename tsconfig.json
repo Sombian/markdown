@@ -9,6 +9,7 @@
 		// miscs
 		//
 		"strict": true,
+		"incremental": true,
 		"declaration": true,
 		"skipLibCheck": true,
 		"noEmitOnError": true,
