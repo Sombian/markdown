@@ -7,11 +7,10 @@ export default class Parser
 {
 	private data: ReturnType<typeof Scanner.prototype.scan> = []; private i = 0;
 
-	constructor(private readonly handle: ({ peek, next, until }:
+	constructor(private readonly handle: ({ peek, next }:
 	{
 		readonly peek: typeof Parser.prototype.peek,
 		readonly next: typeof Parser.prototype.next,
-		readonly until: Token[],
 	}
 	) => AST)
 	{
@@ -39,7 +38,6 @@ export default class Parser
 				{
 					peek: this.peek.bind(this),
 					next: this.next.bind(this),
-					until: [],
 				}));
 			}
 			catch (error)

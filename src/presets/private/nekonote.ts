@@ -141,7 +141,7 @@ export default Object.freeze([
 	// PARSER //
 	//        //
 	//--------//
-	function recursive({ peek, next, until }): AST
+	function recursive({ peek, next }): AST
 	{
 		function lookup()
 		{
@@ -197,7 +197,7 @@ export default Object.freeze([
 						return new HTML.BR();
 					}
 				}
-				return recursive({ peek, next, until: [] });
+				return recursive({ peek, next });
 			}
 			case T.H1:
 			{
@@ -286,12 +286,11 @@ export default Object.freeze([
 									// if indent is found before BQ/OL/UL
 									if (node === null)
 									{
+										// exit
 										break stack;
 									}
-									else
-									{
-										node.children.push(inline()); break;
-									}
+									// insert
+									node.children.push(inline()); break;
 								}
 							}
 							break build;
@@ -338,16 +337,14 @@ export default Object.freeze([
 						{
 							// if inline is found before stack
 							if (node === null) break stack;
-	
-							const ast = recursive({ peek, next, until: [] });
-	
+
 							if (!LI)
 							{
-								node.children.push(ast);
+								node.children.push(inline());
 							}
 							else
 							{
-								node.children.push(new HTML.LI(...ast.children));
+								node.children.push(new HTML.LI(...inline().children));
 							}
 							LI = false;
 							break build;
@@ -362,16 +359,16 @@ export default Object.freeze([
 			}
 		}
 
-		function inline()
+		function inline(until: ReturnType<typeof lookup>[] = [])
 		{
 			const ast = new HTML.PR();
 
-			function style(node: AST, closing: Token)
+			function style(node: AST, ending: Token)
 			{
 				style:
 				while (true)
 				{
-					const t = lookup(); if (until.includes(t as never)) break style;
+					const t = lookup(); if (until.includes(t)) break style;
 
 					switch (t)
 					{
@@ -380,7 +377,7 @@ export default Object.freeze([
 						{
 							break style;
 						}
-						case closing:
+						case ending:
 						{
 							next(); break style;
 						}
@@ -392,7 +389,7 @@ export default Object.freeze([
 							}
 							else
 							{
-								node.children.push(...recursive({ peek, next, until: [...until, closing] }).children);
+								node.children.push(...inline([...until, ending]).children);
 							}
 							continue style;
 						}
@@ -404,7 +401,7 @@ export default Object.freeze([
 			inline:
 			while (true)
 			{
-				const t = lookup(); if (until.includes(t as never)) break inline;
+				const t = lookup(); if (until.includes(t)) break inline;
 				
 				build:
 				switch (t)
@@ -424,18 +421,15 @@ export default Object.freeze([
 						const fallback: string[] = [];
 						try
 						{
-							let alt: ConstructorParameters<typeof HTML.EM>[0];
-							let src: ConstructorParameters<typeof HTML.EM>[1];
-
 							fallback.push(next(T.EXCLAMATION)!.toString());
 							fallback.push(next(T.BRACKET_L)!.toString());
 
-							const t1 = peek(); if (t1 === null) throw new Error(); if (typeof t1 === "string") { alt = t1; next(); };
+							const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body;
 
 							fallback.push(next(T.BRACKET_R)!.toString());
 							fallback.push(next(T.PAREN_L)!.toString());
 
-							const t2 = peek(); if (t1 === null) throw new Error(); if (typeof t2 === "string") { src = t2; next(); };
+							const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body;
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
@@ -452,17 +446,14 @@ export default Object.freeze([
 						const fallback: string[] = [];
 						try
 						{
-							let text: ConstructorParameters<typeof HTML.BACKLINK>[0];
-							let href: ConstructorParameters<typeof HTML.BACKLINK>[1];
-
 							fallback.push(next(T.BRACKET_L)!.toString());
 
-							const t1 = inline(); if (t1 === null) throw new Error(); if (typeof t1 === "string") { text = t1; next(); };
+							const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body;
 
 							fallback.push(next(T.BRACKET_R)!.toString());
 							fallback.push(next(T.PAREN_L)!.toString());
 
-							const t2 = peek(); if (t1 === null) throw new Error(); if (typeof t2 === "string") { href = t2; next(); };
+							const  href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body;
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
