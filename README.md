@@ -1,6 +1,7 @@
 # @sombian/markdown
 
 [![npm](https://badgen.net/npm/v/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
+[![hits](https://hits.sh/github.com/Sombian/markdown.svg)](https://hits.sh/github.com/Sombian/markdown)
 [![downloads](https://badgen.net/npm/dt/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
 [![install size](https://packagephobia.com/badge?p=@sombian/markdown)](https://packagephobia.com/result?p=@sombian/markdown)
 
