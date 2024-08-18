@@ -453,7 +453,7 @@ export default Object.freeze([
 							fallback.push(next(T.BRACKET_R)!.toString());
 							fallback.push(next(T.PAREN_L)!.toString());
 
-							const  href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body;
+							const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body;
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
