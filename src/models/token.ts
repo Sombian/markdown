@@ -1,4 +1,4 @@
-import Level from "../enums/level";
+import Level from "@/enums/level";
 
 export default abstract class Token
 {

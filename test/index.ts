@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
-import { Scanner, Parser, Presets } from "../src";
+import { Scanner, Parser, Presets } from "@";
 
 const [input, output] = [path.join(import.meta.dirname, "in.txt"), path.join(import.meta.dirname, "out.html")];
 

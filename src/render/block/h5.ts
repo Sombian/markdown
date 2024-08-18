@@ -1,4 +1,4 @@
-import AST from "../../models/ast";
+import AST from "@/models/ast";
 
 export class H5 extends AST
 {

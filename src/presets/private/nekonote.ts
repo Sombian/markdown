@@ -1,11 +1,11 @@
-import { Markdown } from "../../";
+import { Markdown } from "@";
 
-import AST from "../../models/ast";
-import Token from "../../models/token";
+import AST from "@/models/ast";
+import Token from "@/models/token";
 
-import Level from "../../enums/level";
+import Level from "@/enums/level";
 
-import * as HTML from "../../render";
+import * as HTML from "@/render";
 
 abstract class impl extends Token
 {

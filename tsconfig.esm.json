@@ -4,7 +4,7 @@
 	{
 		"module": "esnext",
 		"target": "esnext",
-		"outDir": "./out/mjs",
+		"outDir": "./out/esm",
 	},
 	"include": ["src", "types"]
 }

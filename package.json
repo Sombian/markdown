@@ -1,47 +1,42 @@
 {
 	"name": "@sombian/markdown",
 	"main": "out/cjs/index.js",
-	"module": "out/mjs/index.js",
-	"scripts":
-	{
-		"build": "tsc --p tsconfig.cjs.json && tsc --p tsconfig.mjs.json",
+	"module": "out/esm/index.js",
+	"scripts": {
+		"build": "npm run build:esm && npm run build:cjs",
+		"build:esm": "tsc --p tsconfig.esm.json && swc ./src -s -C module.type=es6 -d ./out/esm --strip-leading-paths",
+		"build:cjs": "tsc --p tsconfig.cjs.json && swc ./src -s -C module.type=commonjs -d ./out/cjs --strip-leading-paths",
 		"debug": "bun --hot ./test/index.ts"
 	},
-	"files":
-	[
+	"files": [
 		"out"
 	],
-	"exports":
-	{
-		".":
-		{
-			"import":
-			{
-				"types": "./out/mjs/index.d.ts",
-				"default": "./out/mjs/index.js"
+	"exports": {
+		".": {
+			"import": {
+				"types": "./out/esm/index.d.ts",
+				"default": "./out/esm/index.js"
 			},
-			"require":
-			{
+			"require": {
 				"types": "./out/cjs/index.d.ts",
 				"default": "./out/cjs/index.js"
 			}
 		}
 	},
-	"repository":
-	{
+	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Sombian/markdown.git"
 	},
-	"devDependencies":
-	{
-		"@types/node": "22.4.0",
+	"devDependencies": {
+		"@swc/cli": "^0.4.0",
+		"@swc/core": "^1.7.11",
 		"@types/bun": "^1.1.6",
+		"@types/node": "22.4.0",
 		"eslint": "^9.9.0",
 		"typescript": "^5.5.4",
 		"typescript-eslint": "^8.1.0"
 	},
 	"type": "module",
 	"author": "Sombian",
-	"version": "1.0.6",
-	"keywords": ["markdown"]
+	"version": "1.0.6"
 }

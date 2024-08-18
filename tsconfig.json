@@ -1,24 +1,39 @@
 {
 	"compilerOptions":
 	{
-		//
-		// core
-		//
-		"jsx": "react-jsx", "target": "esnext", "module": "esnext",
-		//
-		// miscs
-		//
+		//-------//
+		//       //
+		// ALIAS //
+		//       //
+		//-------//
+		"paths":
+		{
+			"@": ["./src"],
+			"@/*": ["./src/*"],
+		},
+		//------//
+		//      //
+		// CORE //
+		//      //
+		//------//
+		"jsx": "react-jsx", "target": "esnext", "module": "esnext", "baseUrl": "./",
+		//------//
+		//      //
+		// MISC //
+		//      //
+		//------//
 		"strict": true,
-		"incremental": true,
+		"sourceMap": true,
 		"declaration": true,
 		"skipLibCheck": true,
 		"noEmitOnError": true,
 		"noImplicitAny": true,
 		"declarationMap": true,
-		"inlineSourceMap": true,
 		"esModuleInterop": true,
+		"isolatedModules": false,
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
+		"emitDeclarationOnly": true,
 	},
 	"exclude": ["node_modules"],
 }

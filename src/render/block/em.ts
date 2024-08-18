@@ -1,4 +1,4 @@
-import AST from "../../models/ast";
+import AST from "@/models/ast";
 
 const GIST = /^https:\/\/gist\.github\.com\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9]+)$/;
 const YOUTUBE = /^https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})$/;
