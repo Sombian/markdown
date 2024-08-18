@@ -1,4 +1,4 @@
-# About
+# @sombian/markdown
 
 [![npm](https://badgen.net/npm/v/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
 [![downloads](https://badgen.net/npm/dt/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
@@ -12,9 +12,9 @@ npm i @sombian/markdown
 
 this project focuses on high performance, modularity, and, above all, simplicity.
 
-# Usage
+## Usage
 
-> this project is under heavy development and not yet suitable for production use.
+> this project is under active development and not yet suitable for production use.
 
 ```ts
 import { Markdown, Presets } from "@sombian/markdown";
@@ -24,7 +24,7 @@ const markdown = new Markdown(...Presets.NekoNote);
 console.debug(markdown.run("# hello *world*"));
 ```
 
-## Presets.`NekoNote`
+## NekoNote
 
 whilst **NekoNote** builds on existing markdown grammars, it differs from regular markdown in several ways. also, rather than offering a universal solution, it serves as a template that illustrates how to write your own preset.
 
