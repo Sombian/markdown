@@ -23,8 +23,7 @@ export default class Parser
 		{
 			override render()
 			{
-				// TODO: maybe just return this.body
-				return `<article class="md">${this.body}</article>`;
+				return this.body;
 			}
 		})
 		();

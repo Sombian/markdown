@@ -131,7 +131,7 @@ const T = Object.freeze(
 });
 
 // TODO: lift lookip(), inline(), style() outside of recursive()
-export default Object.freeze([
+export default [
 	//---------//
 	//         //
 	// SCANNER //
@@ -589,4 +589,4 @@ export default Object.freeze([
 			return ast;
 		}
 	},
-] satisfies ConstructorParameters<typeof Markdown>);
+] satisfies ConstructorParameters<typeof Markdown>;

@@ -9,6 +9,7 @@ export class BACKLINK extends AST
 
 	override render()
 	{
-		return `<a href="${this.href ?? ""}">${this.text ?? ""}</a>`;
+		// TODO: maybe return an empty string if both this.text & this.href is empty or undefined
+		return `<${["a", this.href ? `href="${this.href}"` : null].filter((_) => _ !== null).join("\u0020")}>${this.text ?? ""}</a>`;
 	}
 }

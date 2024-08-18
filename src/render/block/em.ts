@@ -22,9 +22,10 @@ export class EM extends AST
 			}
 			if ((groups = YOUTUBE.exec(this.src)))
 			{
-				return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${groups[1]}" title="${this.alt}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+				return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${groups[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 			}
 		}
-		return `<img alt="${this.alt ?? ""}" src="${this.src ?? ""}">`;
+		// TODO: maybe return an empty string if both this.alt & this.src is empty or undefined
+		return `<${["img", this.alt ? `alt="${this.alt}"` : null, this.src ? `src="${this.src}"` : null].filter((_) => _ !== null).join("\u0020")}>`;
 	}
 }
