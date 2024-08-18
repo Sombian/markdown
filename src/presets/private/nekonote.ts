@@ -11,6 +11,7 @@ abstract class impl extends Token
 {
 	constructor(lvl: ConstructorParameters<typeof Token>[0], syntax: ConstructorParameters<typeof Token>[1], next?: ConstructorParameters<typeof Token>[2])
 	{
+		// TODO: maybe change IIFE to a function declaration 
 		super(lvl, syntax, next ?? (() =>
 		{
 			switch (syntax.at(-1))
@@ -129,6 +130,7 @@ const T = Object.freeze(
 	(Level.INLINE, ")"),
 });
 
+// TODO: lift lookip(), inline(), style() outside of recursive()
 export default Object.freeze([
 	//---------//
 	//         //
@@ -270,7 +272,7 @@ export default Object.freeze([
 						case T.INDENT_2S:
 						case T.INDENT_4S:
 						{
-							// get the most recent working node
+							// get the most recently working node
 							const ast = node?.children.at(-1) ?? root;
 
 							switch (ast.constructor)
@@ -283,7 +285,7 @@ export default Object.freeze([
 								}
 								default:
 								{
-									// if indent is found before BQ/OL/UL
+									// if an indent is found before BQ/OL/UL
 									if (node === null)
 									{
 										// exit
@@ -299,7 +301,7 @@ export default Object.freeze([
 						case T.OL:
 						case T.UL:
 						{
-							// get the most recent working node
+							// get the most recently working node
 							const ast = node?.children.at(-1) ?? root;
 
 							const type = (() =>
@@ -313,19 +315,19 @@ export default Object.freeze([
 							})
 							()!;
 							
-							// if token and ast type is equal
+							// if the types of ast and token correspond
 							if (ast instanceof type)
 							{
 								// pickup
 								next(); node = ast as AST;
 							}
-							// if token and ast type is not equal
+							// if the types of ast and token differ
 							else if (node)
 							{
 								// delve
 								next(); node.children.push(node = new type());
 							}
-							// if diff type of stack is found before its kind
+							// if a diff type of ast is found before its kind
 							else
 							{
 								// exit
@@ -335,7 +337,7 @@ export default Object.freeze([
 						}
 						default:
 						{
-							// if inline is found before stack
+							// if an inline element is found before a block element
 							if (node === null) break stack;
 
 							if (!LI)
@@ -411,11 +413,11 @@ export default Object.freeze([
 					{
 						break inline;
 					}
-					//---------//
-					//         //
-					// COMPLEX //
-					//         //
-					//---------//
+					//----------//
+					//          //
+					// COMPOUND //
+					//          //
+					//----------//
 					case T.EXCLAMATION:
 					{
 						const fallback: string[] = [];
@@ -563,11 +565,11 @@ export default Object.freeze([
 					{
 						next(); ast.children.push("≥"); break build;
 					}
-					//-------//
-					//       //
-					// OTHER //
-					//       //
-					//-------//
+					//------//
+					//      //
+					// REST //
+					//      //
+					//------//
 					default:
 					{
 						if (typeof t === "string")

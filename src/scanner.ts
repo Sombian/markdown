@@ -150,6 +150,7 @@ export default class Scanner
 			{
 				this.build(char);
 			}
+			// fail-safe plan..!
 			else
 			{
 				let level: Nullable<Level> = null;
@@ -229,6 +230,7 @@ export default class Scanner
 		// state::update
 		this.state.depth++;
 
+		// :3
 		if (this.state.node[char] instanceof Token)
 		{
 			const token = this.state.node[char];

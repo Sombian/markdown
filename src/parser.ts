@@ -7,7 +7,7 @@ export default class Parser
 {
 	private data: ReturnType<typeof Scanner.prototype.scan> = []; private i = 0;
 
-	constructor(private readonly handle: ({ peek, next }:
+	constructor(private readonly impl: ({ peek, next }:
 	{
 		readonly peek: typeof Parser.prototype.peek,
 		readonly next: typeof Parser.prototype.next,
@@ -23,18 +23,22 @@ export default class Parser
 		{
 			override render()
 			{
+				// TODO: maybe just return this.body
 				return `<article class="md">${this.body}</article>`;
 			}
 		})
 		();
-		//
-		// iterate
-		//
+		//---------------------------//
+		//                           //
+		// RECURSIVE DESCENT PARSING //
+		//                           //
+		//---------------------------//
+		
 		while (this.i in this.data)
 		{
 			try
 			{
-				root.children.push(this.handle(
+				root.children.push(this.impl(
 				{
 					peek: this.peek.bind(this),
 					next: this.next.bind(this),
@@ -56,7 +60,7 @@ export default class Parser
 	{
 		if (type && this.data[this.i] !== type)
 		{
-			throw new Error(`Unexpected token found at position ${this.i}`);
+			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
 		}
 		return this.i in this.data ? this.data[this.i] : null;
 	}
@@ -65,7 +69,7 @@ export default class Parser
 	{
 		if (type && this.data[this.i] !== type)
 		{
-			throw new Error(`Unexpected token found at position ${this.i}`);
+			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
 		}
 		return this.i in this.data ? this.data[this.i++] : null;
 	}
