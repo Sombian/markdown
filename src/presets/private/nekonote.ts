@@ -246,7 +246,7 @@ export default Object.freeze([
 				})
 				()!;
 		
-				let node: Nullable<AST> = root;
+				let node: Nullable<HTML.BQ | HTML.OL | HTML.UL> = root;
 		
 				stack:
 				while (true)
@@ -270,13 +270,8 @@ export default Object.freeze([
 						case T.INDENT_2S:
 						case T.INDENT_4S:
 						{
-							// if indent is found before BQ/OL/UL
-							if (node === null)
-							{
-								break stack;
-							}
 							// get the most recent working node
-							const ast = node.children.at(-1) ?? root;
+							const ast = node?.children.at(-1) ?? root;
 
 							switch (ast.constructor)
 							{
@@ -288,8 +283,15 @@ export default Object.freeze([
 								}
 								default:
 								{
-									// insert
-									node.children.push(inline()); break;
+									// if indent is found before BQ/OL/UL
+									if (node === null)
+									{
+										break stack;
+									}
+									else
+									{
+										node.children.push(inline()); break;
+									}
 								}
 							}
 							break build;
@@ -306,8 +308,8 @@ export default Object.freeze([
 								switch (t)
 								{
 									case T.BQ: { return HTML.BQ; }
-									case T.OL: { return HTML.OL; }
-									case T.UL: { return HTML.UL; }
+									case T.OL: { LI = true; return HTML.OL; }
+									case T.UL: { LI = true; return HTML.UL; }
 								}
 							})
 							()!;
@@ -347,10 +349,10 @@ export default Object.freeze([
 							{
 								node.children.push(new HTML.LI(...ast.children));
 							}
+							LI = false;
 							break build;
 						}
 					}
-					LI = false;
 				}
 				return root;
 			}
@@ -455,7 +457,7 @@ export default Object.freeze([
 
 							fallback.push(next(T.BRACKET_L)!.toString());
 
-							const t1 = peek(); if (t1 === null) throw new Error(); if (typeof t1 === "string") { text = t1; next(); };
+							const t1 = inline(); if (t1 === null) throw new Error(); if (typeof t1 === "string") { text = t1; next(); };
 
 							fallback.push(next(T.BRACKET_R)!.toString());
 							fallback.push(next(T.PAREN_L)!.toString());
