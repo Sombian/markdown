@@ -16,7 +16,7 @@ export default class Scanner
 	private buffer: Buffer;
 	private stream: Chunk[];
 
-	constructor(data: Readonly<Token[]>)
+	constructor(data: Token[])
 	{
 		function routes(ctx: typeof Token.prototype.lvl)
 		{

@@ -137,7 +137,7 @@ export default Object.freeze([
 	// SCANNER //
 	//         //
 	//---------//
-	Object.freeze(Object.values(T)),
+	Object.values(T) as Token[],
 	//--------//
 	//        //
 	// PARSER //
@@ -184,7 +184,9 @@ export default Object.freeze([
 			}
 			case T.BREAK:
 			{
-				next(); const t = lookup();
+				next();
+				
+				const t = lookup();
 
 				if (t instanceof Token)
 				{
