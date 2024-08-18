@@ -428,12 +428,12 @@ export default [
 							fallback.push(next(T.EXCLAMATION)!.toString());
 							fallback.push(next(T.BRACKET_L)!.toString());
 
-							const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body;
+							const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body || null;
 
 							fallback.push(next(T.BRACKET_R)!.toString());
 							fallback.push(next(T.PAREN_L)!.toString());
 
-							const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body;
+							const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body || null;
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
@@ -452,12 +452,12 @@ export default [
 						{
 							fallback.push(next(T.BRACKET_L)!.toString());
 
-							const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body;
+							const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body || null;
 
 							fallback.push(next(T.BRACKET_R)!.toString());
 							fallback.push(next(T.PAREN_L)!.toString());
 
-							const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body;
+							const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body || null;
 
 							fallback.push(next(T.PAREN_R)!.toString());
 
@@ -574,15 +574,7 @@ export default [
 					//------//
 					default:
 					{
-						if (typeof t === "string")
-						{
-							next(); ast.children.push(t);
-						}
-						else
-						{
-							next(); ast.children.push(t.syntax);
-						}
-						break build;
+						next(); ast.children.push(t.toString()); break build;
 					}
 				}
 			}

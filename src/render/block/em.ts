@@ -5,7 +5,7 @@ const YOUTUBE = /^https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})$/;
 
 export class EM extends AST
 {
-	constructor(private readonly alt?: string, private readonly src?: string)
+	constructor(private readonly alt: Nullable<string>, private readonly src: Nullable<string>)
 	{
 		super();
 	}
@@ -25,7 +25,7 @@ export class EM extends AST
 				return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${groups[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 			}
 		}
-		// TODO: maybe return an empty string if both this.alt & this.src is empty or undefined
+		// TODO: maybe return an empty string if both this.alt & this.src is empty or null
 		return `<${["img", this.alt ? `alt="${this.alt}"` : null, this.src ? `src="${this.src}"` : null].filter((_) => _ !== null).join("\u0020")}>`;
 	}
 }
