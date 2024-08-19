@@ -7,12 +7,7 @@ export default class Parser
 {
 	private data: ReturnType<typeof Scanner.prototype.scan> = []; private i = 0;
 
-	constructor(private readonly impl: ({ peek, next }:
-	{
-		readonly peek: typeof Parser.prototype.peek,
-		readonly next: typeof Parser.prototype.next,
-	}
-	) => AST)
+	constructor(private readonly impl: (args: Processor) => AST)
 	{
 		// TODO: none
 	}
@@ -72,4 +67,10 @@ export default class Parser
 		}
 		return this.i in this.data ? this.data[this.i++] : null;
 	}
+}
+
+export interface Processor
+{
+	readonly peek: Parser["peek"];
+	readonly next: Parser["next"];
 }
