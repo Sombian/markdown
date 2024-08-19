@@ -61,10 +61,10 @@ export default class Scanner
 				for (let i = 0; i < token.syntax.length; i++)
 				{
 					const char = token.syntax[i];
-			
-					if (i + 1 < token.syntax.length)
+
+					if (char in node)
 					{
-						if (char in node)
+						if (i + 1 < token.syntax.length)
 						{
 							if (node[char] instanceof Token)
 							{
@@ -77,21 +77,21 @@ export default class Scanner
 						}
 						else
 						{
-							node = (node[char] = {});
-						}
-					}
-					else
-					{
-						if (char in node)
-						{
 							if (node[char] instanceof Token)
 							{
-								throw new Error(`Token [${node[char]}] and [${token}] has exact syntax`)
+								throw new Error(`Token [${node[char]}] and [${token}] has exact syntax`);
 							}
 							else
 							{
 								node[char].default = token;
 							}
+						}
+					}
+					else
+					{
+						if (i + 1 < token.syntax.length)
+						{
+							node = (node[char] = {});
 						}
 						else
 						{
@@ -123,9 +123,7 @@ export default class Scanner
 			if (!this.state.escape && char === "\\")
 			{
 				// state::update
-				this.state = { node: this.TRIE[Level.INLINE], depth: 0, escape: true };
-
-				continue main;
+				[this.state.node, this.state.depth, this.state.escape] = [this.TRIE[Level.INLINE], 0, true]; continue main;
 			}
 			// buffer::build
 			this.buffer.write(char);
@@ -134,11 +132,8 @@ export default class Scanner
 			if (this.state.escape)
 			{
 				// state::update
-				this.state = { node: this.TRIE[Level.INLINE], depth: 0, escape: false };
-
-				continue main;
+				[this.state.node, this.state.depth, this.state.escape] = [this.TRIE[Level.INLINE], 0, false]; continue main;
 			}
-
 			//----------//
 			//          //
 			// SCANNING //
@@ -148,7 +143,7 @@ export default class Scanner
 			// delve branch
 			if (char in this.state.node)
 			{
-				this.build(char);
+				this.lookup(char);
 			}
 			// fail-safe plan..!
 			else
@@ -205,7 +200,7 @@ export default class Scanner
 				// delve branch
 				if (char in this.state.node)
 				{
-					this.build(char);
+					this.lookup(char);
 				}
 			}
 		}
@@ -215,36 +210,23 @@ export default class Scanner
 			// stream::build
 			this.stream.push(this.buffer.toString());
 		}
-		// save
-		const output = this.stream;
-
-		// init...
-		[this.state, this.buffer, this.stream] = [null as unknown as State, null as unknown as Buffer, null as unknown as Chunk[]];
-
-		// emit
-		return output;
+		return this.stream;
 	}
 
-	private build(char: string)
+	private lookup(char: string)
 	{
-		// state::update
-		this.state.depth++;
-
 		// :3
 		if (this.state.node[char] instanceof Token)
 		{
 			const token = this.state.node[char];
 
-			if (this.state.depth < this.buffer.size)
+			if (++this.state.depth < this.buffer.size)
 			{
 				// stream::build && buffer::modify
-				this.stream.push(this.buffer.slice(0, this.buffer.size - this.state.depth));
+				this.stream.push(this.buffer.slice(0, - this.state.depth));
 			}
-			// stream::build
-			this.stream.push(token);
-
-			// buffer::clear
-			this.buffer.clear();
+			// stream::build && buffer::clear
+			this.stream.push(token); this.buffer.clear();
 
 			// state::update
 			[this.state.node, this.state.depth] = [this.TRIE[token.next], 0];
@@ -253,7 +235,7 @@ export default class Scanner
 		else
 		{
 			// state::update
-			this.state.node = this.state.node[char];
+			[this.state.node, this.state.depth] = [this.state.node[char], this.state.depth + 1];
 		}
 	}
 }
@@ -298,9 +280,9 @@ class Buffer
 
 	public slice(start: number, count: number)
 	{
-		if (start < 0 || count < 0) throw new Error("Invalid Range");
+		if (start < 0) throw new Error("Invalid Range");
 
-		const clamp = Math.min(start + count, this.i);
+		const clamp = Math.min(start + (count < 0 ? this.i + count : count), this.i);
 
 		const r1 = this.u16a.subarray(start, clamp);
 
@@ -309,9 +291,9 @@ class Buffer
 
 	public splice(start: number, count: number)
 	{
-		if (start < 0 || count < 0) throw new Error("Invalid Range");
+		if (start < 0) throw new Error("Invalid Range");
 
-		const clamp = Math.min(start + count, this.i);
+		const clamp = Math.min(start + (count < 0 ? this.i + count : count), this.i);
 
 		const [r1, r2] = [
 			this.u16a.subarray(start, clamp),

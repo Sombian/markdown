@@ -130,7 +130,7 @@ const T = Object.freeze(
 	(Level.INLINE, ")"),
 });
 
-// TODO: lift lookip(), inline(), style() outside of recursive()
+// TODO: lift lookup()/inline()/style() outside of recursive()
 export default [
 	//---------//
 	//         //
