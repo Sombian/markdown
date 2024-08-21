@@ -4,6 +4,6 @@ export class PR extends AST
 {
 	override render()
 	{
-		return `<pr>${this.body}</pr>`;
+		return `<p>${this.body}</p>`;
 	}
 }
