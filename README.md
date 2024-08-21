@@ -43,7 +43,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ->
 
 ```html
-<article class="md"><h1>hello *world</h1></article>
+<h1>hello *world</h1>
 ```
 
 ###### Comment
@@ -57,7 +57,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ```
 ->
 ```html
-<article class="md"></article>
+
 ```
 
 ###### Heading 1
@@ -71,7 +71,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ```
 ->
 ```html
-<article class="md"><h1>hello world</h1></article>
+<h1>hello world</h1>
 ```
 
 ###### Heading 2
@@ -85,7 +85,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ```
 ->
 ```html
-<article class="md"><h2>hello world</h2></article>
+<h2>hello world</h2>
 ```
 
 ###### Heading 3
@@ -99,7 +99,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ```
 ->
 ```html
-<article class="md"><h3>hello world</h3></article>
+<h3>hello world</h3>
 ```
 
 ###### Heading 4
@@ -113,7 +113,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ```
 ->
 ```html
-<article class="md"><h4>hello world</h4></article>
+<h4>hello world</h4>
 ```
 
 ###### Heading 5
@@ -127,7 +127,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ```
 ->
 ```html
-<article class="md"><h5>hello world</h5></article>
+<h5>hello world</h5>
 ```
 
 ###### Heading 6
@@ -141,7 +141,7 @@ please be aware that **NekoNote** does not support every feature specified in th
 ```
 ->
 ```html
-<article class="md"><h6>hello world</h6></article>
+<h6>hello world</h6>
 ```
 
 ###### Horizontal Rule
@@ -157,7 +157,7 @@ ___
 ```
 ->
 ```html
-<article class="md"><hr/><hr/><hr/></article>
+<hr/><hr/><hr/>
 ```
 
 ...and more

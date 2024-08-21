@@ -2,7 +2,7 @@
 	"configurations":
 	[
 		{
-			"name": "test", "type": "node-terminal", "cwd":"${workspaceFolder}", "request": "launch", "command": "bun debug",
+			"name": "serve", "type": "node-terminal", "cwd":"${workspaceFolder}", "request": "launch", "command": "bun serve",
 		},
 	],
 }

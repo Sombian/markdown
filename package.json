@@ -3,10 +3,10 @@
 	"main": "out/cjs/index.js",
 	"module": "out/esm/index.js",
 	"scripts": {
+		"serve": "bun --hot ./test/index.ts",
 		"build": "npm run build:esm && npm run build:cjs",
 		"build:esm": "tsc --p tsconfig.esm.json && swc ./src -s -C module.type=es6 -d ./out/esm --strip-leading-paths",
-		"build:cjs": "tsc --p tsconfig.cjs.json && swc ./src -s -C module.type=commonjs -d ./out/cjs --strip-leading-paths",
-		"debug": "bun --hot ./test/index.ts"
+		"build:cjs": "tsc --p tsconfig.cjs.json && swc ./src -s -C module.type=commonjs -d ./out/cjs --strip-leading-paths"
 	},
 	"files": [
 		"out"
@@ -29,12 +29,12 @@
 	},
 	"devDependencies": {
 		"@swc/cli": "^0.4.0",
-		"@swc/core": "^1.7.11",
+		"@swc/core": "^1.7.14",
 		"@types/bun": "^1.1.6",
-		"@types/node": "22.4.0",
+		"@types/node": "^22.4.2",
 		"eslint": "^9.9.0",
 		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.1.0"
+		"typescript-eslint": "^8.2.0"
 	},
 	"type": "module",
 	"author": "Sombian",
