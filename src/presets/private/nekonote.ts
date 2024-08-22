@@ -7,7 +7,7 @@ import Level from "@/enums/level";
 
 import * as HTML from "@/DOM";
 
-import { Processor } from "@/parser";
+import type { Processor } from "@/parser";
 
 abstract class _ extends Token
 {
