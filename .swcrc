@@ -13,7 +13,7 @@
 			"compress": true
 		},
 		// path aliasing
-		"baseUrl": "./", "paths": {	"@": ["./src"], "@/*": ["./src/*"] }, "target": "esnext"
+		"target": "esnext", "baseUrl": "./", "paths": {	"@": ["./src"], "@/*": ["./src/*"] }
 	},
 	// should optimize?
 	"minify": true
