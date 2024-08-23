@@ -1,5 +1,3 @@
-import Sanitizer from "@/sanitizer";
-
 type Child = AST | string;
 
 export default abstract class AST
@@ -13,7 +11,7 @@ export default abstract class AST
 
 	public get body()
 	{
-		return this.children.map((child) => typeof child === "string" ? Sanitizer.sanitize(child) : child.render()).join("");
+		return this.children.map((child) => typeof child === "string" ? child: child.render()).join("");
 	}
 
 	public abstract render(): string;
