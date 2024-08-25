@@ -564,11 +564,11 @@ function impl({ peek, next }: Processor)
 				{
 					next(); ast.children.push("≥"); break build;
 				}
-				//------//
-				//      //
-				// REST //
-				//      //
-				//------//
+				//-----//
+				//     //
+				// ETC //
+				//     //
+				//-----//
 				default:
 				{
 					next(); ast.children.push(t.toString()); break build;

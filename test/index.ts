@@ -23,17 +23,15 @@ function main()
 		return value;
 	}
 
-	const [scanner, parser] = [new Scanner(Presets.NekoNote[0]), new Parser(Presets.NekoNote[1])];
-
 	Bun.file(input).text().then(async (text) =>
 	{
 		process.stdout.write("\x1Bc");
 
-		const tokens = benchmark("Scanner", () => scanner.scan(text));
+		const tokens = benchmark("Scanner", () => new Scanner(Presets.NekoNote[0]).scan(text));
 	
 		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 	
-		const AST = benchmark("Parser", () => parser.parse(tokens));
+		const AST = benchmark("Parser", () => new Parser(Presets.NekoNote[1]).parse(tokens));
 		
 		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
 	
