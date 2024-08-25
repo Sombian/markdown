@@ -175,7 +175,7 @@ export default class Scanner
 							//---------------------------------------------------------//
 
 							// stream::build & buffer::modify
-							this.stream.push(this.buffer.splice(0, this.buffer.size - this.state.depth - 1));
+							this.stream.push(this.buffer.splice(0, - this.state.depth - 1));
 						}
 						//----------------------------------------------//
 						//                                              //

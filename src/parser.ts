@@ -27,16 +27,18 @@ export default class Parser
 		// RECURSIVE DESCENT PARSING //
 		//                           //
 		//---------------------------//
+
+		const args = Object.freeze(
+		{
+			peek: this.peek.bind(this),
+			next: this.next.bind(this),
+		});
 		
 		while (this.i in this.data)
 		{
 			try
 			{
-				root.children.push(this.impl(
-				{
-					peek: this.peek.bind(this),
-					next: this.next.bind(this),
-				}));
+				root.children.push(this.impl(args));
 			}
 			catch (error)
 			{
