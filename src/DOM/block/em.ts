@@ -1,7 +1,7 @@
 import AST from "@/models/ast";
 
-const GIST = /^https:\/\/gist\.github\.com\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9]+)$/;
-const YOUTUBE = /^https:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})$/;
+const GIST = /^https:\/\/gist\.github\.com\/([\w-]+)\/(\w+)$/;
+const YOUTUBE = /(?:youtu\.be|youtube\.com).{0,20}([a-zA-Z0-9_-]{11})/;
 
 export class EM extends AST
 {
