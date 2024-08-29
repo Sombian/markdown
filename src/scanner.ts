@@ -173,7 +173,7 @@ export default class Scanner
 							//                                                         //
 							//---------------------------------------------------------//
 
-							// stream::build & buffer::modify
+							// stream::build - chunk
 							this.stream.push(this.buffer.splice(0, - this.state.depth - 1));
 						}
 						//----------------------------------------------//
@@ -191,7 +191,7 @@ export default class Scanner
 						// buffer::modify
 						this.buffer.splice(0, this.state.depth);
 					}
-					// stream::build
+					// stream::build - token
 					this.stream.push(token);
 				}
 				// state::update
@@ -207,8 +207,19 @@ export default class Scanner
 		// if buffer is not empty
 		if (0 < this.buffer.size)
 		{
-			// stream::build
-			this.stream.push(this.buffer.toString());
+			if (this.state.node.default)
+			{
+				// stream::build - chunk
+				this.stream.push(this.buffer.splice(0, - this.state.depth));
+
+				// stream::build - token
+				this.stream.push(this.state.node.default);
+			}
+			else
+			{
+				// stream::build - full
+				this.stream.push(this.buffer.toString());
+			}
 		}
 		return this.stream;
 	}
