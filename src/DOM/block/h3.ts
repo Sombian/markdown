@@ -2,7 +2,7 @@ import AST from "@/models/ast";
 
 export class H3 extends AST
 {
-	override render()
+	override toString()
 	{
 		return `<h3>${this.body}</h3>`;
 	}

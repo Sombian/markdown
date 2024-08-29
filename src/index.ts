@@ -19,7 +19,7 @@ class Markdown
 
 	public run(data: string)
 	{
-		return this.parser.parse(this.scanner.scan(data)).render();
+		return this.parser.parse(this.scanner.scan(data)).toString();
 	}
 }
 

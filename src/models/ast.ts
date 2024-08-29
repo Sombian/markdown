@@ -1,18 +1,11 @@
 type Child = AST | string;
 
-export default abstract class AST
+export default abstract class AST extends Array<Child>
 {
-	public readonly children: Child[];
-
-	constructor(...children: typeof this.children)
-	{
-		this.children = children;
-	}
-
 	public get body()
 	{
-		return this.children.map((child) => typeof child === "string" ? child: child.render()).join("");
+		return this.map((child) => child.toString()).join("");
 	}
 
-	public abstract render(): string;
+	public abstract toString(): string;
 }

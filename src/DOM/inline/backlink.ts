@@ -7,7 +7,7 @@ export class BACKLINK extends AST
 		super();
 	}
 
-	override render()
+	override toString()
 	{
 		// TODO: maybe return an empty string if both this.text & this.href is empty or null
 		return `<${["a", this.href ? `href="${this.href}"` : null].filter((_) => _ !== null).join("\u0020")}>${this.text ?? ""}</a>`;

@@ -35,7 +35,7 @@ function main()
 		
 		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
 	
-		const HTML = benchmark("Render", () => AST.render());
+		const HTML = benchmark("Render", () => AST.toString());
 	
 		console.debug("\n", util.inspect(HTML, { depth: null, colors: true }), "\n");
 

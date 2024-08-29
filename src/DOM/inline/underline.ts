@@ -2,7 +2,7 @@ import AST from "@/models/ast";
 
 export class UNDERLINE extends AST
 {
-	override render()
+	override toString()
 	{
 		return `<u>${this.body}</u>`;
 	}

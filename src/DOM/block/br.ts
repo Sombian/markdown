@@ -2,7 +2,7 @@ import AST from "@/models/ast";
 
 export class BR extends AST
 {
-	override render()
+	override toString()
 	{
 		return `<br/>`;
 	}

@@ -10,7 +10,7 @@ export class EM extends AST
 		super();
 	}
 
-	override render()
+	override toString()
 	{
 		if (this.src)
 		{

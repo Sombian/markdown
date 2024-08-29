@@ -202,27 +202,27 @@ function impl({ peek, next }: Processor)
 		}
 		case T.H1:
 		{
-			next(); return new HTML.H1(...inline().children);
+			next(); return new HTML.H1(...inline());
 		}
 		case T.H2:
 		{
-			next(); return new HTML.H2(...inline().children);
+			next(); return new HTML.H2(...inline());
 		}
 		case T.H3:
 		{
-			next(); return new HTML.H3(...inline().children);
+			next(); return new HTML.H3(...inline());
 		}
 		case T.H4:
 		{
-			next(); return new HTML.H4(...inline().children);
+			next(); return new HTML.H4(...inline());
 		}
 		case T.H5:
 		{
-			next(); return new HTML.H5(...inline().children);
+			next(); return new HTML.H5(...inline());
 		}
 		case T.H6:
 		{
-			next(); return new HTML.H6(...inline().children);
+			next(); return new HTML.H6(...inline());
 		}
 		case T.HR_1:
 		case T.HR_2:
@@ -272,7 +272,7 @@ function impl({ peek, next }: Processor)
 					case T.INDENT_4S:
 					{
 						// get the most recently working node
-						const ast = node?.children.at(-1) ?? root;
+						const ast = node?.at(-1) ?? root;
 
 						switch (ast.constructor)
 						{
@@ -291,7 +291,7 @@ function impl({ peek, next }: Processor)
 									break stack;
 								}
 								// insert
-								node.children.push(inline()); break;
+								node.push(inline()); break;
 							}
 						}
 						break build;
@@ -301,7 +301,7 @@ function impl({ peek, next }: Processor)
 					case T.UL:
 					{
 						// get the most recently working node
-						const ast = node?.children.at(-1) ?? root;
+						const ast = node?.at(-1) ?? root;
 
 						const type = (() =>
 						{
@@ -324,7 +324,7 @@ function impl({ peek, next }: Processor)
 						else if (node)
 						{
 							// delve
-							next(); node.children.push(node = new type());
+							next(); node.push(node = new type());
 						}
 						// if a diff type of ast is found before its kind
 						else
@@ -341,11 +341,11 @@ function impl({ peek, next }: Processor)
 
 						if (!LI)
 						{
-							node.children.push(inline());
+							node.push(inline());
 						}
 						else
 						{
-							node.children.push(new HTML.LI(...inline().children));
+							node.push(new HTML.LI(...inline()));
 						}
 						LI = false;
 						break build;
@@ -386,11 +386,11 @@ function impl({ peek, next }: Processor)
 					{
 						if (typeof t === "string")
 						{
-							node.children.push(next() as string);
+							node.push(next() as string);
 						}
 						else
 						{
-							node.children.push(...inline([...until, ending]).children);
+							node.push(...inline([...until, ending]));
 						}
 						continue style;
 					}
@@ -434,11 +434,11 @@ function impl({ peek, next }: Processor)
 
 						fallback.push(next(T.PAREN_R)!.toString());
 
-						ast.children.push(new HTML.EM(alt, src));
+						ast.push(new HTML.EM(alt, src));
 					}
 					catch
 					{
-						ast.children.push(...fallback);
+						ast.push(...fallback);
 					}
 					break build;
 				}
@@ -458,11 +458,11 @@ function impl({ peek, next }: Processor)
 
 						fallback.push(next(T.PAREN_R)!.toString());
 
-						ast.children.push(new HTML.BACKLINK(text, href));
+						ast.push(new HTML.BACKLINK(text, href));
 					}
 					catch
 					{
-						ast.children.push(...fallback);
+						ast.push(...fallback);
 					}
 					break build;
 				}
@@ -475,7 +475,7 @@ function impl({ peek, next }: Processor)
 				{
 					next(); const node = style(new HTML.BOLD(), T.BOLD);
 					
-					if (0 < node.children.length) ast.children.push(node);
+					if (0 < node.length) ast.push(node);
 					
 					break build;
 				}
@@ -483,7 +483,7 @@ function impl({ peek, next }: Processor)
 				{
 					next(); const node = style(new HTML.CODE(), T.CODE);
 					
-					if (0 < node.children.length) ast.children.push(node);
+					if (0 < node.length) ast.push(node);
 					
 					break build;
 				}
@@ -491,7 +491,7 @@ function impl({ peek, next }: Processor)
 				{
 					next(); const node = style(new HTML.ITALIC(), T.ITALIC);
 					
-					if (0 < node.children.length) ast.children.push(node);
+					if (0 < node.length) ast.push(node);
 					
 					break build;
 				}
@@ -499,7 +499,7 @@ function impl({ peek, next }: Processor)
 				{
 					next(); const node = style(new HTML.STRIKE(), T.STRIKE);
 					
-					if (0 < node.children.length) ast.children.push(node);
+					if (0 < node.length) ast.push(node);
 					
 					break build;
 				}
@@ -507,17 +507,17 @@ function impl({ peek, next }: Processor)
 				{
 					next(); const node = style(new HTML.UNDERLINE(), T.UNDERLINE);
 					
-					if (0 < node.children.length) ast.children.push(node);
+					if (0 < node.length) ast.push(node);
 					
 					break build;
 				}
 				case T.CHECKED_BOX:
 				{
-					next(); ast.children.push(new HTML.TODO(true)); break build;
+					next(); ast.push(new HTML.TODO(true)); break build;
 				}
 				case T.UNCHECKED_BOX:
 				{
-					next(); ast.children.push(new HTML.TODO(false)); break build;
+					next(); ast.push(new HTML.TODO(false)); break build;
 				}
 				//-------//
 				//       //
@@ -526,43 +526,43 @@ function impl({ peek, next }: Processor)
 				//-------//
 				case T.ARROW_ALL:
 				{
-					next(); ast.children.push("↔"); break build;
+					next(); ast.push("↔"); break build;
 				}
 				case T.ARROW_LEFT:
 				{
-					next(); ast.children.push("←"); break build;
+					next(); ast.push("←"); break build;
 				}
 				case T.ARROW_RIGHT:
 				{
-					next(); ast.children.push("→"); break build;
+					next(); ast.push("→"); break build;
 				}
 				case T.FAT_ARROW_ALL:
 				{
-					next(); ast.children.push("⇔"); break build;
+					next(); ast.push("⇔"); break build;
 				}
 				case T.FAT_ARROW_LEFT:
 				{
-					next(); ast.children.push("⇐"); break build;
+					next(); ast.push("⇐"); break build;
 				}
 				case T.FAT_ARROW_RIGHT:
 				{
-					next(); ast.children.push("⇒"); break build;
+					next(); ast.push("⇒"); break build;
 				}
 				case T.MATH_APX:
 				{
-					next(); ast.children.push("≈"); break build;
+					next(); ast.push("≈"); break build;
 				}
 				case T.MATH_NET:
 				{
-					next(); ast.children.push("≠"); break build;
+					next(); ast.push("≠"); break build;
 				}
 				case T.MATH_LTOET:
 				{
-					next(); ast.children.push("≤"); break build;
+					next(); ast.push("≤"); break build;
 				}
 				case T.MATH_GTOET:
 				{
-					next(); ast.children.push("≥"); break build;
+					next(); ast.push("≥"); break build;
 				}
 				//-----//
 				//     //
@@ -571,7 +571,7 @@ function impl({ peek, next }: Processor)
 				//-----//
 				default:
 				{
-					next(); ast.children.push(t.toString()); break build;
+					next(); ast.push(t.toString()); break build;
 				}
 			}
 		}

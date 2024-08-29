@@ -16,7 +16,7 @@ export default class Parser
 	{
 		this.data = data; this.i = 0; const root = new (class ROOT extends AST
 		{
-			override render()
+			override toString()
 			{
 				return this.body;
 			}
@@ -38,7 +38,7 @@ export default class Parser
 		{
 			try
 			{
-				root.children.push(this.impl(args));
+				root.push(this.impl(args));
 			}
 			catch (error)
 			{

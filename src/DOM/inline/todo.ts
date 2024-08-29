@@ -7,7 +7,7 @@ export class TODO extends AST
 		super();
 	}
 
-	override render()
+	override toString()
 	{
 		if (!this.complete)
 		{

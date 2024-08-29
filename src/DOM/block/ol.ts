@@ -2,7 +2,7 @@ import AST from "@/models/ast";
 
 export class OL extends AST
 {
-	override render()
+	override toString()
 	{
 		return `<ol>${this.body}</ol>`;
 	}
