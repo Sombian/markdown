@@ -236,6 +236,7 @@ function impl({ peek, next }: Processor)
 		{
 			let LI = false;
 
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const root = (() =>
 			{
 				switch (next())
@@ -303,6 +304,7 @@ function impl({ peek, next }: Processor)
 						// get the most recently working node
 						const ast = node?.at(-1) ?? root;
 
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						const type = (() =>
 						{
 							switch (t)
@@ -422,16 +424,21 @@ function impl({ peek, next }: Processor)
 					const fallback: string[] = [];
 					try
 					{
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.EXCLAMATION)!.toString());
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_L)!.toString());
 
 						const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body || null; if (alt !== null) fallback.push(alt);
 
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_R)!.toString());
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_L)!.toString());
 
 						const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body || null; if (src !== null) fallback.push(src);
 
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_R)!.toString());
 
 						ast.push(new HTML.EM(alt, src));
@@ -447,15 +454,19 @@ function impl({ peek, next }: Processor)
 					const fallback: string[] = [];
 					try
 					{
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_L)!.toString());
 
 						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body || null; if (text !== null) fallback.push(text);
 
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_R)!.toString());
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_L)!.toString());
 
 						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body || null; if (href !== null) fallback.push(href);
 
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_R)!.toString());
 
 						ast.push(new HTML.BACKLINK(text, href));

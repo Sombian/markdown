@@ -2,6 +2,10 @@ import Parser from "./parser";
 import Scanner from "./scanner";
 import Presets from "./presets";
 
+import Level from "./enums/level";
+import AST from "./models/ast";
+import Token from "./models/token";
+
 class Markdown
 {
 	private readonly scanner: Scanner;
@@ -23,4 +27,4 @@ class Markdown
 	}
 }
 
-export { Markdown, Parser, Scanner, Presets };
+export { Markdown, Parser, Scanner, Presets, Level, AST, Token };
