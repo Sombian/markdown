@@ -207,18 +207,15 @@ export default class Scanner
 		// if buffer is not empty
 		if (0 < this.buffer.size)
 		{
-			if (this.state.node.default)
-			{
-				// stream::build - chunk
-				this.stream.push(this.buffer.splice(0, - this.state.depth));
-
-				// stream::build - token
-				this.stream.push(this.state.node.default);
-			}
-			else
+			if (!this.state.node.default)
 			{
 				// stream::build - full
 				this.stream.push(this.buffer.toString());
+			}
+			else
+			{
+				// stream::build - chunk, token
+				this.stream.push(this.buffer.splice(0, - this.state.depth), this.state.node.default);
 			}
 		}
 		return this.stream;
