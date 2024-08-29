@@ -1,16 +1,1 @@
-/* backlink */
-[text](href)
-[text]()
-[](href)
-[]()
-
-/* embeded */
-![alt](src)
-![alt]()
-![](src)
-![]()
-
-/* example */
-[![npm](https://badgen.net/npm/v/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
-[![downloads](https://badgen.net/npm/dt/@sombian/markdown)](https://www.npmjs.com/package/@sombian/markdown)
-[![install size](https://packagephobia.com/badge?p=@sombian/markdown)](https://packagephobia.com/result?p=@sombian/markdown)
+[![npm](https://badgen.net/npm/v/@sombian/markdown)]

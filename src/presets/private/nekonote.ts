@@ -425,12 +425,12 @@ function impl({ peek, next }: Processor)
 						fallback.push(next(T.EXCLAMATION)!.toString());
 						fallback.push(next(T.BRACKET_L)!.toString());
 
-						const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body || null;
+						const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body || null; if (alt) fallback.push(alt);
 
 						fallback.push(next(T.BRACKET_R)!.toString());
 						fallback.push(next(T.PAREN_L)!.toString());
 
-						const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body || null;
+						const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body || null; if (src) fallback.push(src);
 
 						fallback.push(next(T.PAREN_R)!.toString());
 
@@ -449,12 +449,12 @@ function impl({ peek, next }: Processor)
 					{
 						fallback.push(next(T.BRACKET_L)!.toString());
 
-						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body || null;
+						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body || null; if (text) fallback.push(text);
 
 						fallback.push(next(T.BRACKET_R)!.toString());
 						fallback.push(next(T.PAREN_L)!.toString());
 
-						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body || null;
+						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body || null; if (href) fallback.push(href);
 
 						fallback.push(next(T.PAREN_R)!.toString());
 
