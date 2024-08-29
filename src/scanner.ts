@@ -233,8 +233,10 @@ export default class Scanner
 				// stream::build && buffer::modify
 				this.stream.push(this.buffer.slice(0, - this.state.depth));
 			}
-			// stream::build && buffer::clear
-			this.stream.push(token); this.buffer.clear();
+			// buffer:clear
+			this.buffer.clear();
+			// stream::build
+			this.stream.push(token);
 
 			// state::update
 			[this.state.node, this.state.depth] = [this.TRIE[token.next], 0];
