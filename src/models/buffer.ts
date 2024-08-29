@@ -59,7 +59,7 @@ export default class Buffer
 		// shift
 		this.u16a.set(r2, start);
 		// offset
-		this.i -= count;
+		this.i -= clamp;
 
 		return slice;
 	}

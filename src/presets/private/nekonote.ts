@@ -76,7 +76,7 @@ const T = Object.freeze(
 	//       //
 	//-------//
 	BQ: new (class BQ extends _ { })
-	(Level.BLOCK, "> ", Level.BLOCK),
+	(Level.BLOCK, ">", Level.BLOCK),
 	OL: new (class OL extends _ { })
 	(Level.BLOCK, "- ", Level.BLOCK),
 	UL: new (class UL extends _ { })
