@@ -237,7 +237,6 @@ export default class Scanner
 			this.buffer.clear();
 			// stream::build
 			this.stream.push(token);
-
 			// state::update
 			[this.state.node, this.state.depth] = [this.TRIE[token.next], 0];
 		}

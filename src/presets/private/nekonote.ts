@@ -181,24 +181,7 @@ function impl({ peek, next }: Processor)
 		}
 		case T.BREAK:
 		{
-			next();
-			
-			const t = lookup();
-
-			if (t instanceof Token)
-			{
-				// edge case - itself
-				if (t === T.BREAK)
-				{
-					return new HTML.BR();
-				}
-				// edge case - inline
-				if (t.lvl === Level.INLINE)
-				{
-					return new HTML.BR();
-				}
-			}
-			return impl({ peek, next });
+			next(); return new HTML.BR();
 		}
 		case T.H1:
 		{
@@ -262,7 +245,7 @@ function impl({ peek, next }: Processor)
 					case T.BREAK:
 					{
 						// if EOF/BR is found before BQ/OL/UL
-						if (node === null) break stack;
+						if (!node) break stack;
 
 						next();
 						node = null;
@@ -286,7 +269,7 @@ function impl({ peek, next }: Processor)
 							default:
 							{
 								// if an indent is found before BQ/OL/UL
-								if (node === null)
+								if (!node)
 								{
 									// exit
 									break stack;
@@ -323,7 +306,7 @@ function impl({ peek, next }: Processor)
 							next(); node = ast as AST;
 						}
 						// if the types of ast and token differ
-						else if (node !== null)
+						else if (node)
 						{
 							// delve
 							next(); node.push(node = new type());
@@ -339,11 +322,11 @@ function impl({ peek, next }: Processor)
 					default:
 					{
 						// if an inline element is found before a block element
-						if (node === null) break stack;
+						if (!node) break stack;
 
 						if (!LI)
 						{
-							node.push(inline());
+							node.push(inline(), new HTML.BR());
 						}
 						else
 						{
@@ -429,14 +412,14 @@ function impl({ peek, next }: Processor)
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_L)!.toString());
 
-						const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body || null; if (alt !== null) fallback.push(alt);
+						const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body || null; if (alt) fallback.push(alt);
 
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_R)!.toString());
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_L)!.toString());
 
-						const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body || null; if (src !== null) fallback.push(src);
+						const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body || null; if (src) fallback.push(src);
 
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_R)!.toString());
@@ -457,14 +440,14 @@ function impl({ peek, next }: Processor)
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_L)!.toString());
 
-						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body || null; if (text !== null) fallback.push(text);
+						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body || null; if (text) fallback.push(text);
 
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.BRACKET_R)!.toString());
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_L)!.toString());
 
-						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body || null; if (href !== null) fallback.push(href);
+						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body || null; if (href) fallback.push(href);
 
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						fallback.push(next(T.PAREN_R)!.toString());

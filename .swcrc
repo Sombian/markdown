@@ -12,9 +12,11 @@
 			"mangle": true,
 			"compress": true
 		},
+		// core options
+		"target": "esnext", "loose": true,
 		// path aliasing
-		"target": "esnext", "baseUrl": "./", "paths": {	"@": ["./src"], "@/*": ["./src/*"] }
+		"baseUrl": "./", "paths": {	"@": ["./src"], "@/*": ["./src/*"] }
 	},
-	// should optimize?
+	// should minify?
 	"minify": true
 }

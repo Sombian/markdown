@@ -4,6 +4,6 @@ export class PR extends AST
 {
 	override toString()
 	{
-		return `<p>${this.body}</p>`;
+		return this.body;
 	}
 }
