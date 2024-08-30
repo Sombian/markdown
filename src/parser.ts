@@ -34,7 +34,7 @@ export default class Parser
 			next: this.next.bind(this),
 		});
 		
-		while (this.i in this.data)
+		while (this.i < this.data.length)
 		{
 			try
 			{
@@ -58,7 +58,7 @@ export default class Parser
 		{
 			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
 		}
-		return this.i in this.data ? this.data[this.i] : null;
+		return this.i < this.data.length ? this.data[this.i] : null;
 	}
 
 	private next(type?: Token)
@@ -67,7 +67,7 @@ export default class Parser
 		{
 			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
 		}
-		return this.i in this.data ? this.data[this.i++] : null;
+		return this.i < this.data.length ? this.data[this.i++] : null;
 	}
 }
 
