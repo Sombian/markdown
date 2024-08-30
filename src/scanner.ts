@@ -151,9 +151,6 @@ export default class Scanner
 				if (this.state.node.default)
 				{
 					const token = this.state.node.default;
-
-					level = token.next;
-
 					//---------------------------------------------------------//
 					//                                                         //
 					// e.g. depth=1, token=(ITALIC { syntax: "*" })            //
@@ -168,7 +165,6 @@ export default class Scanner
 
 					// stream::build - chunk, token
 					this.stream.push(this.buffer.splice(0, - this.state.depth - 1), token);
-
 					//----------------------------------------------//
 					//                                              //
 					// e.g. depth=1, token=(ITALIC { syntax: "*" }) //
@@ -183,6 +179,8 @@ export default class Scanner
 
 					// buffer::modify
 					this.buffer.splice(0, this.state.depth);
+					// :3
+					level = token.next;
 				}
 				// state::update
 				[this.state.node, this.state.depth] = [this.TRIE[level], 0];
