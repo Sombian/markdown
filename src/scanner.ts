@@ -7,11 +7,9 @@ type Chunk = Token | string;
 
 export default class Scanner
 {
+	// @ts-expect-error auto generate
 	private readonly TRIE: Record<Level, Route> = {
 		// auto-generate
-		[Level.BLOCK]: {},
-		// auto-generate
-		[Level.INLINE]: {},
 	};
 	private state: State;
 	private buffer: Buffer;
@@ -56,7 +54,7 @@ export default class Scanner
 		{
 			for (const ctx of routes(token.lvl))
 			{
-				let node = this.TRIE[ctx];
+				let node = (this.TRIE[ctx] ??= {});
 		
 				for (let i = 0; i < token.syntax.length; i++)
 				{
@@ -145,10 +143,9 @@ export default class Scanner
 			{
 				this.lookup(char);
 			}
-			// fail-safe plan..!
 			else
 			{
-				let level: Nullable<Level> = null;
+				let level = Level.INLINE;
 
 				// handle fallback
 				if (this.state.node.default)
@@ -157,45 +154,38 @@ export default class Scanner
 
 					level = token.next;
 
-					if (this.state.depth < this.buffer.size - 0)
-					{
-						if (this.state.depth < this.buffer.size - 1)
-						{
-							//---------------------------------------------------------//
-							//                                                         //
-							// e.g. token=(ITALIC { syntax: "*" }), depth=1            //
-							//                                                         //
-							// (BEFORE)                                                //
-							// buffer -> ["<char>", "<char>", "<char>", "*", "<char>"] //
-							//                                                         //
-							// (AFTER)                                                 //
-							// buffer -> ["*", "<char>"]                               //
-							//                                                         //
-							//---------------------------------------------------------//
+					//---------------------------------------------------------//
+					//                                                         //
+					// e.g. depth=1, token=(ITALIC { syntax: "*" })            //
+					//                                                         //
+					// (BEFORE)                                                //
+					// buffer -> ["<code>", "<code>", "<code>", "*", "<char>"] //
+					//                                                         //
+					// (AFTER)                                                 //
+					// buffer -> ["<char>"]                                    //
+					//                                                         //
+					//---------------------------------------------------------//
 
-							// stream::build - chunk
-							this.stream.push(this.buffer.splice(0, - this.state.depth - 1));
-						}
-						//----------------------------------------------//
-						//                                              //
-						// e.g. token=(ITALIC { syntax: "*" }), depth=1 //
-						//                                              //
-						// (BEFORE)                                     //
-						// buffer -> ["*", "<char>"]                    //
-						//                                              //
-						// (AFTER)                                      //
-						// buffer -> ["<char>"]                         //
-						//                                              //
-						//----------------------------------------------//
+					// stream::build - chunk, token
+					this.stream.push(this.buffer.splice(0, - this.state.depth - 1), token);
 
-						// buffer::modify
-						this.buffer.splice(0, this.state.depth);
-					}
-					// stream::build - token
-					this.stream.push(token);
+					//----------------------------------------------//
+					//                                              //
+					// e.g. depth=1, token=(ITALIC { syntax: "*" }) //
+					//                                              //
+					// (BEFORE)                                     //
+					// buffer -> ["*", "<char>"]                    //
+					//                                              //
+					// (AFTER)                                      //
+					// buffer -> ["<char>"]                         //
+					//                                              //
+					//----------------------------------------------//
+
+					// buffer::modify
+					this.buffer.splice(0, this.state.depth);
 				}
 				// state::update
-				[this.state.node, this.state.depth] = [this.TRIE[level ?? Level.INLINE], 0];
+				[this.state.node, this.state.depth] = [this.TRIE[level], 0];
 
 				// delve branch
 				if (char in this.state.node)
