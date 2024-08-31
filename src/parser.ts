@@ -14,14 +14,7 @@ export default class Parser
 
 	public parse(data: typeof this.data)
 	{
-		this.data = data; this.i = 0; const root = new (class ROOT extends AST
-		{
-			override toString()
-			{
-				return this.body;
-			}
-		})
-		();
+		this.data = data; this.i = 0; const root = new ROOT();
 		//---------------------------//
 		//                           //
 		// RECURSIVE DESCENT PARSING //
@@ -68,6 +61,14 @@ export default class Parser
 			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
 		}
 		return this.i < this.data.length ? this.data[this.i++] : null;
+	}
+}
+
+class ROOT extends AST
+{
+	override toString()
+	{
+		return this.body;
 	}
 }
 
