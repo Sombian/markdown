@@ -151,17 +151,17 @@ export default class Scanner
 				if (this.state.node.default)
 				{
 					const token = this.state.node.default;
-					//---------------------------------------------------------//
-					//                                                         //
-					// e.g. depth=1, token=(ITALIC { syntax: "*" })            //
-					//                                                         //
-					// (BEFORE)                                                //
-					// buffer -> ["<code>", "<code>", "<code>", "*", "<char>"] //
-					//                                                         //
-					// (AFTER)                                                 //
-					// buffer -> ["<char>"]                                    //
-					//                                                         //
-					//---------------------------------------------------------//
+					//------------------------------------------------//
+					//                                                //
+					// e.g. depth=1, token=(ITALIC { syntax: "*" })   //
+					//                                                //
+					// (BEFORE)                                       //
+					// buffer -> ["<char>"..."<char>", "*", "<char>"] //
+					//                                                //
+					// (AFTER)                                        //
+					// buffer -> ["*", "<char>"]                      //
+					//                                                //
+					//------------------------------------------------//
 
 					// stream::build - chunk, token
 					this.stream.push(this.buffer.splice(0, - this.state.depth - 1), token);
