@@ -14,12 +14,14 @@ export default class Parser
 
 	public parse(data: typeof this.data)
 	{
-		this.data = data; this.i = 0; const root = new ROOT();
+		[this.data, this.i] = [data, 0];
 		//---------------------------//
 		//                           //
 		// RECURSIVE DESCENT PARSING //
 		//                           //
 		//---------------------------//
+
+		const root = new ROOT();
 
 		const args = Object.freeze(
 		{
