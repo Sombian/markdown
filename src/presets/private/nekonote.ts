@@ -75,8 +75,10 @@ const T = Object.freeze(
 	// STACK //
 	//       //
 	//-------//
-	BQ: new (class BQ extends _ { })
+	BQ_1: new (class BQ extends _ { })
 	(Level.BLOCK, ">", Level.BLOCK),
+	BQ_2: new (class BQ extends _ { })
+	(Level.BLOCK, "> ", Level.BLOCK),
 	OL: new (class OL extends _ { })
 	(Level.BLOCK, "- ", Level.BLOCK),
 	UL: new (class UL extends _ { })
@@ -213,7 +215,8 @@ function impl({ peek, next }: Processor)
 		{
 			next(); return new HTML.HR(/* leaf node */);
 		}
-		case T.BQ:
+		case T.BQ_1:
+		case T.BQ_2:
 		case T.OL:
 		case T.UL:
 		{
@@ -224,7 +227,8 @@ function impl({ peek, next }: Processor)
 			{
 				switch (next())
 				{
-					case T.BQ: { return new HTML.BQ(); }
+					case T.BQ_1: { return new HTML.BQ(); }
+					case T.BQ_2: { return new HTML.BQ(); }
 					case T.OL: { LI = true; return new HTML.OL(); }
 					case T.UL: { LI = true; return new HTML.UL(); }
 				}
@@ -280,7 +284,8 @@ function impl({ peek, next }: Processor)
 						}
 						break build;
 					}
-					case T.BQ:
+					case T.BQ_1:
+					case T.BQ_2:
 					case T.OL:
 					case T.UL:
 					{
@@ -292,7 +297,8 @@ function impl({ peek, next }: Processor)
 						{
 							switch (t)
 							{
-								case T.BQ: { return HTML.BQ; }
+								case T.BQ_1: { return HTML.BQ; }
+								case T.BQ_2: { return HTML.BQ; }
 								case T.OL: { LI = true; return HTML.OL; }
 								case T.UL: { LI = true; return HTML.UL; }
 							}
