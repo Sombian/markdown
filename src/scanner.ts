@@ -56,7 +56,7 @@ export default class Scanner
 			{
 				let node = (this.TRIE[ctx] ??= {});
 		
-				for (let i = 0; i < token.syntax.length; i++)
+				for (let i = 0; i < token.syntax.length; ++i)
 				{
 					const char = token.syntax[i];
 
