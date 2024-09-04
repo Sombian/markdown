@@ -163,8 +163,14 @@ export default class Scanner
 					//                                                //
 					//------------------------------------------------//
 
-					// stream::build - chunk, token
-					this.stream.push(this.buffer.splice(0, - this.state.depth - 1), token);
+					// if chunk is not empty
+					if (this.state.depth < this.buffer.size - 1)
+					{
+						// stream::build - chunk
+						this.stream.push(this.buffer.splice(0, - this.state.depth - 1));
+					}
+					// stream::build - token
+					this.stream.push(token);
 					//----------------------------------------------//
 					//                                              //
 					// e.g. depth=1, token=(ITALIC { syntax: "*" }) //
