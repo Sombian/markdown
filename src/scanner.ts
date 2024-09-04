@@ -17,9 +17,9 @@ export default class Scanner
 
 	constructor(data: Token[])
 	{
-		function routes(ctx: typeof Token.prototype.lvl)
+		function routes(lvl: typeof Token.prototype.lvl)
 		{
-			switch (ctx)
+			switch (lvl)
 			{
 				case "all":
 				{
@@ -52,9 +52,9 @@ export default class Scanner
 
 		for (const token of data)
 		{
-			for (const ctx of routes(token.lvl))
+			for (const lvl of routes(token.lvl))
 			{
-				let node = (this.TRIE[ctx] ??= {});
+				let node = (this.TRIE[lvl] ??= {});
 		
 				for (let i = 0; i < token.syntax.length; ++i)
 				{
