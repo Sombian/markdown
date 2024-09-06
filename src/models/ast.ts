@@ -1,5 +1,6 @@
 type Child = AST | string;
 
+// TODO: support JSX
 export default abstract class AST extends Array<Child>
 {
 	public get body()

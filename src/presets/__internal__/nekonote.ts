@@ -40,11 +40,11 @@ const T = Object.freeze(
 	//      //
 	//------//
 	BREAK: new (class BREAK extends _ {})
-	("all", "\n"),
+	(Level.INLINE, "\n"),
 	COMMENT_L: new (class COMMENT_L extends _ {})
-	("all", "/*"),
+	(Level.INLINE, "/*"),
 	COMMENT_R: new (class COMMENT_R extends _ {})
-	("all", "*/"),
+	(Level.INLINE, "*/"),
 	//-------//
 	//       //
 	// BLOCK //

@@ -86,8 +86,10 @@ export default class Buffer implements Iterable<string>
 
 	[Symbol.iterator]()
 	{
+		//
 		// the power of iterator comes from lazy eval, which makes infinite iteration possible.
 		// however, buffer's size is bounded, meaning the 'infinite' case doesnt apply here.
+		//
 		return this.toString()[Symbol.iterator]();
 	}
 }

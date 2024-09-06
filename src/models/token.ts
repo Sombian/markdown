@@ -2,7 +2,7 @@ import Level from "@/enums/level";
 
 export default abstract class Token
 {
-	constructor(public readonly lvl: Level | "all", public readonly syntax: string, public readonly next: Level)
+	constructor(public readonly lvl: Level, public readonly syntax: string, public readonly next: Level)
 	{
 		// TODO: none
 	}

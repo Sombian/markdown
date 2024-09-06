@@ -21,10 +21,6 @@ export default class Scanner
 		{
 			switch (lvl)
 			{
-				case "all":
-				{
-					return [Level.BLOCK, Level.INLINE];
-				}
 				case Level.BLOCK:
 				{
 					return [Level.BLOCK];
