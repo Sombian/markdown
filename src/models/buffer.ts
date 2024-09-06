@@ -95,7 +95,9 @@ export default class Buffer implements Iterable<string>
 		{
 			next(): IteratorResult<string>
 			{
-				return { value: Buffer.DC.decode(buffer.u16a.subarray(i, i + 1)), done: !(i++ < buffer.i) };
+				const done = !(i < buffer.i);
+				// @ts-expect-error stfu
+				return { value: done ? null : Buffer.DC.decode(buffer.u16a.subarray(i, ++i)), done };
 			}
 		});
 	}
