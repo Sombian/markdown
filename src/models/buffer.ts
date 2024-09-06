@@ -95,7 +95,7 @@ export default class Buffer implements Iterable<string>
 		{
 			next(): IteratorResult<string>
 			{
-				return { value: String.fromCharCode(buffer.u16a[i]), done: !(i++ < buffer.i) };
+				return { value: Buffer.DC.decode(buffer.u16a.subarray(i, i + 1)), done: !(i++ < buffer.i) };
 			}
 		});
 	}
