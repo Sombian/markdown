@@ -1,4 +1,4 @@
-export default class Buffer
+export default class Buffer implements Iterable<string>
 {
 	// lazy init
 	private static DC: TextDecoder;
@@ -82,5 +82,21 @@ export default class Buffer
 	public toString()
 	{
 		return Buffer.DC.decode(this.u16a.subarray(0, this.i));
+	}
+
+	[Symbol.iterator]()
+	{
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const buffer = this;
+
+		let i = 0;
+
+		return (
+		{
+			next(): IteratorResult<string>
+			{
+				return { value: String.fromCharCode(buffer.u16a[i]), done: !(i++ < buffer.i) };
+			}
+		});
 	}
 }
