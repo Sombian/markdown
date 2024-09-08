@@ -14,6 +14,8 @@ function main()
 
 	Bun.file(sample).text().then(async (text) =>
 	{
+		process.stdout.write("\x1Bc");
+		
 		console.time("Scan"); const T = preset.scan(text); console.timeEnd("Scan");
 
 		console.debug("\n", T.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
