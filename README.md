@@ -22,7 +22,7 @@ import { Markdown, Presets } from "@sombian/markdown";
 
 const markdown = new Markdown(...Presets.NekoNote);
 
-console.debug(markdown.run("# hello *world*"));
+console.debug(markdown.run("hello world"));
 ```
 
 ## NekoNote

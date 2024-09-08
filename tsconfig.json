@@ -4,7 +4,7 @@
 		"paths":
 		{
 			"@": ["./src"],
-			"@/*": ["./src/*"],
+			"@/*": ["./src/*"]
 		},
 		//------//
 		//      //
@@ -26,12 +26,12 @@
 		"noImplicitThis": true,
 		"declarationMap": true,
 		"esModuleInterop": true,
-		"isolatedModules": true,
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"emitDeclarationOnly": true,
+		"verbatimModuleSyntax": true,
 		"exactOptionalPropertyTypes": true,
-		"forceConsistentCasingInFileNames": true,
+		"forceConsistentCasingInFileNames": true
 	},
-	"exclude": ["node_modules", "./out"],
+	"exclude": ["node_modules", "./out"]
 }
