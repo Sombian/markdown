@@ -2,44 +2,31 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 
-import { Scanner, Parser, Presets } from "@";
+import { Markdown, Presets } from "@";
 
-const [input, output] = [path.join(import.meta.dirname, "in.txt"), path.join(import.meta.dirname, "out.html")];
+const sample = path.join(import.meta.dir, "sample.txt");
 
 main();
 
 function main()
 {
-	function benchmark<T>(label: string, task: () => T)
+	const preset = new Markdown(...Presets.NekoNote);
+
+	Bun.file(sample).text().then(async (text) =>
 	{
-		console.time(label);
+		console.time("Scan"); const T = preset.scan(text); console.timeEnd("Scan");
 
-		const result = task();
+		console.debug("\n", T.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
 
-		console.timeEnd(label);
+		console.time("Parse"); const AST = preset.parse(T); console.timeEnd("Parse");
 
-		return result;
-	}
-
-	Bun.file(input).text().then(async (text) =>
-	{
-		process.stdout.write("\x1Bc");
-
-		const tokens = benchmark("Scanner", () => new Scanner(Presets.NekoNote[0]).scan(text));
-	
-		console.debug("\n", tokens.map((_) => typeof _ === "string" ? _ : _.constructor.name), "\n");
-	
-		const AST = benchmark("Parser", () => new Parser(Presets.NekoNote[1]).parse(tokens));
-		
 		console.debug("\n", util.inspect(AST, { depth: null, colors: true }), "\n");
-	
-		const HTML = benchmark("Render", () => AST.toString());
-	
+
+		console.time("Render"); const HTML = AST.toString(); console.timeEnd("Render");
+
 		console.debug("\n", util.inspect(HTML, { depth: null, colors: true }), "\n");
 
-		const bytes = await Bun.write(output, HTML);
-
-		console.debug(`\x1b[4m${output}\x1b[0m ~ ${bytes}bytes`);
+		console.debug(`${await Bun.write(path.join(import.meta.dir, "out.html"), HTML)} bytes in size`);
 	});
 }
 
@@ -49,4 +36,4 @@ declare global
 	var watcher: fs.FSWatcher;
 }
 
-global.watcher ??= fs.watch(input, main); process.on("SIGINT", () => { global.watcher.close(); process.exit(0); });
+global.watcher ??= fs.watch(sample, main); process.on("SIGINT", () => { global.watcher.close(); process.exit(0); });

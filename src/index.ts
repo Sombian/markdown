@@ -8,22 +8,24 @@ import Token from "./models/token";
 
 class Markdown
 {
-	private readonly scanner: Scanner;
-	private readonly parser: Parser;
-
-	constructor
-	(
-		param_0: ConstructorParameters<typeof Scanner>[0],
-		param_1: ConstructorParameters<typeof Parser>[0],
-	)
+	constructor(private readonly scanner: Scanner, private readonly parser: Parser)
 	{
-		this.scanner = new Scanner(param_0);
-		this.parser = new Parser(param_1);
+		// TODO: none
+	}
+
+	public get scan()
+	{
+		return this.scanner.scan.bind(this.scanner);
+	}
+
+	public get parse()
+	{
+		return this.parser.parse.bind(this.parser);
 	}
 
 	public run(data: string)
 	{
-		return this.parser.parse(this.scanner.scan(data)).toString();
+		return this.parse(this.scan(data)).toString();
 	}
 }
 

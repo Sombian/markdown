@@ -1,13 +1,14 @@
 import { Markdown } from "@";
 
+import Parser from "@/parser";
+import Scanner from "@/scanner";
+
 import AST from "@/models/ast";
 import Token from "@/models/token";
 
 import Level from "@/enums/level";
 
 import * as HTML from "@/DOM";
-
-import type { Processor } from "@/parser";
 
 abstract class _ extends Token
 {
@@ -142,22 +143,27 @@ const T = Object.freeze(
 	(Level.INLINE, ")"),
 });
 
-function impl({ peek, next }: Processor)
+class Preset extends Parser
 {
-	function lookup()
+	protected main()
 	{
-		const t = peek();
+		return this.block();
+	}
+
+	protected lookup()
+	{
+		const t = this.peek();
 
 		switch (t)
 		{
 			case T.COMMENT_L:
 			{
-				next();
+				this.next();
 
 				comment:
 				while (true)
 				{
-					switch (next())
+					switch (this.next())
 					{
 						case null:
 						{
@@ -175,223 +181,191 @@ function impl({ peek, next }: Processor)
 		return t;
 	}
 
-	switch (lookup())
+	protected block()
 	{
-		case null:
+		switch (this.lookup())
 		{
-			throw "EOF";
-		}
-		case T.BREAK:
-		{
-			next(); return new HTML.BR();
-		}
-		case T.H1:
-		{
-			next(); return new HTML.H1(...inline());
-		}
-		case T.H2:
-		{
-			next(); return new HTML.H2(...inline());
-		}
-		case T.H3:
-		{
-			next(); return new HTML.H3(...inline());
-		}
-		case T.H4:
-		{
-			next(); return new HTML.H4(...inline());
-		}
-		case T.H5:
-		{
-			next(); return new HTML.H5(...inline());
-		}
-		case T.H6:
-		{
-			next(); return new HTML.H6(...inline());
-		}
-		case T.HR_1:
-		case T.HR_2:
-		case T.HR_3:
-		{
-			next(); return new HTML.HR(/* leaf node */);
-		}
-		case T.BQ_1:
-		case T.BQ_2:
-		case T.OL:
-		case T.UL:
-		{
-			let LI = false;
-
-			const root = (() =>
+			case null:
 			{
-				switch (next())
-				{
-					case T.BQ_1: { return new HTML.BQ(); }
-					case T.BQ_2: { return new HTML.BQ(); }
-					case T.OL: { LI = true; return new HTML.OL(); }
-					case T.UL: { LI = true; return new HTML.UL(); }
-				}
-			})
-			()!;
-	
-			let node: Nullable<HTML.BQ | HTML.OL | HTML.UL> = root;
-	
-			stack:
-			while (true)
+				throw "EOF";
+			}
+			case T.BREAK:
 			{
-				const t = lookup();
+				this.next(); return new HTML.BR();
+			}
+			case T.H1:
+			{
+				this.next(); return new HTML.H1(...this.inline());
+			}
+			case T.H2:
+			{
+				this.next(); return new HTML.H2(...this.inline());
+			}
+			case T.H3:
+			{
+				this.next(); return new HTML.H3(...this.inline());
+			}
+			case T.H4:
+			{
+				this.next(); return new HTML.H4(...this.inline());
+			}
+			case T.H5:
+			{
+				this.next(); return new HTML.H5(...this.inline());
+			}
+			case T.H6:
+			{
+				this.next(); return new HTML.H6(...this.inline());
+			}
+			case T.HR_1:
+			case T.HR_2:
+			case T.HR_3:
+			{
+				this.next(); return new HTML.HR(/* leaf node */);
+			}
+			case T.BQ_1:
+			case T.BQ_2:
+			case T.OL:
+			case T.UL:
+			{
+				let LI = false;
 
-				build:
-				switch (t)
+				const root = (() =>
 				{
-					case null:
-					case T.BREAK:
+					switch (this.next())
 					{
-						// if EOF/BR is found before BQ/OL/UL
-						if (!node) break stack;
-
-						next();
-						node = null;
-						break build;
+						case T.BQ_1: { return new HTML.BQ(); }
+						case T.BQ_2: { return new HTML.BQ(); }
+						case T.OL: { LI = true; return new HTML.OL(); }
+						case T.UL: { LI = true; return new HTML.UL(); }
 					}
-					case T.INDENT_1T:
-					case T.INDENT_2S:
-					case T.INDENT_4S:
-					{
-						// get the most recently working node
-						const ast = node?.at(-1) ?? root;
+				})
+				()!;
+		
+				let node: Nullable<HTML.BQ | HTML.OL | HTML.UL> = root;
+		
+				stack:
+				while (true)
+				{
+					const t = this.lookup();
 
-						switch (ast.constructor)
+					build:
+					switch (t)
+					{
+						case null:
+						case T.BREAK:
 						{
-							case HTML.OL:
-							case HTML.UL:
+							// if EOF/BR is found before BQ/OL/UL
+							if (!node) break stack;
+
+							this.next();
+							node = null;
+							break build;
+						}
+						case T.INDENT_1T:
+						case T.INDENT_2S:
+						case T.INDENT_4S:
+						{
+							// get the most recently working node
+							const ast = node?.at(-1) ?? root;
+
+							switch (ast.constructor)
+							{
+								case HTML.OL:
+								case HTML.UL:
+								{
+									// pickup
+									this.next(); node = ast as AST; break;
+								}
+								default:
+								{
+									// if an indent is found before BQ/OL/UL
+									if (!node)
+									{
+										// exit
+										break stack;
+									}
+									// insert
+									node.push(this.inline()); break;
+								}
+							}
+							break build;
+						}
+						case T.BQ_1:
+						case T.BQ_2:
+						case T.OL:
+						case T.UL:
+						{
+							// get the most recently working node
+							const ast = node?.at(-1) ?? root;
+
+							const type = (() =>
+							{
+								switch (t)
+								{
+									case T.BQ_1: { return HTML.BQ; }
+									case T.BQ_2: { return HTML.BQ; }
+									case T.OL: { LI = true; return HTML.OL; }
+									case T.UL: { LI = true; return HTML.UL; }
+								}
+							})
+							()!;
+							
+							// if the types of ast and token correspond
+							if (ast instanceof type)
 							{
 								// pickup
-								next(); node = ast as AST; break;
+								this.next(); node = ast as AST;
 							}
-							default:
+							// if the types of ast and token differ
+							else if (node)
 							{
-								// if an indent is found before BQ/OL/UL
-								if (!node)
-								{
-									// exit
-									break stack;
-								}
-								// insert
-								node.push(inline()); break;
+								// delve
+								this.next(); node.push(node = new type());
 							}
-						}
-						break build;
-					}
-					case T.BQ_1:
-					case T.BQ_2:
-					case T.OL:
-					case T.UL:
-					{
-						// get the most recently working node
-						const ast = node?.at(-1) ?? root;
-
-						const type = (() =>
-						{
-							switch (t)
+							// if a diff type of ast is found before its kind
+							else
 							{
-								case T.BQ_1: { return HTML.BQ; }
-								case T.BQ_2: { return HTML.BQ; }
-								case T.OL: { LI = true; return HTML.OL; }
-								case T.UL: { LI = true; return HTML.UL; }
+								// exit
+								break stack;
 							}
-						})
-						()!;
-						
-						// if the types of ast and token correspond
-						if (ast instanceof type)
-						{
-							// pickup
-							next(); node = ast as AST;
+							break build;
 						}
-						// if the types of ast and token differ
-						else if (node)
+						default:
 						{
-							// delve
-							next(); node.push(node = new type());
-						}
-						// if a diff type of ast is found before its kind
-						else
-						{
-							// exit
-							break stack;
-						}
-						break build;
-					}
-					default:
-					{
-						// if an inline element is found before a block element
-						if (!node) break stack;
+							// if an inline element is found before a block element
+							if (!node) break stack;
 
-						if (!LI)
-						{
-							node.push(inline(), new HTML.BR());
+							if (!LI)
+							{
+								node.push(this.inline(), new HTML.BR());
+							}
+							else
+							{
+								node.push(new HTML.LI(...this.inline()));
+							}
+							LI = false;
+							break build;
 						}
-						else
-						{
-							node.push(new HTML.LI(...inline()));
-						}
-						LI = false;
-						break build;
 					}
 				}
+				return root;
 			}
-			return root;
-		}
-		default:
-		{
-			return inline();
+			default:
+			{
+				return this.inline();
+			}
 		}
 	}
 
-	function inline(until: ReturnType<typeof lookup>[] = [])
+	protected inline(until: ReturnType<typeof this.lookup>[] = [])
 	{
 		const ast = new HTML.PR();
-
-		function style(node: AST, ending: Token)
-		{
-			style:
-			while (true)
-			{
-				const t = lookup(); if (until.includes(t)) break style;
-
-				switch (t)
-				{
-					case null:
-					case T.BREAK:
-					{
-						break style;
-					}
-					case ending:
-					{
-						next(); break style;
-					}
-					default:
-					{
-						if (typeof t === "string")
-						{
-							node.push(next() as string);
-						}
-						else
-						{
-							node.push(...inline([...until, ending]));
-						}
-						continue style;
-					}
-				}
-			}
-			return node;
-		}
 
 		inline:
 		while (true)
 		{
-			const t = lookup(); if (until.includes(t)) break inline;
+			const t = this.lookup(); if (until.includes(t)) break inline;
 			
 			build:
 			switch (t)
@@ -411,17 +385,17 @@ function impl({ peek, next }: Processor)
 					const fallback: string[] = [];
 					try
 					{
-						fallback.push(next(T.EXCLAMATION)!.toString());
-						fallback.push(next(T.BRACKET_L)!.toString());
+						fallback.push(this.next(T.EXCLAMATION)!.toString());
+						fallback.push(this.next(T.BRACKET_L)!.toString());
 
-						const alt: ConstructorParameters<typeof HTML.EM>[0] = inline([...until, T.BRACKET_R]).body || null; if (alt) fallback.push(alt);
+						const alt: ConstructorParameters<typeof HTML.EM>[0] = this.inline([...until, T.BRACKET_R]).body || null; if (alt) fallback.push(alt);
 
-						fallback.push(next(T.BRACKET_R)!.toString());
-						fallback.push(next(T.PAREN_L)!.toString());
+						fallback.push(this.next(T.BRACKET_R)!.toString());
+						fallback.push(this.next(T.PAREN_L)!.toString());
 
-						const src: ConstructorParameters<typeof HTML.EM>[1] = inline([...until, T.PAREN_R]).body || null; if (src) fallback.push(src);
+						const src: ConstructorParameters<typeof HTML.EM>[1] = this.inline([...until, T.PAREN_R]).body || null; if (src) fallback.push(src);
 
-						fallback.push(next(T.PAREN_R)!.toString());
+						fallback.push(this.next(T.PAREN_R)!.toString());
 
 						ast.push(new HTML.EM(alt, src));
 					}
@@ -436,16 +410,16 @@ function impl({ peek, next }: Processor)
 					const fallback: string[] = [];
 					try
 					{
-						fallback.push(next(T.BRACKET_L)!.toString());
+						fallback.push(this.next(T.BRACKET_L)!.toString());
 
-						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = inline([...until, T.BRACKET_R]).body || null; if (text) fallback.push(text);
+						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = this.inline([...until, T.BRACKET_R]).body || null; if (text) fallback.push(text);
 
-						fallback.push(next(T.BRACKET_R)!.toString());
-						fallback.push(next(T.PAREN_L)!.toString());
+						fallback.push(this.next(T.BRACKET_R)!.toString());
+						fallback.push(this.next(T.PAREN_L)!.toString());
 
-						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = inline([...until, T.PAREN_R]).body || null; if (href) fallback.push(href);
+						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = this.inline([...until, T.PAREN_R]).body || null; if (href) fallback.push(href);
 
-						fallback.push(next(T.PAREN_R)!.toString());
+						fallback.push(this.next(T.PAREN_R)!.toString());
 
 						ast.push(new HTML.BACKLINK(text, href));
 					}
@@ -462,51 +436,31 @@ function impl({ peek, next }: Processor)
 				//-------//
 				case T.BOLD:
 				{
-					next(); const node = style(new HTML.BOLD(), T.BOLD);
-					
-					if (0 < node.length) ast.push(node);
-					
-					break build;
+					this.next(); ast.push(new HTML.BOLD(...this.style(until, T.BOLD))); break build;
 				}
 				case T.CODE:
 				{
-					next(); const node = style(new HTML.CODE(), T.CODE);
-					
-					if (0 < node.length) ast.push(node);
-					
-					break build;
+					this.next(); ast.push(new HTML.CODE(...this.style(until, T.CODE))); break build;
 				}
 				case T.ITALIC:
 				{
-					next(); const node = style(new HTML.ITALIC(), T.ITALIC);
-					
-					if (0 < node.length) ast.push(node);
-					
-					break build;
+					this.next(); ast.push(new HTML.ITALIC(...this.style(until, T.ITALIC))); break build;
 				}
 				case T.STRIKE:
 				{
-					next(); const node = style(new HTML.STRIKE(), T.STRIKE);
-					
-					if (0 < node.length) ast.push(node);
-					
-					break build;
+					this.next(); ast.push(new HTML.STRIKE(...this.style(until, T.STRIKE))); break build;
 				}
 				case T.UNDERLINE:
 				{
-					next(); const node = style(new HTML.UNDERLINE(), T.UNDERLINE);
-					
-					if (0 < node.length) ast.push(node);
-					
-					break build;
+					this.next(); ast.push(new HTML.UNDERLINE(...this.style(until, T.UNDERLINE))); break build;
 				}
 				case T.CHECKED_BOX:
 				{
-					next(); ast.push(new HTML.TODO(true)); break build;
+					this.next(); ast.push(new HTML.TODO(true)); break build;
 				}
 				case T.UNCHECKED_BOX:
 				{
-					next(); ast.push(new HTML.TODO(false)); break build;
+					this.next(); ast.push(new HTML.TODO(false)); break build;
 				}
 				//-------//
 				//       //
@@ -515,43 +469,43 @@ function impl({ peek, next }: Processor)
 				//-------//
 				case T.ARROW_ALL:
 				{
-					next(); ast.push("↔"); break build;
+					this.next(); ast.push("↔"); break build;
 				}
 				case T.ARROW_LEFT:
 				{
-					next(); ast.push("←"); break build;
+					this.next(); ast.push("←"); break build;
 				}
 				case T.ARROW_RIGHT:
 				{
-					next(); ast.push("→"); break build;
+					this.next(); ast.push("→"); break build;
 				}
 				case T.FAT_ARROW_ALL:
 				{
-					next(); ast.push("⇔"); break build;
+					this.next(); ast.push("⇔"); break build;
 				}
 				case T.FAT_ARROW_LEFT:
 				{
-					next(); ast.push("⇐"); break build;
+					this.next(); ast.push("⇐"); break build;
 				}
 				case T.FAT_ARROW_RIGHT:
 				{
-					next(); ast.push("⇒"); break build;
+					this.next(); ast.push("⇒"); break build;
 				}
 				case T.MATH_APX:
 				{
-					next(); ast.push("≈"); break build;
+					this.next(); ast.push("≈"); break build;
 				}
 				case T.MATH_NET:
 				{
-					next(); ast.push("≠"); break build;
+					this.next(); ast.push("≠"); break build;
 				}
 				case T.MATH_LTOET:
 				{
-					next(); ast.push("≤"); break build;
+					this.next(); ast.push("≤"); break build;
 				}
 				case T.MATH_GTOET:
 				{
-					next(); ast.push("≥"); break build;
+					this.next(); ast.push("≥"); break build;
 				}
 				//-----//
 				//     //
@@ -560,12 +514,49 @@ function impl({ peek, next }: Processor)
 				//-----//
 				default:
 				{
-					next(); ast.push(t.toString()); break build;
+					this.next(); ast.push(t.toString()); break build;
 				}
 			}
 		}
 		return ast;
 	}
+
+	protected style(until: ReturnType<typeof this.lookup>[] = [], ending: Token)
+	{
+		const temp: AST[number][] = [];
+
+		style:
+		while (true)
+		{
+			const t = this.lookup(); if (until.includes(t)) break style;
+
+			switch (t)
+			{
+				case null:
+				case T.BREAK:
+				{
+					break style;
+				}
+				case ending:
+				{
+					this.next(); break style;
+				}
+				default:
+				{
+					if (typeof t === "string")
+					{
+						temp.push(this.next() as string);
+					}
+					else
+					{
+						temp.push(...this.inline([...until, ending]));
+					}
+					continue style;
+				}
+			}
+		}
+		return temp;
+	}
 }
 
-export default [Object.values(T), impl] satisfies ConstructorParameters<typeof Markdown> as ConstructorParameters<typeof Markdown>;
+export default [new Scanner(Object.values(T)), new Preset()] satisfies ConstructorParameters<typeof Markdown> as ConstructorParameters<typeof Markdown>;

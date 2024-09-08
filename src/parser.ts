@@ -3,37 +3,21 @@ import Scanner from "./scanner";
 import AST from "./models/ast";
 import Token from "./models/token";
 
-export default class Parser
+export default abstract class Parser
 {
-	private data: ReturnType<typeof Scanner.prototype.scan> = []; private i = 0;
-
-	constructor(private readonly impl: (args: Processor) => AST)
-	{
-		// TODO: none
-	}
+	private data: ReturnType<typeof Scanner.prototype.scan> = [];
+	/** keep track of current position */
+	private i = 0;
 
 	public parse(data: typeof this.data)
 	{
-		[this.data, this.i] = [data, 0];
-		//---------------------------//
-		//                           //
-		// RECURSIVE DESCENT PARSING //
-		//                           //
-		//---------------------------//
-
 		const root = new ROOT();
 
-		const args = Object.freeze(
-		{
-			peek: this.peek.bind(this),
-			next: this.next.bind(this),
-		});
-		
-		while (this.i < this.data.length)
+		for ([this.data, this.i] = [data, 0]; this.i < this.data.length; /* nothing */)
 		{
 			try
 			{
-				root.push(this.impl(args));
+				root.push(this.main());
 			}
 			catch (error)
 			{
@@ -47,7 +31,7 @@ export default class Parser
 		return root;
 	}
 
-	private peek(type?: Token)
+	protected peek(type?: Token)
 	{
 		if (type && this.data[this.i] !== type)
 		{
@@ -56,7 +40,7 @@ export default class Parser
 		return this.i < this.data.length ? this.data[this.i] : null;
 	}
 
-	private next(type?: Token)
+	protected next(type?: Token)
 	{
 		if (type && this.data[this.i] !== type)
 		{
@@ -64,6 +48,8 @@ export default class Parser
 		}
 		return this.i < this.data.length ? this.data[this.i++] : null;
 	}
+
+	protected abstract main(): AST;
 }
 
 class ROOT extends AST
@@ -72,10 +58,4 @@ class ROOT extends AST
 	{
 		return this.body;
 	}
-}
-
-export interface Processor
-{
-	readonly peek: Parser["peek"];
-	readonly next: Parser["next"];
 }
