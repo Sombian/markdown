@@ -1,6 +1,5 @@
 export default class Buffer implements Iterable<string>
 {
-	// lazy init
 	private static DC: TextDecoder;
 	// stores binary data
 	private u16a: Uint16Array;
@@ -10,7 +9,7 @@ export default class Buffer implements Iterable<string>
 	constructor(capacity: number)
 	{
 		this.u16a = new Uint16Array(capacity);
-
+		// lazy init
 		Buffer.DC ??= new TextDecoder("utf-16");
 	}
 
@@ -79,6 +78,11 @@ export default class Buffer implements Iterable<string>
 		return this.u16a.length;
 	}
 
+	public toArray()
+	{
+		return Array.from(this.u16a.subarray(0, this.i));
+	}
+
 	public toString()
 	{
 		return Buffer.DC.decode(this.u16a.subarray(0, this.i));
@@ -86,10 +90,6 @@ export default class Buffer implements Iterable<string>
 
 	[Symbol.iterator]()
 	{
-		//
-		// the power of iterator comes from lazy eval, which makes infinite iteration possible.
-		// however, buffer's size is bounded, meaning the 'infinite' case doesnt apply here.
-		//
 		return this.toString()[Symbol.iterator]();
 	}
 }

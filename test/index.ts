@@ -10,17 +10,15 @@ main();
 
 function main()
 {
-	function benchmark<T>(name: string, task: () => T)
+	function benchmark<T>(label: string, task: () => T)
 	{
-		const t1 = performance.now();
+		console.time(label);
 
-		const value = task();
+		const result = task();
 
-		const t2 = performance.now();
+		console.timeEnd(label);
 
-		console.debug(`\x1b[33m⚡ ${name}\x1b[0m took \x1b[4m${t2 - t1}ms\x1b[0m`);
-
-		return value;
+		return result;
 	}
 
 	Bun.file(input).text().then(async (text) =>

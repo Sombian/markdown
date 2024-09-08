@@ -29,10 +29,10 @@
 	},
 	"devDependencies": {
 		"@swc/cli": "^0.4.0",
-		"@swc/core": "^1.7.23",
+		"@swc/core": "^1.7.24",
 		"@types/bun": "^1.1.8",
 		"@types/node": "^22.5.4",
-		"eslint": "^9.9.1",
+		"eslint": "^9.10.0",
 		"typescript": "^5.5.4",
 		"typescript-eslint": "^8.4.0"
 	},
