@@ -1,5 +1,4 @@
 import Level from "./enums/level";
-
 import Token from "./models/token";
 import Buffer from "./models/buffer";
 

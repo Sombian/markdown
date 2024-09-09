@@ -18,9 +18,9 @@ this project focuses on high performance, modularity, and, above all, simplicity
 > this project is under active development and not yet suitable for production use.
 
 ```ts
-import { Markdown, Presets } from "@sombian/markdown";
+import { Presets } from "@sombian/markdown";
 
-const markdown = new Markdown(...Presets.NekoNote);
+const markdown = Presets.NekoNote;
 
 console.debug(markdown.run("hello world"));
 ```

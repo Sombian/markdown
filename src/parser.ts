@@ -1,5 +1,4 @@
 import Scanner from "./scanner";
-
 import AST from "./models/ast";
 import Token from "./models/token";
 

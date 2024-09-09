@@ -1,8 +1,7 @@
 import fs from "fs";
 import path from "path";
 import util from "util";
-
-import { Markdown, Presets } from "@";
+import { Presets } from "@";
 
 const sample = path.join(import.meta.dir, "sample.txt");
 
@@ -10,7 +9,7 @@ main();
 
 function main()
 {
-	const preset = new Markdown(...Presets.NekoNote);
+	const preset = Presets.NekoNote;
 
 	Bun.file(sample).text().then(async (text) =>
 	{

@@ -26,10 +26,10 @@
 		"noImplicitThis": true,
 		"declarationMap": true,
 		"esModuleInterop": true,
+		"isolatedModules": true,
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"emitDeclarationOnly": true,
-		"verbatimModuleSyntax": true,
 		"exactOptionalPropertyTypes": true,
 		"forceConsistentCasingInFileNames": true
 	},

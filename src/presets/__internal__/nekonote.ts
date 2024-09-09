@@ -1,13 +1,9 @@
-import { Markdown } from "@";
-
-import Parser from "@/parser";
+import Helper from "@/helper";
 import Scanner from "@/scanner";
-
+import Parser from "@/parser";
 import AST from "@/models/ast";
 import Token from "@/models/token";
-
 import Level from "@/enums/level";
-
 import * as HTML from "@/DOM";
 
 abstract class _ extends Token
@@ -40,7 +36,7 @@ const T = Object.freeze(
 	// CORE //
 	//      //
 	//------//
-	BREAK: new (class BREAK extends _ {})
+	BR: new (class BR extends _ {})
 	(Level.INLINE, "\n"),
 	COMMENT_L: new (class COMMENT_L extends _ {})
 	(Level.INLINE, "/*"),
@@ -189,7 +185,7 @@ class Preset extends Parser
 			{
 				throw "EOF";
 			}
-			case T.BREAK:
+			case T.BR:
 			{
 				this.next(); return new HTML.BR();
 			}
@@ -228,134 +224,139 @@ class Preset extends Parser
 			case T.OL:
 			case T.UL:
 			{
-				let LI = false;
-
-				const root = (() =>
-				{
-					switch (this.next())
-					{
-						case T.BQ_1: { return new HTML.BQ(); }
-						case T.BQ_2: { return new HTML.BQ(); }
-						case T.OL: { LI = true; return new HTML.OL(); }
-						case T.UL: { LI = true; return new HTML.UL(); }
-					}
-				})
-				()!;
-		
-				let node: Nullable<HTML.BQ | HTML.OL | HTML.UL> = root;
-		
-				stack:
-				while (true)
-				{
-					const t = this.lookup();
-
-					build:
-					switch (t)
-					{
-						case null:
-						case T.BREAK:
-						{
-							// if EOF/BR is found before BQ/OL/UL
-							if (!node) break stack;
-
-							this.next();
-							node = null;
-							break build;
-						}
-						case T.INDENT_1T:
-						case T.INDENT_2S:
-						case T.INDENT_4S:
-						{
-							// get the most recently working node
-							const ast = node?.at(-1) ?? root;
-
-							switch (ast.constructor)
-							{
-								case HTML.OL:
-								case HTML.UL:
-								{
-									// pickup
-									this.next(); node = ast as AST; break;
-								}
-								default:
-								{
-									// if an indent is found before BQ/OL/UL
-									if (!node)
-									{
-										// exit
-										break stack;
-									}
-									// insert
-									node.push(this.inline()); break;
-								}
-							}
-							break build;
-						}
-						case T.BQ_1:
-						case T.BQ_2:
-						case T.OL:
-						case T.UL:
-						{
-							// get the most recently working node
-							const ast = node?.at(-1) ?? root;
-
-							const type = (() =>
-							{
-								switch (t)
-								{
-									case T.BQ_1: { return HTML.BQ; }
-									case T.BQ_2: { return HTML.BQ; }
-									case T.OL: { LI = true; return HTML.OL; }
-									case T.UL: { LI = true; return HTML.UL; }
-								}
-							})
-							()!;
-							
-							// if the types of ast and token correspond
-							if (ast instanceof type)
-							{
-								// pickup
-								this.next(); node = ast as AST;
-							}
-							// if the types of ast and token differ
-							else if (node)
-							{
-								// delve
-								this.next(); node.push(node = new type());
-							}
-							// if a diff type of ast is found before its kind
-							else
-							{
-								// exit
-								break stack;
-							}
-							break build;
-						}
-						default:
-						{
-							// if an inline element is found before a block element
-							if (!node) break stack;
-
-							if (!LI)
-							{
-								node.push(this.inline(), new HTML.BR());
-							}
-							else
-							{
-								node.push(new HTML.LI(...this.inline()));
-							}
-							LI = false;
-							break build;
-						}
-					}
-				}
-				return root;
+				return this.stack();
 			}
 			default:
 			{
 				return this.inline();
 			}
 		}
+	}
+
+	protected stack()
+	{
+		let LI = false;
+
+		const root = (() =>
+		{
+			switch (this.next())
+			{
+				case T.BQ_1: { return new HTML.BQ(); }
+				case T.BQ_2: { return new HTML.BQ(); }
+				case T.OL: { LI = true; return new HTML.OL(); }
+				case T.UL: { LI = true; return new HTML.UL(); }
+			}
+		})
+		()!;
+
+		let node: Nullable<HTML.BQ | HTML.OL | HTML.UL> = root;
+
+		stack:
+		while (true)
+		{
+			const t = this.lookup();
+
+			build:
+			switch (t)
+			{
+				case null:
+				case T.BR:
+				{
+					// if EOF/BR is found before BQ/OL/UL
+					if (!node) break stack;
+
+					this.next();
+					node = null;
+					break build;
+				}
+				case T.INDENT_1T:
+				case T.INDENT_2S:
+				case T.INDENT_4S:
+				{
+					// get the most recently working node
+					const ast = node?.at(-1) ?? root;
+
+					switch (ast.constructor)
+					{
+						case HTML.OL:
+						case HTML.UL:
+						{
+							// pickup
+							this.next(); node = ast as AST; break;
+						}
+						default:
+						{
+							// if an indent is found before BQ/OL/UL
+							if (!node)
+							{
+								// exit
+								break stack;
+							}
+							// insert
+							node.push(this.inline()); break;
+						}
+					}
+					break build;
+				}
+				case T.BQ_1:
+				case T.BQ_2:
+				case T.OL:
+				case T.UL:
+				{
+					// get the most recently working node
+					const ast = node?.at(-1) ?? root;
+
+					const type = (() =>
+					{
+						switch (t)
+						{
+							case T.BQ_1: { return HTML.BQ; }
+							case T.BQ_2: { return HTML.BQ; }
+							case T.OL: { LI = true; return HTML.OL; }
+							case T.UL: { LI = true; return HTML.UL; }
+						}
+					})
+					()!;
+					
+					// if the types of ast and token correspond
+					if (ast instanceof type)
+					{
+						// pickup
+						this.next(); node = ast as AST;
+					}
+					// if the types of ast and token differ
+					else if (node)
+					{
+						// delve
+						this.next(); node.push(node = new type());
+					}
+					// if a diff type of ast is found before its kind
+					else
+					{
+						// exit
+						break stack;
+					}
+					break build;
+				}
+				default:
+				{
+					// if an inline element is found before a block element
+					if (!node) break stack;
+
+					if (!LI)
+					{
+						node.push(this.inline(), new HTML.BR());
+					}
+					else
+					{
+						node.push(new HTML.LI(...this.inline()));
+					}
+					LI = false;
+					break build;
+				}
+			}
+		}
+		return root;
 	}
 
 	protected inline(until: ReturnType<typeof this.lookup>[] = [])
@@ -371,7 +372,7 @@ class Preset extends Parser
 			switch (t)
 			{
 				case null:
-				case T.BREAK:
+				case T.BR:
 				{
 					break inline;
 				}
@@ -533,7 +534,7 @@ class Preset extends Parser
 			switch (t)
 			{
 				case null:
-				case T.BREAK:
+				case T.BR:
 				{
 					break style;
 				}
@@ -559,4 +560,4 @@ class Preset extends Parser
 	}
 }
 
-export default [new Scanner(Object.values(T)), new Preset()] satisfies ConstructorParameters<typeof Markdown> as ConstructorParameters<typeof Markdown>;
+export default new Helper(new Scanner(Object.values(T)), new Preset());
