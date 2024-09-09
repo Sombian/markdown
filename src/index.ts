@@ -6,4 +6,4 @@ import Level from "./enums/level";
 import AST from "./models/ast";
 import Token from "./models/token";
 
-export { Helper as Helper, Parser, Scanner, Presets, Level, AST, Token };
+export { Helper, Parser, Scanner, Presets, Level, AST, Token };
