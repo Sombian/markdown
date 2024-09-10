@@ -9,6 +9,6 @@ export class BACKLINK extends AST
 
 	override toString()
 	{
-		return `<${["a", this.href ? `href="${this.href}"` : null].filter((_) => _ !== null).join("\u0020")}>${this.text ?? ""}</a>`;
+		return `<${["a", (this.href ? `href="${this.href}"` : null)].filter((_) => _ !== null).join("\u0020")}>${this.text ?? ""}</a>`;
 	}
 }

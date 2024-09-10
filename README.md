@@ -20,9 +20,10 @@ this project focuses on high performance, modularity, and, above all, simplicity
 ```ts
 import { Presets } from "@sombian/markdown";
 
-const markdown = Presets.NekoNote;
+const helper = Presets.NekoNote;
 
-console.debug(markdown.run("hello world"));
+console.debug(helper.run("hello world"));
+// or helper.parse(helper.scan("hello world"))
 ```
 
 ## NekoNote

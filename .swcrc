@@ -15,7 +15,7 @@
 		// core options
 		"target": "esnext", "loose": true,
 		// path aliasing
-		"baseUrl": "./", "paths": {	"@": ["./src"], "@/*": ["./src/*"] }
+		"baseUrl": "./", "paths": { "@": ["./src"], "@/*": ["./src/*"] }
 	},
 	// should minify?
 	"minify": true
