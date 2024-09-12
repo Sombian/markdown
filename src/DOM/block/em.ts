@@ -14,7 +14,7 @@ export class EM extends AST
 	{
 		if (this.src)
 		{
-			let groups: ReturnType<typeof RegExp.prototype.exec>;
+			let groups: ReturnType<RegExp["exec"]>;
 
 			if ((groups = GIST.exec(this.src)))
 			{

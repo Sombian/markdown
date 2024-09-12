@@ -4,9 +4,9 @@ import Parser from "@/parser";
 
 class Preset extends Parser
 {
-	protected main(): ReturnType<typeof Parser.prototype["main"]>
+	constructor()
 	{
-		throw new Error("Unimplemented");
+		super();
 	}
 }
 

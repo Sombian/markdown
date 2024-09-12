@@ -1,4 +1,4 @@
-export default class Buffer implements Iterable<string>
+export default class Buffer
 {
 	private static DC: TextDecoder;
 	// stores binary data
@@ -25,7 +25,7 @@ export default class Buffer implements Iterable<string>
 			this.u16a = temp;
 		}
 		// write
-		for (let j = 0; j < data.length; ++j)
+		for (let j = 0; j < data.length; j++)
 		{
 			this.u16a[this.i + j] = data.charCodeAt(j);
 		}
@@ -78,18 +78,8 @@ export default class Buffer implements Iterable<string>
 		return this.u16a.length;
 	}
 
-	public toArray()
-	{
-		return Array.from(this.u16a.subarray(0, this.i));
-	}
-
 	public toString()
 	{
 		return Buffer.DC.decode(this.u16a.subarray(0, this.i));
-	}
-
-	[Symbol.iterator]()
-	{
-		return this.toString()[Symbol.iterator]();
 	}
 }

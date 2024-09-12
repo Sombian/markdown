@@ -4,12 +4,13 @@ import Parser from "@/parser";
 import AST from "@/models/ast";
 import Token from "@/models/token";
 import Level from "@/enums/level";
-import * as HTML from "@/DOM";
+import * as DOM from "@/DOM";
 
 abstract class _ extends Token
 {
-	constructor(lvl: typeof Token.prototype.lvl, syntax: typeof Token.prototype.syntax, next?: typeof Token.prototype.next)
+	constructor(...args: [...Take<ConstructorParameters<typeof Token>, 2>, Level?])
 	{
+		const [lvl, syntax, next] = args;
 		// TODO: maybe change IIFE to a function declaration 
 		super(lvl, syntax, next ?? (() =>
 		{
@@ -62,24 +63,22 @@ const T = Object.freeze(
 	CB: new (class CB extends _ {})
 	(Level.BLOCK, "```"),
 	HR_1: new (class HR_1 extends _ {})
-	(Level.BLOCK, "___" + "\n"),
-	HR_2: new (class HR_2 extends _ {})
 	(Level.BLOCK, "---" + "\n"),
-	HR_3: new (class HR_3 extends _ {})
+	HR_2: new (class HR_2 extends _ {})
 	(Level.BLOCK, "===" + "\n"),
 	//-------//
 	//       //
 	// STACK //
 	//       //
 	//-------//
-	BQ_1: new (class BQ extends _ { })
-	(Level.BLOCK, ">", Level.BLOCK),
-	BQ_2: new (class BQ extends _ { })
-	(Level.BLOCK, "> ", Level.BLOCK),
 	OL: new (class OL extends _ { })
 	(Level.BLOCK, "- ", Level.BLOCK),
 	UL: new (class UL extends _ { })
 	(Level.BLOCK, "~ ", Level.BLOCK),
+	BQ_1: new (class BQ_1 extends _ { })
+	(Level.BLOCK, ">", Level.BLOCK),
+	BQ_2: new (class BQ_2 extends _ { })
+	(Level.BLOCK, "> ", Level.BLOCK),
 	INDENT_1T: new (class INDENT_1T extends _ { })
 	(Level.BLOCK, "\u0009".repeat(1), Level.BLOCK),
 	INDENT_2S: new (class INDENT_2S extends _ { })
@@ -141,25 +140,217 @@ const T = Object.freeze(
 
 class Preset extends Parser
 {
-	protected main()
+	constructor()
 	{
-		return this.block();
+		super();
+		//-------//
+		//       //
+		// BLOCK //
+		//       //
+		//-------//
+		this.rule(Level.BLOCK, T.BR, () =>
+		{
+			return new DOM.BR(/* leaf node */);
+		});
+		this.rule(Level.BLOCK, T.H1, () =>
+		{
+			const temp = new DOM.H1(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.BLOCK, T.H2, () =>
+		{
+			const temp = new DOM.H2(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.BLOCK, T.H3, () =>
+		{
+			const temp = new DOM.H3(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.BLOCK, T.H4, () =>
+		{
+			const temp = new DOM.H4(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.BLOCK, T.H5, () =>
+		{
+			const temp = new DOM.H5(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.BLOCK, T.H6, () =>
+		{
+			const temp = new DOM.H6(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.BLOCK, T.HR_1, () =>
+		{
+			return new DOM.HR(/* leaf node */);
+		});
+		this.rule(Level.BLOCK, T.HR_2, () =>
+		{
+			return new DOM.HR(/* leaf node */);
+		});
+		this.rule(Level.BLOCK, T.OL, (t) =>
+		{
+			return this.stack(t);
+		});
+		this.rule(Level.BLOCK, T.UL, (t) =>
+		{
+			return this.stack(t);
+		});
+		this.rule(Level.BLOCK, T.BQ_1, (t) =>
+		{
+			return this.stack(t);
+		});
+		this.rule(Level.BLOCK, T.BQ_2, (t) =>
+		{
+			return this.stack(t);
+		});
+		//--------//
+		//        //
+		// INLINE //
+		//        //
+		//--------//
+		this.rule(Level.INLINE, T.BR, () =>
+		{
+			throw "EOL";
+		});
+		this.rule(Level.INLINE, T.BOLD, (t) =>
+		{
+			const temp = new DOM.BOLD(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.INLINE, T.CODE, (t) =>
+		{
+			const temp = new DOM.CODE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.INLINE, T.ITALIC, (t) =>
+		{
+			const temp = new DOM.ITALIC(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.INLINE, T.STRIKE, (t) =>
+		{
+			const temp = new DOM.STRIKE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.INLINE, T.UNDERLINE, (t) =>
+		{
+			const temp = new DOM.UNDERLINE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+		});
+		this.rule(Level.INLINE, T.CHECKED_BOX, () =>
+		{
+			return new DOM.TODO(true);
+		});
+		this.rule(Level.INLINE, T.UNCHECKED_BOX, () =>
+		{
+			return new DOM.TODO(false);
+		});
+		this.rule(Level.INLINE, T.ARROW_ALL, () =>
+		{
+			return "↔";
+		});
+		this.rule(Level.INLINE, T.ARROW_LEFT, () =>
+		{
+			return "←";
+		});
+		this.rule(Level.INLINE, T.ARROW_RIGHT, () =>
+		{
+			return "→";
+		});
+		this.rule(Level.INLINE, T.FAT_ARROW_ALL, () =>
+		{
+			return "⇔";
+		});
+		this.rule(Level.INLINE, T.FAT_ARROW_LEFT, () =>
+		{
+			return "⇐";
+		});
+		this.rule(Level.INLINE, T.FAT_ARROW_RIGHT, () =>
+		{
+			return "⇒";
+		});
+		this.rule(Level.INLINE, T.MATH_APX, () =>
+		{
+			return "≈";
+		});
+		this.rule(Level.INLINE, T.MATH_NET, () =>
+		{
+			return "≠";
+		});
+		this.rule(Level.INLINE, T.MATH_LTOET, () =>
+		{
+			return "≤";
+		});
+		this.rule(Level.INLINE, T.MATH_GTOET, () =>
+		{
+			return "≥";
+		});
+		//---------//
+		//         //
+		// PATTERN //
+		//         //
+		//---------//
+		this.rule(Level.INLINE, T.BRACKET_L, () =>
+		{
+			let string = "";
+			try
+			{
+				string += this.consume(T.BRACKET_L)!.toString();
+
+				const text: ConstructorParameters<typeof DOM.BACKLINK>[0] = this.inline(T.BRACKET_R).body || null; if (text) string += text;
+
+				string += this.consume(T.BRACKET_R)!.toString();
+				string += this.consume(T.PAREN_L)!.toString();
+
+				const href: ConstructorParameters<typeof DOM.BACKLINK>[1] = this.inline(T.PAREN_R).body || null; if (href) string += href;
+
+				string += this.consume(T.PAREN_R)!.toString();
+
+				return new DOM.BACKLINK(text, href);
+			}
+			catch
+			{
+				return string;
+			}
+		});
+		this.rule(Level.INLINE, T.EXCLAMATION, () =>
+		{
+			let string = "";
+			try
+			{
+				string += this.consume(T.EXCLAMATION)!.toString();
+				string += this.consume(T.BRACKET_L)!.toString();
+
+				const alt: ConstructorParameters<typeof DOM.EM>[0] = this.inline(T.BRACKET_R).body || null; if (alt) string += alt;
+
+				string += this.consume(T.BRACKET_R)!.toString();
+				string += this.consume(T.PAREN_L)!.toString();
+
+				const src: ConstructorParameters<typeof DOM.EM>[1] = this.inline(T.PAREN_R).body || null; if (src) string += src;
+
+				string += this.consume(T.PAREN_R)!.toString();
+
+				return new DOM.EM(alt, src);
+			}
+			catch
+			{
+				return string;
+			}
+		});
 	}
 
-	protected lookup()
+	override peek(type?: Token)
 	{
-		const t = this.peek();
-
-		switch (t)
+		if (type)
 		{
+			return super.peek(type);
+		}
+		let t: ReturnType<Parser["peek"]>;
+
+		switch (t = super.peek())
+		{
+			case null:
+			{
+				throw "EOF";
+			}
 			case T.COMMENT_L:
 			{
-				this.next();
-
 				comment:
 				while (true)
 				{
-					switch (this.next())
+					switch (t = super.consume())
 					{
 						case null:
 						{
@@ -177,84 +368,30 @@ class Preset extends Parser
 		return t;
 	}
 
-	protected block()
+	private stack(token: Token)
 	{
-		switch (this.lookup())
+		const root = new (type(token))();
+
+		let item = false;
+
+		function type(token: Token)
 		{
-			case null:
+			switch (token)
 			{
-				throw "EOF";
+				case T.BQ_1: { return DOM.BQ; }
+				case T.BQ_2: { return DOM.BQ; }
+				case T.OL: { item = true; return DOM.OL; }
+				case T.UL: { item = true; return DOM.UL; }
 			}
-			case T.BR:
-			{
-				this.next(); return new HTML.BR();
-			}
-			case T.H1:
-			{
-				this.next(); return new HTML.H1(...this.inline());
-			}
-			case T.H2:
-			{
-				this.next(); return new HTML.H2(...this.inline());
-			}
-			case T.H3:
-			{
-				this.next(); return new HTML.H3(...this.inline());
-			}
-			case T.H4:
-			{
-				this.next(); return new HTML.H4(...this.inline());
-			}
-			case T.H5:
-			{
-				this.next(); return new HTML.H5(...this.inline());
-			}
-			case T.H6:
-			{
-				this.next(); return new HTML.H6(...this.inline());
-			}
-			case T.HR_1:
-			case T.HR_2:
-			case T.HR_3:
-			{
-				this.next(); return new HTML.HR(/* leaf node */);
-			}
-			case T.BQ_1:
-			case T.BQ_2:
-			case T.OL:
-			case T.UL:
-			{
-				return this.stack();
-			}
-			default:
-			{
-				return this.inline();
-			}
+			throw new Error();
 		}
-	}
 
-	protected stack()
-	{
-		let LI = false;
-
-		const root = (() =>
-		{
-			switch (this.next())
-			{
-				case T.BQ_1: { return new HTML.BQ(); }
-				case T.BQ_2: { return new HTML.BQ(); }
-				case T.OL: { LI = true; return new HTML.OL(); }
-				case T.UL: { LI = true; return new HTML.UL(); }
-			}
-		})
-		()!;
-
-		let node: Nullable<HTML.BQ | HTML.OL | HTML.UL> = root;
+		let node: Nullable<typeof root> = root;
 
 		stack:
 		while (true)
 		{
-			const t = this.lookup();
+			const t = this.peek();
 
 			build:
 			switch (t)
@@ -264,8 +401,7 @@ class Preset extends Parser
 				{
 					// if EOF/BR is found before BQ/OL/UL
 					if (!node) break stack;
-
-					this.next();
+					this.consume();
 					node = null;
 					break build;
 				}
@@ -276,24 +412,22 @@ class Preset extends Parser
 					// get the most recently working node
 					const ast = node?.at(-1) ?? root;
 
+					indent:
 					switch (ast.constructor)
 					{
-						case HTML.OL:
-						case HTML.UL:
+						case DOM.OL:
+						case DOM.UL:
 						{
-							// pickup
-							this.next(); node = ast as AST; break;
+							this.consume();
+							node = ast as AST;
+							break indent;
 						}
 						default:
 						{
 							// if an indent is found before BQ/OL/UL
-							if (!node)
-							{
-								// exit
-								break stack;
-							}
-							// insert
-							node.push(this.inline()); break;
+							if (!node) break stack;
+							node.push(this.inline(T.BR));
+							break indent;
 						}
 					}
 					break build;
@@ -306,34 +440,23 @@ class Preset extends Parser
 					// get the most recently working node
 					const ast = node?.at(-1) ?? root;
 
-					const type = (() =>
-					{
-						switch (t)
-						{
-							case T.BQ_1: { return HTML.BQ; }
-							case T.BQ_2: { return HTML.BQ; }
-							case T.OL: { LI = true; return HTML.OL; }
-							case T.UL: { LI = true; return HTML.UL; }
-						}
-					})
-					()!;
+					const stack = type(t);
 					
 					// if the types of ast and token correspond
-					if (ast instanceof type)
+					if (ast instanceof stack)
 					{
-						// pickup
-						this.next(); node = ast as AST;
+						this.consume();
+						node = ast as AST;
 					}
 					// if the types of ast and token differ
 					else if (node)
 					{
-						// delve
-						this.next(); node.push(node = new type());
+						this.consume();
+						node.push(node = new stack());
 					}
 					// if a diff type of ast is found before its kind
 					else
 					{
-						// exit
 						break stack;
 					}
 					break build;
@@ -343,220 +466,18 @@ class Preset extends Parser
 					// if an inline element is found before a block element
 					if (!node) break stack;
 
-					if (!LI)
-					{
-						node.push(this.inline(), new HTML.BR());
-					}
-					else
-					{
-						node.push(new HTML.LI(...this.inline()));
-					}
-					LI = false;
+					node.push(...(!item
+						?
+						[this.inline(T.BR), new DOM.BR()]
+						:
+						[new DOM.LI(...this.inline(T.BR))]
+					));
+					item = false;
 					break build;
 				}
 			}
 		}
 		return root;
-	}
-
-	protected inline(until: ReturnType<typeof this.lookup>[] = [])
-	{
-		const ast = new HTML.PR();
-
-		inline:
-		while (true)
-		{
-			const t = this.lookup(); if (until.includes(t)) break inline;
-			
-			build:
-			switch (t)
-			{
-				case null:
-				case T.BR:
-				{
-					break inline;
-				}
-				//----------//
-				//          //
-				// COMPOUND //
-				//          //
-				//----------//
-				case T.EXCLAMATION:
-				{
-					const fallback: string[] = [];
-					try
-					{
-						fallback.push(this.next(T.EXCLAMATION)!.toString());
-						fallback.push(this.next(T.BRACKET_L)!.toString());
-
-						const alt: ConstructorParameters<typeof HTML.EM>[0] = this.inline([...until, T.BRACKET_R]).body || null; if (alt) fallback.push(alt);
-
-						fallback.push(this.next(T.BRACKET_R)!.toString());
-						fallback.push(this.next(T.PAREN_L)!.toString());
-
-						const src: ConstructorParameters<typeof HTML.EM>[1] = this.inline([...until, T.PAREN_R]).body || null; if (src) fallback.push(src);
-
-						fallback.push(this.next(T.PAREN_R)!.toString());
-
-						ast.push(new HTML.EM(alt, src));
-					}
-					catch
-					{
-						ast.push(...fallback);
-					}
-					break build;
-				}
-				case T.BRACKET_L:
-				{
-					const fallback: string[] = [];
-					try
-					{
-						fallback.push(this.next(T.BRACKET_L)!.toString());
-
-						const text: ConstructorParameters<typeof HTML.BACKLINK>[0] = this.inline([...until, T.BRACKET_R]).body || null; if (text) fallback.push(text);
-
-						fallback.push(this.next(T.BRACKET_R)!.toString());
-						fallback.push(this.next(T.PAREN_L)!.toString());
-
-						const href: ConstructorParameters<typeof HTML.BACKLINK>[1] = this.inline([...until, T.PAREN_R]).body || null; if (href) fallback.push(href);
-
-						fallback.push(this.next(T.PAREN_R)!.toString());
-
-						ast.push(new HTML.BACKLINK(text, href));
-					}
-					catch
-					{
-						ast.push(...fallback);
-					}
-					break build;
-				}
-				//-------//
-				//       //
-				// STYLE //
-				//       //
-				//-------//
-				case T.BOLD:
-				{
-					this.next(); ast.push(new HTML.BOLD(...this.style(until, T.BOLD))); break build;
-				}
-				case T.CODE:
-				{
-					this.next(); ast.push(new HTML.CODE(...this.style(until, T.CODE))); break build;
-				}
-				case T.ITALIC:
-				{
-					this.next(); ast.push(new HTML.ITALIC(...this.style(until, T.ITALIC))); break build;
-				}
-				case T.STRIKE:
-				{
-					this.next(); ast.push(new HTML.STRIKE(...this.style(until, T.STRIKE))); break build;
-				}
-				case T.UNDERLINE:
-				{
-					this.next(); ast.push(new HTML.UNDERLINE(...this.style(until, T.UNDERLINE))); break build;
-				}
-				case T.CHECKED_BOX:
-				{
-					this.next(); ast.push(new HTML.TODO(true)); break build;
-				}
-				case T.UNCHECKED_BOX:
-				{
-					this.next(); ast.push(new HTML.TODO(false)); break build;
-				}
-				//-------//
-				//       //
-				// MACRO //
-				//       //
-				//-------//
-				case T.ARROW_ALL:
-				{
-					this.next(); ast.push("↔"); break build;
-				}
-				case T.ARROW_LEFT:
-				{
-					this.next(); ast.push("←"); break build;
-				}
-				case T.ARROW_RIGHT:
-				{
-					this.next(); ast.push("→"); break build;
-				}
-				case T.FAT_ARROW_ALL:
-				{
-					this.next(); ast.push("⇔"); break build;
-				}
-				case T.FAT_ARROW_LEFT:
-				{
-					this.next(); ast.push("⇐"); break build;
-				}
-				case T.FAT_ARROW_RIGHT:
-				{
-					this.next(); ast.push("⇒"); break build;
-				}
-				case T.MATH_APX:
-				{
-					this.next(); ast.push("≈"); break build;
-				}
-				case T.MATH_NET:
-				{
-					this.next(); ast.push("≠"); break build;
-				}
-				case T.MATH_LTOET:
-				{
-					this.next(); ast.push("≤"); break build;
-				}
-				case T.MATH_GTOET:
-				{
-					this.next(); ast.push("≥"); break build;
-				}
-				//-----//
-				//     //
-				// ETC //
-				//     //
-				//-----//
-				default:
-				{
-					this.next(); ast.push(t.toString()); break build;
-				}
-			}
-		}
-		return ast;
-	}
-
-	protected style(until: ReturnType<typeof this.lookup>[] = [], ending: Token)
-	{
-		const temp: AST[number][] = [];
-
-		style:
-		while (true)
-		{
-			const t = this.lookup(); if (until.includes(t)) break style;
-
-			switch (t)
-			{
-				case null:
-				case T.BR:
-				{
-					break style;
-				}
-				case ending:
-				{
-					this.next(); break style;
-				}
-				default:
-				{
-					if (typeof t === "string")
-					{
-						temp.push(this.next() as string);
-					}
-					else
-					{
-						temp.push(...this.inline([...until, ending]));
-					}
-					continue style;
-				}
-			}
-		}
-		return temp;
 	}
 }
 

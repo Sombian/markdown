@@ -16,7 +16,7 @@ export default class Scanner
 
 	constructor(data: Token[])
 	{
-		function routes(lvl: typeof Token.prototype.lvl)
+		function routes(lvl: Token["lvl"])
 		{
 			switch (lvl)
 			{
@@ -51,7 +51,7 @@ export default class Scanner
 			{
 				let node = (this.TRIE[lvl] ??= {});
 		
-				for (let i = 0; i < token.syntax.length; ++i)
+				for (let i = 0; i < token.syntax.length; i++)
 				{
 					const char = token.syntax[i];
 
@@ -94,13 +94,11 @@ export default class Scanner
 				}
 			}
 		}
-		// init...
 		[this.state, this.buffer, this.stream] = [null as unknown as State, null as unknown as Buffer, null as unknown as Chunk[]];
 	}
 
 	public scan(data: string)
 	{
-		// init...
 		[this.state, this.buffer, this.stream] = [{ node: this.TRIE[Level.BLOCK], depth: 0, escape: false }, new Buffer(data.length), []];
 
 		main:
