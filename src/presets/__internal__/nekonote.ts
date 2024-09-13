@@ -154,27 +154,27 @@ class Preset extends Parser
 		});
 		this.rule(Level.BLOCK, T.H1, () =>
 		{
-			const temp = new DOM.H1(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+			const temp = new DOM.H1(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H2, () =>
 		{
-			const temp = new DOM.H2(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+			const temp = new DOM.H2(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H3, () =>
 		{
-			const temp = new DOM.H3(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+			const temp = new DOM.H3(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H4, () =>
 		{
-			const temp = new DOM.H4(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+			const temp = new DOM.H4(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H5, () =>
 		{
-			const temp = new DOM.H5(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+			const temp = new DOM.H5(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H6, () =>
 		{
-			const temp = new DOM.H6(...this.inline()); try { this.consume(T.BR); } catch { /* none */ } return temp;
+			const temp = new DOM.H6(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.HR_1, () =>
 		{
@@ -207,27 +207,27 @@ class Preset extends Parser
 		//--------//
 		this.rule(Level.INLINE, T.BR, () =>
 		{
-			throw "EOL";
+			throw "exit";
 		});
 		this.rule(Level.INLINE, T.BOLD, (t) =>
 		{
-			const temp = new DOM.BOLD(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+			const temp = new DOM.BOLD(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.CODE, (t) =>
 		{
-			const temp = new DOM.CODE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+			const temp = new DOM.CODE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.ITALIC, (t) =>
 		{
-			const temp = new DOM.ITALIC(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+			const temp = new DOM.ITALIC(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.STRIKE, (t) =>
 		{
-			const temp = new DOM.STRIKE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+			const temp = new DOM.STRIKE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.UNDERLINE, (t) =>
 		{
-			const temp = new DOM.UNDERLINE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* none */ } return temp;
+			const temp = new DOM.UNDERLINE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.CHECKED_BOX, () =>
 		{
@@ -339,22 +339,19 @@ class Preset extends Parser
 		}
 		let t: ReturnType<Parser["peek"]>;
 
+		main:
 		switch (t = super.peek())
 		{
-			case null:
-			{
-				throw "EOF";
-			}
 			case T.COMMENT_L:
 			{
 				comment:
 				while (true)
 				{
-					switch (t = super.consume())
+					switch (t = this.consume())
 					{
 						case null:
 						{
-							throw "EOF";
+							throw "exit"
 						}
 						case T.COMMENT_R:
 						{
@@ -362,7 +359,19 @@ class Preset extends Parser
 						}
 					}
 				}
-				break;
+				try
+				{
+					this.consume(T.BR);
+				}
+				catch
+				{
+					/* ignore */
+				}
+				finally
+				{
+					t = super.peek();
+				}
+				break main;
 			}
 		}
 		return t;
@@ -370,21 +379,20 @@ class Preset extends Parser
 
 	private stack(token: Token)
 	{
-		const root = new (type(token))();
-
-		let item = false;
+		let is_item: boolean;
 
 		function type(token: Token)
 		{
 			switch (token)
 			{
-				case T.BQ_1: { return DOM.BQ; }
-				case T.BQ_2: { return DOM.BQ; }
-				case T.OL: { item = true; return DOM.OL; }
-				case T.UL: { item = true; return DOM.UL; }
+				case T.OL: { is_item = true; return DOM.OL; }
+				case T.UL: { is_item = true; return DOM.UL; }
+				case T.BQ_1: { is_item = false; return DOM.BQ; }
+				case T.BQ_2: { is_item = false; return DOM.BQ; }
 			}
 			throw new Error();
 		}
+		const root = new (type(token))();
 
 		let node: Nullable<typeof root> = root;
 
@@ -397,12 +405,46 @@ class Preset extends Parser
 			switch (t)
 			{
 				case null:
+				{
+					break stack;
+				}
 				case T.BR:
 				{
-					// if EOF/BR is found before BQ/OL/UL
+					// if EOL is found before BQ/OL/UL
 					if (!node) break stack;
 					this.consume();
 					node = null;
+					break build;
+				}
+				case T.OL:
+				case T.UL:
+				case T.BQ_1:
+				case T.BQ_2:
+				{
+					// get the most recently working node
+					const ast = node?.at(-1) ?? root;
+
+					const stack = type(t);
+					
+					// if the types of ast and token correspond
+					if (ast instanceof stack)
+					{
+						this.consume();
+						// pickup
+						node = ast as AST;
+					}
+					// if the types of ast and token differ
+					else if (node)
+					{
+						this.consume();
+						// insert
+						node.push(node = new stack());
+					}
+					// if a diff type of ast is found before its kind
+					else
+					{
+						break stack;
+					}
 					break build;
 				}
 				case T.INDENT_1T:
@@ -432,47 +474,19 @@ class Preset extends Parser
 					}
 					break build;
 				}
-				case T.BQ_1:
-				case T.BQ_2:
-				case T.OL:
-				case T.UL:
-				{
-					// get the most recently working node
-					const ast = node?.at(-1) ?? root;
-
-					const stack = type(t);
-					
-					// if the types of ast and token correspond
-					if (ast instanceof stack)
-					{
-						this.consume();
-						node = ast as AST;
-					}
-					// if the types of ast and token differ
-					else if (node)
-					{
-						this.consume();
-						node.push(node = new stack());
-					}
-					// if a diff type of ast is found before its kind
-					else
-					{
-						break stack;
-					}
-					break build;
-				}
 				default:
 				{
 					// if an inline element is found before a block element
 					if (!node) break stack;
 
-					node.push(...(!item
+					// @ts-expect-error stfu
+					node.push(...(!is_item
 						?
 						[this.inline(T.BR), new DOM.BR()]
 						:
 						[new DOM.LI(...this.inline(T.BR))]
 					));
-					item = false;
+					is_item = false;
 					break build;
 				}
 			}

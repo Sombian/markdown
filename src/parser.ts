@@ -17,23 +17,24 @@ export default abstract class Parser
 
 	public parse(data: typeof this.data)
 	{
-		const ast = new ROOT();
+		const ast = new $();
 
 		main:
 		for ([this.data, this.i] = [data, 0]; this.i < this.data.length; /* none */)
 		{
-			const t = this.peek()!; const rule = this.RULES[Level.BLOCK].get(t as Token);
-
-			if (rule) this.i++; // <-- step up
 			try
 			{
+				const t = this.peek()!; const rule = this.RULES[Level.BLOCK].get(t as Token);
+
+				if (rule) this.i++; // <-- step up
+
 				ast.push(rule?.(t as Token) ?? this.inline());
 			}
 			catch (error)
 			{
 				switch (error)
 				{
-					case "EOF":
+					case "exit":
 					{
 						break main;
 					}
@@ -63,32 +64,35 @@ export default abstract class Parser
 
 	protected consume(type?: Token)
 	{
-		const t = this.peek(type);
-		this.i++;
-		return t;
+		if (type && this.data[this.i] !== type)
+			{
+				throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
+			}
+			return this.i < this.data.length ? this.data[this.i++] : null;
 	}
 
 	protected inline(...until: ReturnType<typeof this.peek>[])
 	{
-		const ast = new SPAN();
+		const ast = new _();
 
 		main:
 		for (/* none */; this.i < this.data.length; /* none */)
 		{
-			const t = this.peek()!; const rule = this.RULES[Level.INLINE].get(t as Token);
-
-			if (until.includes(t)) break main;
-			
-			/* if (rule) */ this.i++; // <-- step up
 			try
 			{
+				const t = this.peek()!; const rule = this.RULES[Level.INLINE].get(t as Token);
+
+				if (until.includes(t)) break main;
+				
+				/* if (rule) */ this.i++; // <-- step up
+
 				ast.push(rule?.(t as Token) ?? t.toString());
 			}
 			catch (error)
 			{
 				switch (error)
 				{
-					case "EOL":
+					case "exit":
 					{
 						this.i--; // <-- step back
 						break main;
@@ -104,7 +108,7 @@ export default abstract class Parser
 	}
 }
 
-class ROOT extends AST
+class $ extends AST // root
 {
 	override toString()
 	{
@@ -112,7 +116,7 @@ class ROOT extends AST
 	}
 }
 
-class SPAN extends AST
+class _ extends AST // inline
 {
 	override toString()
 	{
