@@ -4,7 +4,7 @@ import Parser from "@/parser";
 import AST from "@/models/ast";
 import Token from "@/models/token";
 import Level from "@/enums/level";
-import * as DOM from "@/DOM";
+import * as XML from "@/DOM";
 
 abstract class _ extends Token
 {
@@ -150,39 +150,39 @@ class Preset extends Parser
 		//-------//
 		this.rule(Level.BLOCK, T.BR, () =>
 		{
-			return new DOM.BR(/* leaf node */);
+			return new XML.BR(/* leaf node */);
 		});
 		this.rule(Level.BLOCK, T.H1, () =>
 		{
-			const temp = new DOM.H1(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
+			const temp = new XML.H1(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H2, () =>
 		{
-			const temp = new DOM.H2(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
+			const temp = new XML.H2(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H3, () =>
 		{
-			const temp = new DOM.H3(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
+			const temp = new XML.H3(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H4, () =>
 		{
-			const temp = new DOM.H4(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
+			const temp = new XML.H4(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H5, () =>
 		{
-			const temp = new DOM.H5(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
+			const temp = new XML.H5(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.H6, () =>
 		{
-			const temp = new DOM.H6(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
+			const temp = new XML.H6(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.BLOCK, T.HR_1, () =>
 		{
-			return new DOM.HR(/* leaf node */);
+			return new XML.HR(/* leaf node */);
 		});
 		this.rule(Level.BLOCK, T.HR_2, () =>
 		{
-			return new DOM.HR(/* leaf node */);
+			return new XML.HR(/* leaf node */);
 		});
 		this.rule(Level.BLOCK, T.OL, (t) =>
 		{
@@ -207,35 +207,35 @@ class Preset extends Parser
 		//--------//
 		this.rule(Level.INLINE, T.BR, () =>
 		{
-			throw "exit";
+			return new XML.BR(/* leaf node */);
 		});
 		this.rule(Level.INLINE, T.BOLD, (t) =>
 		{
-			const temp = new DOM.BOLD(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
+			const temp = new XML.BOLD(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.CODE, (t) =>
 		{
-			const temp = new DOM.CODE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
+			const temp = new XML.CODE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.ITALIC, (t) =>
 		{
-			const temp = new DOM.ITALIC(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
+			const temp = new XML.ITALIC(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.STRIKE, (t) =>
 		{
-			const temp = new DOM.STRIKE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
+			const temp = new XML.STRIKE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.UNDERLINE, (t) =>
 		{
-			const temp = new DOM.UNDERLINE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
+			const temp = new XML.UNDERLINE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
 		this.rule(Level.INLINE, T.CHECKED_BOX, () =>
 		{
-			return new DOM.TODO(true);
+			return new XML.TODO(true);
 		});
 		this.rule(Level.INLINE, T.UNCHECKED_BOX, () =>
 		{
-			return new DOM.TODO(false);
+			return new XML.TODO(false);
 		});
 		this.rule(Level.INLINE, T.ARROW_ALL, () =>
 		{
@@ -289,16 +289,16 @@ class Preset extends Parser
 			{
 				string += this.consume(T.BRACKET_L)!.toString();
 
-				const text: ConstructorParameters<typeof DOM.BACKLINK>[0] = this.inline(T.BRACKET_R).body || null; if (text) string += text;
+				const text: ConstructorParameters<typeof XML.BACKLINK>[0] = this.inline(T.BRACKET_R).body || null; if (text) string += text;
 
 				string += this.consume(T.BRACKET_R)!.toString();
 				string += this.consume(T.PAREN_L)!.toString();
 
-				const href: ConstructorParameters<typeof DOM.BACKLINK>[1] = this.inline(T.PAREN_R).body || null; if (href) string += href;
+				const href: ConstructorParameters<typeof XML.BACKLINK>[1] = this.inline(T.PAREN_R).body || null; if (href) string += href;
 
 				string += this.consume(T.PAREN_R)!.toString();
 
-				return new DOM.BACKLINK(text, href);
+				return new XML.BACKLINK(text, href);
 			}
 			catch
 			{
@@ -313,16 +313,16 @@ class Preset extends Parser
 				string += this.consume(T.EXCLAMATION)!.toString();
 				string += this.consume(T.BRACKET_L)!.toString();
 
-				const alt: ConstructorParameters<typeof DOM.EM>[0] = this.inline(T.BRACKET_R).body || null; if (alt) string += alt;
+				const alt: ConstructorParameters<typeof XML.EM>[0] = this.inline(T.BRACKET_R).body || null; if (alt) string += alt;
 
 				string += this.consume(T.BRACKET_R)!.toString();
 				string += this.consume(T.PAREN_L)!.toString();
 
-				const src: ConstructorParameters<typeof DOM.EM>[1] = this.inline(T.PAREN_R).body || null; if (src) string += src;
+				const src: ConstructorParameters<typeof XML.EM>[1] = this.inline(T.PAREN_R).body || null; if (src) string += src;
 
 				string += this.consume(T.PAREN_R)!.toString();
 
-				return new DOM.EM(alt, src);
+				return new XML.EM(alt, src);
 			}
 			catch
 			{
@@ -351,7 +351,7 @@ class Preset extends Parser
 					{
 						case null:
 						{
-							throw "exit"
+							throw "EOF";
 						}
 						case T.COMMENT_R:
 						{
@@ -379,16 +379,16 @@ class Preset extends Parser
 
 	private stack(token: Token)
 	{
-		let is_item: boolean;
+		let LI: boolean;
 
 		function type(token: Token)
 		{
 			switch (token)
 			{
-				case T.OL: { is_item = true; return DOM.OL; }
-				case T.UL: { is_item = true; return DOM.UL; }
-				case T.BQ_1: { is_item = false; return DOM.BQ; }
-				case T.BQ_2: { is_item = false; return DOM.BQ; }
+				case T.OL: { LI = true; return XML.OL; }
+				case T.UL: { LI = true; return XML.UL; }
+				case T.BQ_1: { LI = false; return XML.BQ; }
+				case T.BQ_2: { LI = false; return XML.BQ; }
 			}
 			throw new Error();
 		}
@@ -424,10 +424,10 @@ class Preset extends Parser
 					// get the most recently working node
 					const ast = node?.at(-1) ?? root;
 
-					const stack = type(t);
+					const html = type(t);
 					
 					// if the types of ast and token correspond
-					if (ast instanceof stack)
+					if (ast instanceof html)
 					{
 						this.consume();
 						// pickup
@@ -438,7 +438,7 @@ class Preset extends Parser
 					{
 						this.consume();
 						// insert
-						node.push(node = new stack());
+						node.push(node = new html());
 					}
 					// if a diff type of ast is found before its kind
 					else
@@ -454,23 +454,23 @@ class Preset extends Parser
 					// get the most recently working node
 					const ast = node?.at(-1) ?? root;
 
-					indent:
-					switch (ast.constructor)
+					// if an indent is found after OL/UL
+					if (!(ast instanceof XML.BQ))
 					{
-						case DOM.OL:
-						case DOM.UL:
-						{
-							this.consume();
-							node = ast as AST;
-							break indent;
-						}
-						default:
-						{
-							// if an indent is found before BQ/OL/UL
-							if (!node) break stack;
-							node.push(this.inline(T.BR));
-							break indent;
-						}
+						this.consume();
+						// pickup
+						node = ast as AST;
+					}
+					// if an indent is found after BQ
+					else if (node)
+					{
+						// insert
+						node.push(this.inline(T.BR));
+					}
+					// if an indent is found after BQ/OL/UL
+					else
+					{
+						break stack;
 					}
 					break build;
 				}
@@ -480,13 +480,13 @@ class Preset extends Parser
 					if (!node) break stack;
 
 					// @ts-expect-error stfu
-					node.push(...(!is_item
+					node.push(...(!LI
 						?
-						[this.inline(T.BR), new DOM.BR()]
+						[this.inline(T.BR), new XML.BR()]
 						:
-						[new DOM.LI(...this.inline(T.BR))]
+						[new XML.LI(...this.inline(T.BR))]
 					));
-					is_item = false;
+					LI = false;
 					break build;
 				}
 			}

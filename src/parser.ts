@@ -34,7 +34,7 @@ export default abstract class Parser
 			{
 				switch (error)
 				{
-					case "exit":
+					case "EOF":
 					{
 						break main;
 					}
@@ -65,44 +65,26 @@ export default abstract class Parser
 	protected consume(type?: Token)
 	{
 		if (type && this.data[this.i] !== type)
-			{
-				throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
-			}
-			return this.i < this.data.length ? this.data[this.i++] : null;
+		{
+			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
+		}
+		return this.i < this.data.length ? this.data[this.i++] : null;
 	}
 
 	protected inline(...until: ReturnType<typeof this.peek>[])
 	{
-		const ast = new _();
+		const ast = new PR();
 
 		main:
 		for (/* none */; this.i < this.data.length; /* none */)
 		{
-			try
-			{
-				const t = this.peek()!; const rule = this.RULES[Level.INLINE].get(t as Token);
+			const t = this.peek()!; const rule = this.RULES[Level.INLINE].get(t as Token);
 
-				if (until.includes(t)) break main;
-				
-				/* if (rule) */ this.i++; // <-- step up
+			if (until.includes(t)) break main;
+			
+			/* if (rule) */ this.i++; // <-- step up
 
-				ast.push(rule?.(t as Token) ?? t.toString());
-			}
-			catch (error)
-			{
-				switch (error)
-				{
-					case "exit":
-					{
-						this.i--; // <-- step back
-						break main;
-					}
-					default:
-					{
-						throw error;
-					}
-				}
-			}
+			ast.push(rule?.(t as Token) ?? t.toString());
 		}
 		return ast;
 	}
@@ -116,7 +98,7 @@ class $ extends AST // root
 	}
 }
 
-class _ extends AST // inline
+class PR extends AST // inline
 {
 	override toString()
 	{

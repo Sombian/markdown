@@ -11,8 +11,8 @@
 		{
 			"mangle":
 			{
-				"properties": {},
-				"toplevel": true
+				"toplevel": true,
+				"properties": {}
 			},
 			"compress":
 			{
