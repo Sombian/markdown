@@ -148,55 +148,51 @@ class Preset extends Parser
 		// BLOCK //
 		//       //
 		//-------//
-		this.rule(Level.BLOCK, T.BR, () =>
-		{
-			return new XML.BR(/* leaf node */);
-		});
-		this.rule(Level.BLOCK, T.H1, () =>
+		this.rule(T.H1, () =>
 		{
 			const temp = new XML.H1(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.BLOCK, T.H2, () =>
+		this.rule(T.H2, () =>
 		{
 			const temp = new XML.H2(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.BLOCK, T.H3, () =>
+		this.rule(T.H3, () =>
 		{
 			const temp = new XML.H3(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.BLOCK, T.H4, () =>
+		this.rule(T.H4, () =>
 		{
 			const temp = new XML.H4(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.BLOCK, T.H5, () =>
+		this.rule(T.H5, () =>
 		{
 			const temp = new XML.H5(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.BLOCK, T.H6, () =>
+		this.rule(T.H6, () =>
 		{
 			const temp = new XML.H6(...this.inline()); try { this.consume(T.BR); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.BLOCK, T.HR_1, () =>
+		this.rule(T.HR_1, () =>
 		{
 			return new XML.HR(/* leaf node */);
 		});
-		this.rule(Level.BLOCK, T.HR_2, () =>
+		this.rule(T.HR_2, () =>
 		{
 			return new XML.HR(/* leaf node */);
 		});
-		this.rule(Level.BLOCK, T.OL, (t) =>
+		this.rule(T.OL, (t) =>
 		{
 			return this.stack(t);
 		});
-		this.rule(Level.BLOCK, T.UL, (t) =>
+		this.rule(T.UL, (t) =>
 		{
 			return this.stack(t);
 		});
-		this.rule(Level.BLOCK, T.BQ_1, (t) =>
+		this.rule(T.BQ_1, (t) =>
 		{
 			return this.stack(t);
 		});
-		this.rule(Level.BLOCK, T.BQ_2, (t) =>
+		this.rule(T.BQ_2, (t) =>
 		{
 			return this.stack(t);
 		});
@@ -205,75 +201,75 @@ class Preset extends Parser
 		// INLINE //
 		//        //
 		//--------//
-		this.rule(Level.INLINE, T.BR, () =>
+		this.rule(T.BR, () =>
 		{
-			return new XML.BR(/* leaf node */);
+			throw new XML.BR(/* leaf node */);
 		});
-		this.rule(Level.INLINE, T.BOLD, (t) =>
+		this.rule(T.BOLD, (t) =>
 		{
 			const temp = new XML.BOLD(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.INLINE, T.CODE, (t) =>
+		this.rule(T.CODE, (t) =>
 		{
 			const temp = new XML.CODE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.INLINE, T.ITALIC, (t) =>
+		this.rule(T.ITALIC, (t) =>
 		{
 			const temp = new XML.ITALIC(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.INLINE, T.STRIKE, (t) =>
+		this.rule(T.STRIKE, (t) =>
 		{
 			const temp = new XML.STRIKE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.INLINE, T.UNDERLINE, (t) =>
+		this.rule(T.UNDERLINE, (t) =>
 		{
 			const temp = new XML.UNDERLINE(...this.inline(T.BR, t)); try { this.consume(t); } catch { /* ignore */ } return temp;
 		});
-		this.rule(Level.INLINE, T.CHECKED_BOX, () =>
+		this.rule(T.CHECKED_BOX, () =>
 		{
 			return new XML.TODO(true);
 		});
-		this.rule(Level.INLINE, T.UNCHECKED_BOX, () =>
+		this.rule(T.UNCHECKED_BOX, () =>
 		{
 			return new XML.TODO(false);
 		});
-		this.rule(Level.INLINE, T.ARROW_ALL, () =>
+		this.rule(T.ARROW_ALL, () =>
 		{
 			return "↔";
 		});
-		this.rule(Level.INLINE, T.ARROW_LEFT, () =>
+		this.rule(T.ARROW_LEFT, () =>
 		{
 			return "←";
 		});
-		this.rule(Level.INLINE, T.ARROW_RIGHT, () =>
+		this.rule(T.ARROW_RIGHT, () =>
 		{
 			return "→";
 		});
-		this.rule(Level.INLINE, T.FAT_ARROW_ALL, () =>
+		this.rule(T.FAT_ARROW_ALL, () =>
 		{
 			return "⇔";
 		});
-		this.rule(Level.INLINE, T.FAT_ARROW_LEFT, () =>
+		this.rule(T.FAT_ARROW_LEFT, () =>
 		{
 			return "⇐";
 		});
-		this.rule(Level.INLINE, T.FAT_ARROW_RIGHT, () =>
+		this.rule(T.FAT_ARROW_RIGHT, () =>
 		{
 			return "⇒";
 		});
-		this.rule(Level.INLINE, T.MATH_APX, () =>
+		this.rule(T.MATH_APX, () =>
 		{
 			return "≈";
 		});
-		this.rule(Level.INLINE, T.MATH_NET, () =>
+		this.rule(T.MATH_NET, () =>
 		{
 			return "≠";
 		});
-		this.rule(Level.INLINE, T.MATH_LTOET, () =>
+		this.rule(T.MATH_LTOET, () =>
 		{
 			return "≤";
 		});
-		this.rule(Level.INLINE, T.MATH_GTOET, () =>
+		this.rule(T.MATH_GTOET, () =>
 		{
 			return "≥";
 		});
@@ -282,7 +278,7 @@ class Preset extends Parser
 		// PATTERN //
 		//         //
 		//---------//
-		this.rule(Level.INLINE, T.BRACKET_L, () =>
+		this.rule(T.BRACKET_L, () =>
 		{
 			let string = "";
 			try
@@ -305,7 +301,7 @@ class Preset extends Parser
 				return string;
 			}
 		});
-		this.rule(Level.INLINE, T.EXCLAMATION, () =>
+		this.rule(T.EXCLAMATION, () =>
 		{
 			let string = "";
 			try

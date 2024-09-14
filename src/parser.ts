@@ -32,59 +32,70 @@ export default abstract class Parser
 			}
 			catch (error)
 			{
-				switch (error)
+				if (error instanceof AST)
 				{
-					case "EOF":
-					{
-						break main;
-					}
-					default:
-					{
-						throw error;
-					}
+					ast.push(error);
+					continue main;
 				}
+				else if (error === "EOF")
+				{
+					break main;
+				}
+				throw error;
 			}
 		}
 		return ast;
 	}
 
-	protected rule(lvl: Level, type: Token, handle: Rule)
+	protected rule(token: Token, callback: Rule)
 	{
-		(this.RULES[lvl] ??= new Map()).set(type, handle);
+		(this.RULES[token.lvl] ??= new Map()).set(token, callback);
 	}
 
-	protected peek(type?: Token)
+	protected peek(token?: Token)
 	{
-		if (type && this.data[this.i] !== type)
+		if (token && this.data[this.i] !== token)
 		{
-			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
+			throw new Error(`Unexpected token found at position ${this.i}. Expected '${token.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
 		}
 		return this.i < this.data.length ? this.data[this.i] : null;
 	}
 
-	protected consume(type?: Token)
+	protected consume(token?: Token)
 	{
-		if (type && this.data[this.i] !== type)
+		if (token && this.data[this.i] !== token)
 		{
-			throw new Error(`Unexpected token found at position ${this.i}. Expected '${type.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
+			throw new Error(`Unexpected token found at position ${this.i}. Expected '${token.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
 		}
 		return this.i < this.data.length ? this.data[this.i++] : null;
 	}
 
 	protected inline(...until: ReturnType<typeof this.peek>[])
 	{
-		const ast = new PR();
+		const ast = new _();
 
 		main:
 		for (/* none */; this.i < this.data.length; /* none */)
 		{
-			const t = this.peek()!; const rule = this.RULES[Level.INLINE].get(t as Token);
+			try
+			{
+				const t = this.peek()!; const rule = this.RULES[Level.INLINE].get(t as Token);
 
-			if (until.includes(t)) break main;
-			
-			/* if (rule) */ this.i++; // <-- step up
-
-			ast.push(rule?.(t as Token) ?? t.toString());
+				if (until.includes(t)) break main;
+				
+				/* if (rule) */ this.i++; // <-- step up
+	
+				ast.push(rule?.(t as Token) ?? t.toString());
+			}
+			catch (error)
+			{
+				if (error instanceof AST)
+				{
+					ast.push(error);
+					throw ast;
+				}
+				throw error;
+			}
 		}
 		return ast;
 	}
@@ -98,7 +109,7 @@ class $ extends AST // root
 	}
 }
 
-class PR extends AST // inline
+class _ extends AST // inline
 {
 	override toString()
 	{
