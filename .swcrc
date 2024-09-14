@@ -9,15 +9,8 @@
 		},
 		"minify":
 		{
-			"mangle":
-			{
-				"toplevel": true,
-				"properties": {}
-			},
-			"compress":
-			{
-				"unsafe": true
-			}
+			"mangle": true,
+			"compress": true
 		},
 		// core options
 		"target": "esnext", "loose": true,

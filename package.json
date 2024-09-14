@@ -29,11 +29,11 @@
 	},
 	"devDependencies": {
 		"@swc/cli": "^0.4.0",
-		"@swc/core": "^1.7.24",
-		"@types/bun": "^1.1.8",
+		"@swc/core": "^1.7.26",
+		"@types/bun": "^1.1.9",
 		"eslint": "^9.10.0",
-		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.4.0"
+		"typescript": "^5.6.2",
+		"typescript-eslint": "^8.5.0"
 	},
 	"type": "module",
 	"author": "Sombian",
