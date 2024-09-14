@@ -32,12 +32,7 @@ export default abstract class Parser
 			}
 			catch (error)
 			{
-				if (error instanceof AST)
-				{
-					ast.push(error);
-					continue main;
-				}
-				else if (error === "EOF")
+				if (error === "EOF")
 				{
 					break main;
 				}
@@ -92,7 +87,7 @@ export default abstract class Parser
 				if (error instanceof AST)
 				{
 					ast.push(error);
-					throw ast;
+					break main;
 				}
 				throw error;
 			}
