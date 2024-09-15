@@ -43,6 +43,10 @@ const T = Object.freeze(
 	(Level.INLINE, "/*"),
 	COMMENT_R: new (class COMMENT_R extends _ {})
 	(Level.INLINE, "*/"),
+	XML_COMMENT_L: new (class XML_COMMENT_L extends _ {})
+	(Level.INLINE, "<!--"),
+	XML_COMMENT_R: new (class XML_COMMENT_R extends _ {})
+	(Level.INLINE, "-->"),
 	//-------//
 	//       //
 	// BLOCK //
@@ -213,6 +217,33 @@ class Preset extends Parser
 						throw "EOF";
 					}
 					case T.COMMENT_R:
+					{
+						break comment;
+					}
+				}
+			}
+			try
+			{
+				this.consume(T.BR);
+			}
+			catch
+			{
+				/* ignore */
+			}
+			throw "continue";
+		});
+		this.rule(T.XML_COMMENT_L, () =>
+		{
+			comment:
+			while (true)
+			{
+				switch (this.consume())
+				{
+					case null:
+					{
+						throw "EOF";
+					}
+					case T.XML_COMMENT_R:
 					{
 						break comment;
 					}
