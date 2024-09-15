@@ -142,6 +142,7 @@ const T = Object.freeze(
 	(Level.INLINE, ")"),
 });
 
+// TODO: codeblock, footnote, table
 class Preset extends Parser
 {
 	constructor()
@@ -385,7 +386,7 @@ class Preset extends Parser
 		});
 	}
 
-	private stack(token: Token)
+	private stack(from: Token)
 	{
 		let LI: boolean;
 
@@ -412,7 +413,7 @@ class Preset extends Parser
 			}
 			throw new Error();
 		}
-		const root = new (type(token))();
+		const root = new (type(from))();
 
 		let node: Nullable<typeof root> = root;
 

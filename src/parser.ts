@@ -15,7 +15,35 @@ export default abstract class Parser
 	/** keep track of current position */
 	private i = 0;
 
-	public parse(data: typeof this.data)
+	public parse(...args: Parameters<typeof this.block>)
+	{
+		return this.block(...args);
+	}
+
+	protected rule(token: Token, handle: Rule)
+	{
+		(this.RULES[token.lvl] ??= new Map()).set(token, handle);
+	}
+
+	protected peek(token?: Token)
+	{
+		if (token && this.data[this.i] !== token)
+		{
+			throw new Error(`Unexpected token found at position ${this.i}. Expected '${token.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
+		}
+		return this.i < this.data.length ? this.data[this.i] : null;
+	}
+
+	protected consume(token?: Token)
+	{
+		if (token && this.data[this.i] !== token)
+		{
+			throw new Error(`Unexpected token found at position ${this.i}. Expected '${token.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
+		}
+		return this.i < this.data.length ? this.data[this.i++] : null;
+	}
+
+	protected block(data: typeof this.data)
 	{
 		const ast = new $();
 
@@ -43,29 +71,6 @@ export default abstract class Parser
 			}
 		}
 		return ast;
-	}
-
-	protected rule(token: Token, handle: Rule)
-	{
-		(this.RULES[token.lvl] ??= new Map()).set(token, handle);
-	}
-
-	protected peek(token?: Token)
-	{
-		if (token && this.data[this.i] !== token)
-		{
-			throw new Error(`Unexpected token found at position ${this.i}. Expected '${token.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
-		}
-		return this.i < this.data.length ? this.data[this.i] : null;
-	}
-
-	protected consume(token?: Token)
-	{
-		if (token && this.data[this.i] !== token)
-		{
-			throw new Error(`Unexpected token found at position ${this.i}. Expected '${token.constructor.name}', but found '${this.data[this.i].constructor.name}'`);
-		}
-		return this.i < this.data.length ? this.data[this.i++] : null;
 	}
 
 	protected inline(...until: ReturnType<typeof this.consume>[])
