@@ -4,15 +4,16 @@ import Buffer from "./models/buffer";
 
 type Chunk = Token | string;
 
+// TODO: dont merge BLOCK & INLINE, instead use INLINE as a fallback
 export default class Scanner
 {
 	// @ts-expect-error auto generate
 	private readonly TRIE: Record<Level, Route> = {
 		// auto-generate
 	};
-	private state: State;
-	private buffer: Buffer;
-	private stream: Chunk[];
+	private state: State = null as unknown as typeof this.state;
+	private buffer: Buffer = null as unknown as typeof this.buffer;
+	private stream: Chunk[] = null as unknown as typeof this.stream;
 
 	constructor(data: Token[])
 	{
@@ -94,7 +95,6 @@ export default class Scanner
 				}
 			}
 		}
-		[this.state, this.buffer, this.stream] = [null as unknown as State, null as unknown as Buffer, null as unknown as Chunk[]];
 	}
 
 	public scan(data: string)

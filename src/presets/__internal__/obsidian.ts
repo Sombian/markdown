@@ -4,6 +4,8 @@ import Parser from "@/parser";
 
 class Preset extends Parser
 {
+	static { console.warn("This preset is unimplemented."); }
+
 	constructor()
 	{
 		super();

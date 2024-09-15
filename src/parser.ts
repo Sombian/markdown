@@ -19,22 +19,25 @@ export default abstract class Parser
 	{
 		const ast = new $();
 
-		main:
 		for ([this.data, this.i] = [data, 0]; this.i < this.data.length; /* none */)
 		{
 			try
 			{
 				const t = this.peek()!; const rule = this.RULES[Level.BLOCK].get(t as Token);
 
-				if (rule) this.i++; // <-- step up
+				if (rule) this.consume();
 
 				ast.push(rule?.(t as Token) ?? this.inline());
 			}
 			catch (error)
 			{
+				if (error === "continue")
+				{
+					continue;
+				}
 				if (error === "EOF")
 				{
-					break main;
+					break;
 				}
 				throw error;
 			}
@@ -42,9 +45,9 @@ export default abstract class Parser
 		return ast;
 	}
 
-	protected rule(token: Token, callback: Rule)
+	protected rule(token: Token, handle: Rule)
 	{
-		(this.RULES[token.lvl] ??= new Map()).set(token, callback);
+		(this.RULES[token.lvl] ??= new Map()).set(token, handle);
 	}
 
 	protected peek(token?: Token)
@@ -65,29 +68,30 @@ export default abstract class Parser
 		return this.i < this.data.length ? this.data[this.i++] : null;
 	}
 
-	protected inline(...until: ReturnType<typeof this.peek>[])
+	protected inline(...until: ReturnType<typeof this.consume>[])
 	{
 		const ast = new _();
 
-		main:
 		for (/* none */; this.i < this.data.length; /* none */)
 		{
 			try
 			{
-				const t = this.peek()!; const rule = this.RULES[Level.INLINE].get(t as Token);
+				const t = this.consume()!; const rule = this.RULES[Level.INLINE].get(t as Token);
 
-				if (until.includes(t)) break main;
-				
-				/* if (rule) */ this.i++; // <-- step up
+				if (until.includes(t)) break;
 	
 				ast.push(rule?.(t as Token) ?? t.toString());
 			}
 			catch (error)
 			{
+				if (error === "continue")
+				{
+					continue;
+				}
 				if (error instanceof AST)
 				{
 					ast.push(error);
-					break main;
+					break;
 				}
 				throw error;
 			}

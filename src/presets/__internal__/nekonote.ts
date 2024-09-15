@@ -174,11 +174,11 @@ class Preset extends Parser
 		});
 		this.rule(T.HR_1, () =>
 		{
-			return new XML.HR(/* leaf node */);
+			return new XML.HR();
 		});
 		this.rule(T.HR_2, () =>
 		{
-			return new XML.HR(/* leaf node */);
+			return new XML.HR();
 		});
 		this.rule(T.OL, (t) =>
 		{
@@ -201,9 +201,36 @@ class Preset extends Parser
 		// INLINE //
 		//        //
 		//--------//
+		this.rule(T.COMMENT_L, () =>
+		{
+			comment:
+			while (true)
+			{
+				switch (this.consume())
+				{
+					case null:
+					{
+						throw "EOF";
+					}
+					case T.COMMENT_R:
+					{
+						break comment;
+					}
+				}
+			}
+			try
+			{
+				this.consume(T.BR);
+			}
+			catch
+			{
+				/* ignore */
+			}
+			throw "continue";
+		});
 		this.rule(T.BR, () =>
 		{
-			throw new XML.BR(/* leaf node */);
+			throw new XML.BR();
 		});
 		this.rule(T.BOLD, (t) =>
 		{
@@ -327,52 +354,6 @@ class Preset extends Parser
 		});
 	}
 
-	override peek(type?: Token)
-	{
-		if (type)
-		{
-			return super.peek(type);
-		}
-		let t: ReturnType<Parser["peek"]>;
-
-		main:
-		switch (t = super.peek())
-		{
-			case T.COMMENT_L:
-			{
-				comment:
-				while (true)
-				{
-					switch (t = this.consume())
-					{
-						case null:
-						{
-							throw "EOF";
-						}
-						case T.COMMENT_R:
-						{
-							break comment;
-						}
-					}
-				}
-				try
-				{
-					this.consume(T.BR);
-				}
-				catch
-				{
-					/* ignore */
-				}
-				finally
-				{
-					t = super.peek();
-				}
-				break main;
-			}
-		}
-		return t;
-	}
-
 	private stack(token: Token)
 	{
 		let LI: boolean;
@@ -381,10 +362,22 @@ class Preset extends Parser
 		{
 			switch (token)
 			{
-				case T.OL: { LI = true; return XML.OL; }
-				case T.UL: { LI = true; return XML.UL; }
-				case T.BQ_1: { LI = false; return XML.BQ; }
-				case T.BQ_2: { LI = false; return XML.BQ; }
+				case T.OL:
+				{
+					LI = true;
+					return XML.OL;
+				}
+				case T.UL:
+				{
+					LI = true;
+					return XML.UL;
+				}
+				case T.BQ_1:
+				case T.BQ_2:
+				{
+					LI = false;
+					return XML.BQ;
+				}
 			}
 			throw new Error();
 		}
