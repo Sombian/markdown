@@ -15,9 +15,11 @@ export default abstract class Parser
 	/** keep track of current position */
 	private i = 0;
 
-	public parse(...args: Parameters<typeof this.block>)
+	public parse(data: typeof this.data)
 	{
-		return this.block(...args);
+		[this.data, this.i] = [data, 0];
+
+		return this.block();
 	}
 
 	protected rule(token: Token, handle: Rule)
@@ -43,15 +45,19 @@ export default abstract class Parser
 		return this.i < this.data.length ? this.data[this.i++] : null;
 	}
 
-	protected block(data: typeof this.data)
+	protected block()
 	{
 		const ast = new $();
 
-		for ([this.data, this.i] = [data, 0]; this.i < this.data.length; /* none */)
+		for (/* none */; this.i < this.data.length; /* none */)
 		{
 			try
 			{
-				const t = this.peek()!; const rule = this.RULES[Level.BLOCK].get(t as Token);
+				const t = this.peek();
+				
+				if (t === null) break;
+				
+				const rule = this.RULES[Level.BLOCK].get(t as Token);
 
 				if (rule) this.consume();
 
@@ -81,7 +87,11 @@ export default abstract class Parser
 		{
 			try
 			{
-				const t = this.consume()!; const rule = this.RULES[Level.INLINE].get(t as Token);
+				const t = this.consume();
+				
+				if (t === null) break;
+				
+				const rule = this.RULES[Level.INLINE].get(t as Token);
 
 				if (until.includes(t)) break;
 	
