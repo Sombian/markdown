@@ -157,7 +157,7 @@ export default class Scanner
 					//------------------------------------------------//
 
 					// if chunk is not empty
-					if (this.state.depth < this.buffer.size - 1)
+					if (this.state.depth < this.buffer.length - 1)
 					{
 						// stream::build - chunk
 						this.stream.push(this.buffer.splice(0, - this.state.depth - 1));
@@ -192,7 +192,7 @@ export default class Scanner
 			}
 		}
 		// if buffer is not empty
-		if (0 < this.buffer.size)
+		if (0 < this.buffer.length)
 		{
 			if (!this.state.node.default)
 			{
@@ -215,7 +215,7 @@ export default class Scanner
 		{
 			const token = this.state.node[char];
 
-			if (++this.state.depth < this.buffer.size)
+			if (++this.state.depth < this.buffer.length)
 			{
 				// stream::build && buffer::modify
 				this.stream.push(this.buffer.slice(0, - this.state.depth));

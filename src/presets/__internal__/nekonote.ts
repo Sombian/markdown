@@ -390,7 +390,7 @@ class Preset extends Parser
 	{
 		let LI: boolean;
 
-		function type(token: Token)
+		function type(token: Token): typeof XML.OL | typeof XML.UL | typeof XML.BQ
 		{
 			switch (token)
 			{

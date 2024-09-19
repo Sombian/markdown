@@ -68,7 +68,7 @@ export default class Buffer
 		this.i = 0;
 	}
 
-	public get size()
+	public get length()
 	{
 		return this.i;
 	}
