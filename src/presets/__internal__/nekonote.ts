@@ -507,7 +507,6 @@ class Preset extends Parser
 						:
 						[new XML.LI(...this.inline(T.BR))]
 					));
-					LI = false;
 					break build;
 				}
 			}
