@@ -8,9 +8,8 @@ import * as XML from "@/DOM";
 
 abstract class _ extends Token
 {
-	constructor(...args: [...Take<ConstructorParameters<typeof Token>, 2>, Level?])
+	constructor(...[lvl, syntax, next]: [...Take<ConstructorParameters<typeof Token>, 2>, Level?])
 	{
-		const [lvl, syntax, next] = args;
 		// TODO: maybe change IIFE to a function declaration 
 		super(lvl, syntax, next ?? (() =>
 		{
@@ -231,7 +230,7 @@ class Preset extends Parser
 			{
 				/* ignore */
 			}
-			throw "continue";
+			throw "SKIP";
 		});
 		this.rule(T.XML_COMMENT_L, () =>
 		{
@@ -258,7 +257,7 @@ class Preset extends Parser
 			{
 				/* ignore */
 			}
-			throw "continue";
+			throw "SKIP";
 		});
 		this.rule(T.BR, () =>
 		{
