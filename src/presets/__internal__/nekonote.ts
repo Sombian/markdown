@@ -230,7 +230,7 @@ class Preset extends Parser
 			{
 				/* ignore */
 			}
-			throw "SKIP";
+			throw "continue";
 		});
 		this.rule(T.XML_COMMENT_L, () =>
 		{
@@ -257,7 +257,7 @@ class Preset extends Parser
 			{
 				/* ignore */
 			}
-			throw "SKIP";
+			throw "continue";
 		});
 		this.rule(T.BR, () =>
 		{
